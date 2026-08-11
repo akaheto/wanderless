@@ -809,7 +809,7 @@ export async function searchHotelsAction(formData: FormData): Promise<void> {
         destinationId,
         checkIn,
         checkOut,
-        result as Record<string, unknown>,
+        result as unknown as Record<string, unknown>,
         result.provider,
         result.retrievedAt,
       );
