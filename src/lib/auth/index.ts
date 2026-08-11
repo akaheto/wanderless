@@ -33,14 +33,16 @@ function toUser(row: Row): User {
     id: String(row.id),
     email: String(row.email),
     createdAt: String(row.created_at),
+    emailVerified: row.email_verified === 1 || Boolean(row.email_verified),
   };
 }
 
 /**
  * Sign up a new user with email and password.
+ * Creates a verification token and returns it so the caller can send verification email.
  * Throws if email already exists or password is invalid.
  */
-export async function signUp(email: string, password: string): Promise<User> {
+export async function signUp(email: string, password: string): Promise<{ user: User; verificationToken: string }> {
   if (!email || !password) {
     throw new Error("Email and password are required");
   }
@@ -66,18 +68,25 @@ export async function signUp(email: string, password: string): Promise<User> {
   const userId = randomBytes(12).toString("hex");
   const now = new Date().toISOString();
 
+  // Create verification token
+  const verificationToken = randomBytes(32).toString("hex");
+  const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
+
   await client.execute({
-    sql: "INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)",
-    args: [userId, email, passwordHash, now],
+    sql: "INSERT INTO users (id, email, password_hash, created_at, email_verified, verification_token, verification_token_expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    args: [userId, email, passwordHash, now, 0, verificationToken, tokenExpiresAt],
   });
 
-  return { id: userId, email, createdAt: now };
+  return {
+    user: { id: userId, email, createdAt: now, emailVerified: false },
+    verificationToken
+  };
 }
 
 /**
  * Sign in a user with email and password.
  * Creates a session and returns the user.
- * Throws if credentials are invalid.
+ * Throws if credentials are invalid or email is not verified.
  */
 export async function signIn(email: string, password: string): Promise<User> {
   if (!email || !password) {
@@ -102,6 +111,12 @@ export async function signIn(email: string, password: string): Promise<User> {
   // Verify password
   if (!passwordHash || !(await verifyPassword(password, passwordHash))) {
     throw new Error("Invalid email or password");
+  }
+
+  // Check if email is verified
+  const emailVerified = userRow.email_verified === 1 || Boolean(userRow.email_verified);
+  if (!emailVerified) {
+    throw new Error("Email not verified. Check your inbox for a verification link.");
   }
 
   const user = toUser(userRow);

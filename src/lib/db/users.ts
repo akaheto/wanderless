@@ -8,6 +8,7 @@ export interface User {
   id: string;
   email: string;
   createdAt: string;
+  emailVerified?: boolean;
 }
 
 export interface TripCollaborator {
@@ -33,6 +34,7 @@ function toUser(row: Row): User {
     id: String(row.id),
     email: String(row.email),
     createdAt: String(row.created_at),
+    emailVerified: row.email_verified === 1 || Boolean(row.email_verified),
   };
 }
 
@@ -393,4 +395,81 @@ export async function deleteInvite(token: string): Promise<void> {
     sql: `DELETE FROM trip_invites WHERE token = ?`,
     args: [token],
   });
+}
+
+// ---------------------------------------------------------------------------
+// Email Verification
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a verification token for a user.
+ * Token expires after 24 hours.
+ */
+export async function createVerificationToken(userId: string): Promise<string> {
+  const client = await db();
+  const token = randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
+
+  await client.execute({
+    sql: `UPDATE users SET verification_token = ?, verification_token_expires_at = ? WHERE id = ?`,
+    args: [token, expiresAt, userId],
+  });
+
+  return token;
+}
+
+/**
+ * Verify a user's email using their verification token.
+ * Clears the token after successful verification.
+ * Returns true if verification succeeded, false if token is invalid/expired.
+ */
+export async function verifyEmail(token: string): Promise<boolean> {
+  const client = await db();
+
+  // Find user with valid token
+  const result = await client.execute({
+    sql: `SELECT id, verification_token_expires_at FROM users WHERE verification_token = ?`,
+    args: [token],
+  });
+
+  if (result.rows.length === 0) {
+    return false; // Token not found
+  }
+
+  const userRow = result.rows[0] as Row;
+  const expiresAt = userRow.verification_token_expires_at
+    ? new Date(String(userRow.verification_token_expires_at))
+    : null;
+
+  // Check if token is expired
+  if (!expiresAt || expiresAt < new Date()) {
+    return false; // Token expired
+  }
+
+  // Mark user as verified and clear token
+  const userId = String(userRow.id);
+  await client.execute({
+    sql: `UPDATE users SET email_verified = 1, verification_token = NULL, verification_token_expires_at = NULL WHERE id = ?`,
+    args: [userId],
+  });
+
+  return true;
+}
+
+/**
+ * Check if a user has verified their email.
+ */
+export async function isEmailVerified(userId: string): Promise<boolean> {
+  const client = await db();
+  const result = await client.execute({
+    sql: `SELECT email_verified FROM users WHERE id = ?`,
+    args: [userId],
+  });
+
+  if (result.rows.length === 0) {
+    return false;
+  }
+
+  const row = result.rows[0] as Row;
+  return row.email_verified === 1 || Boolean(row.email_verified);
 }

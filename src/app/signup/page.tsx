@@ -13,6 +13,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [signUpSuccess, setSignUpSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +40,11 @@ export default function SignupPage() {
       if ("error" in result) {
         setError(result.error);
       } else {
-        router.push("/trips");
+        setSignUpSuccess(true);
+        // Show success message for 3 seconds then redirect
+        setTimeout(() => {
+          router.push("/login");
+        }, 3000);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -47,6 +52,39 @@ export default function SignupPage() {
       setIsLoading(false);
     }
   };
+
+  if (signUpSuccess) {
+    return (
+      <div className="mx-auto max-w-sm space-y-6 py-12">
+        <div className="space-y-2">
+          <div className="text-4xl">✓</div>
+          <h1 className="text-2xl font-bold">Account created!</h1>
+          <p className="mt-2 text-sm text-ink-3">
+            Check your email for a verification link. It expires in 24 hours.
+          </p>
+        </div>
+
+        <div className="rounded bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          <p className="font-medium">What's next?</p>
+          <p className="mt-2">
+            1. Check your inbox (and spam folder) for an email from Travel Intelligence Hub
+          </p>
+          <p className="mt-2">
+            2. Click the verification link in the email
+          </p>
+          <p className="mt-2">
+            3. Sign in and start planning your trips
+          </p>
+        </div>
+
+        <div className="text-center">
+          <p className="text-sm text-ink-3">
+            Redirecting to sign in...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-sm space-y-6 py-12">

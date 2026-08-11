@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signInAction } from "@/app/actions";
+import { signInAction, resendVerificationAction } from "@/app/actions";
 import { Button } from "@/components/ui";
 
 export default function LoginPage() {
@@ -12,6 +12,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [requiresVerification, setRequiresVerification] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +28,7 @@ export default function LoginPage() {
       const result = await signInAction(formData);
       if ("error" in result) {
         setError(result.error);
+        setRequiresVerification(result.requiresVerification || false);
       } else {
         router.push("/trips");
       }
@@ -33,6 +36,32 @@ export default function LoginPage() {
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      setError("Please enter your email address");
+      return;
+    }
+
+    setIsResending(true);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.set("email", email);
+      const result = await resendVerificationAction(formData);
+
+      if ("error" in result) {
+        setError(result.error);
+      } else {
+        alert("Verification email sent! Check your inbox.");
+      }
+    } catch (err) {
+      setError("Failed to resend verification email");
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -51,7 +80,17 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="rounded bg-red-50 px-4 py-3 text-sm text-red-800">
-            {error}
+            <p>{error}</p>
+            {requiresVerification && (
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={isResending}
+                className="mt-2 text-sm font-medium text-red-700 hover:underline disabled:opacity-50"
+              >
+                {isResending ? "Sending..." : "Resend verification email"}
+              </button>
+            )}
           </div>
         )}
 

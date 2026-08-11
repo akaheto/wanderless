@@ -43,6 +43,7 @@ import {
 } from "@/lib/domain/types";
 import { ItineraryPanel } from "@/components/ItineraryPanel";
 import { PlacesPanel } from "@/components/PlacesPanel";
+import { PlaceSearchForm } from "@/components/PlaceSearchForm";
 import { ForecastPanel } from "@/components/ForecastPanel";
 import { FlightSearchesPanel } from "@/components/FlightSearchesPanel";
 import { FlightSearchForm } from "@/components/FlightSearchForm";
@@ -301,6 +302,10 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
             tripStartDate={trip.startDate}
             sources={sources}
           />
+
+          {selected && hasDates && getDestination(selected.destinationId) && (
+            <PlaceSearchForm destinationId={selected.destinationId} tripId={trip.id} />
+          )}
 
           {(trip.priorities || trip.notes) && (
             <Card>

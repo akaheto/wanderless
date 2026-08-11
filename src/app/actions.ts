@@ -512,6 +512,126 @@ export async function deletePlaceAction(formData: FormData): Promise<void> {
   revalidatePath(`/destinations/${existing.destinationId}`);
 }
 
+/**
+ * Search for places using the configured provider.
+ *
+ * Returns a list of places from the provider that can be imported into a trip.
+ * No database modifications — just a search and return.
+ */
+export async function searchPlacesAction(
+  destinationId: string,
+  category?: string,
+  query?: string,
+): Promise<Array<{
+  name: string;
+  category: string;
+  address: string;
+  lat: number;
+  lon: number;
+  url?: string;
+  providerPlaceId: string;
+  neighborhood: string;
+  description?: string;
+}>> {
+  // Validate destination exists
+  const destination = getDestination(destinationId);
+  if (!destination) {
+    throw new Error(`Unknown destination: ${destinationId}`);
+  }
+
+  // Validate category if provided
+  if (category && !PLACE_CATEGORIES.includes(category as any)) {
+    throw new Error(`Invalid category: ${category}`);
+  }
+
+  // Import provider dynamically to avoid circular dependencies
+  const { placesProvider } = await import("@/lib/places/provider");
+  const provider = placesProvider();
+
+  const searchQuery = {
+    destinationId,
+    category: category as any,
+    query,
+    center: { lat: destination.lat, lon: destination.lon },
+    radiusKm: 10,
+  };
+
+  const result = await provider.search(searchQuery);
+  return result.places;
+}
+
+/**
+ * Import a searched place into a trip.
+ *
+ * Takes a place from a provider result and saves it to the database.
+ * All places are marked as "considering" and unverified (discovery, not confirmation).
+ */
+export async function importPlaceAction(formData: FormData): Promise<void> {
+  const tripId = Number(formData.get("tripId"));
+  const destinationId = String(formData.get("destinationId"));
+  const category = String(formData.get("category"));
+  const name = String(formData.get("name"));
+  const address = String(formData.get("address"));
+  const neighborhood = String(formData.get("neighborhood"));
+  const lat = Number(formData.get("lat"));
+  const lon = Number(formData.get("lon"));
+  const url = String(formData.get("url") || "");
+  const providerPlaceId = String(formData.get("providerPlaceId"));
+
+  if (!Number.isFinite(tripId)) throw new Error("Invalid trip ID");
+  if (!destinationId) throw new Error("Missing destination ID");
+  if (!name) throw new Error("Missing place name");
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error("Invalid coordinates");
+
+  // Validate trip exists
+  const trip = await store.getTrip(tripId);
+  if (!trip) throw new Error(`No trip with id ${tripId}`);
+
+  // Validate destination exists
+  const destination = getDestination(destinationId);
+  if (!destination) throw new Error(`Unknown destination: ${destinationId}`);
+
+  // Validate category
+  if (!PLACE_CATEGORIES.includes(category as any)) {
+    throw new Error(`Invalid category: ${category}`);
+  }
+
+  // Create a source record for this import
+  const sourceId = await placesStore.createSource({
+    label: "OpenStreetMap (Nominatim)",
+    kind: "provider",
+    url: "https://nominatim.openstreetmap.org",
+  });
+
+  // Add the place — imported places start as "considering" and unverified
+  await placesStore.createPlace({
+    destinationId,
+    tripId,
+    category: category as any,
+    fetched: {
+      name,
+      address,
+      neighborhood,
+      lat,
+      lon,
+      hours: "",
+      priceLevel: null,
+      url,
+      providerPlaceId,
+    },
+    personal: {
+      whyItMatters: "",
+      notes: "Imported from search",
+      priority: "considering",
+      reservationRequired: false,
+    },
+    sourceId,
+    verifiedOn: null, // Imported places are unverified until checked by user
+  });
+
+  revalidatePath(`/trips/${tripId}`);
+}
+
 export async function deleteFlightSearchAction(formData: FormData): Promise<void> {
   const searchId = Number(formData.get("searchId"));
   const tripId = Number(formData.get("tripId"));
@@ -826,9 +946,10 @@ export async function searchHotelsAction(formData: FormData): Promise<void> {
 // Auth
 // ---------------------------------------------------------------------------
 
-export async function signUpAction(formData: FormData): Promise<{ user: any } | { error: string }> {
+export async function signUpAction(formData: FormData): Promise<{ user: any; verificationToken: string } | { error: string }> {
   try {
     const { signUp } = await import("@/lib/auth");
+    const { sendVerificationEmail } = await import("@/lib/email");
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
 
@@ -836,7 +957,10 @@ export async function signUpAction(formData: FormData): Promise<{ user: any } | 
       return { error: "Email and password are required" };
     }
 
-    const user = await signUp(email, password);
+    const { user, verificationToken } = await signUp(email, password);
+
+    // Send verification email
+    await sendVerificationEmail(email, verificationToken);
 
     void logAudit(user?.id ?? null, null, "user_signed_up", {
       email,
@@ -844,14 +968,14 @@ export async function signUpAction(formData: FormData): Promise<{ user: any } | 
 
     revalidatePath("/trips");
     revalidatePath("/");
-    return { user };
+    return { user, verificationToken };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Sign up failed";
     return { error: message };
   }
 }
 
-export async function signInAction(formData: FormData): Promise<{ user: any } | { error: string }> {
+export async function signInAction(formData: FormData): Promise<{ user: any; requiresVerification?: boolean } | { error: string; requiresVerification?: boolean }> {
   try {
     const { signIn } = await import("@/lib/auth");
     const email = String(formData.get("email") ?? "").trim();
@@ -872,7 +996,8 @@ export async function signInAction(formData: FormData): Promise<{ user: any } | 
     return { user };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Sign in failed";
-    return { error: message };
+    const isVerificationError = message.includes("Email not verified");
+    return { error: message, requiresVerification: isVerificationError };
   }
 }
 
@@ -887,6 +1012,62 @@ export async function signOutAction(): Promise<void> {
   revalidatePath("/trips");
   revalidatePath("/");
   redirect("/");
+}
+
+export async function verifyEmailAction(formData: FormData): Promise<{ success: true } | { error: string }> {
+  try {
+    const { verifyEmail } = await import("@/lib/db/users");
+    const token = String(formData.get("token") ?? "").trim();
+
+    if (!token) {
+      return { error: "Invalid verification link" };
+    }
+
+    const success = await verifyEmail(token);
+    if (!success) {
+      return { error: "Your verification link has expired or is invalid. Please request a new one." };
+    }
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Verification failed";
+    return { error: message };
+  }
+}
+
+export async function resendVerificationAction(formData: FormData): Promise<{ success: true } | { error: string }> {
+  try {
+    const { sendVerificationEmail } = await import("@/lib/email");
+    const { createVerificationToken } = await import("@/lib/db/users");
+    const { getUserByEmail } = await import("@/lib/db/users");
+
+    const email = String(formData.get("email") ?? "").trim();
+
+    if (!email) {
+      return { error: "Email is required" };
+    }
+
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return { error: "Email not found" };
+    }
+
+    // If already verified, no need to resend
+    if (user.emailVerified) {
+      return { error: "This email is already verified" };
+    }
+
+    // Create new verification token
+    const newToken = await createVerificationToken(user.id);
+
+    // Send verification email
+    await sendVerificationEmail(email, newToken);
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to resend verification";
+    return { error: message };
+  }
 }
 
 // ---------------------------------------------------------------------------

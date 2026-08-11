@@ -412,4 +412,18 @@ export const MIGRATIONS: { name: string; statements: string[] }[] = [
       `CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_log (created_at)`,
     ],
   },
+  {
+    /*
+     * Release 13. Email verification. Users must verify their email address before
+     * accessing the app. Verification tokens expire after 24 hours.
+     */
+    name: "0014_email_verification",
+    statements: [
+      `ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0`,
+      `ALTER TABLE users ADD COLUMN verification_token TEXT`,
+      `ALTER TABLE users ADD COLUMN verification_token_expires_at TEXT`,
+
+      `CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users (verification_token)`,
+    ],
+  },
 ];
