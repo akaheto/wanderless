@@ -40,7 +40,7 @@ export function HotelSearchesPanel({ searches, tripId }: HotelSearchesPanelProps
       <div className="divide-y divide-line">
         {searches.map((search) => {
           const isExpanded = expandedId === search.id;
-          const result = search.payload as HotelSearchResult;
+          const result = search.payload as unknown as HotelSearchResult;
           const age = searchAge(result);
 
           return (
