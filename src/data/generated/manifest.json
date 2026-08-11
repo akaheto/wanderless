@@ -1,0 +1,11 @@
+{
+  "generatedOn": "2026-08-11",
+  "climatePeriod": "2015-2024",
+  "destinations": 27,
+  "coastalDestinations": 17,
+  "sources": [
+    "Open-Meteo historical reanalysis archive (ERA5)",
+    "Open-Meteo marine archive",
+    "Nager.Date public holiday API"
+  ]
+}

@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+/* Tailwind v4 uses CSS-first config — theme customization goes here via
+   @theme, not a tailwind.config.js file. See:
+   https://tailwindcss.com/docs/theme
+   Example:
+   @theme {
+     --color-brand: oklch(0.6 0.2 250);
+   }
+*/
