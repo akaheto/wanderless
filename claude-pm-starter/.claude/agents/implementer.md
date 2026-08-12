@@ -10,6 +10,7 @@ assume the task you're given has already been broken down; if it hasn't,
 ask a clarifying question before writing code rather than guessing scope.
 
 When invoked:
+
 1. Read the relevant files before editing. Don't assume structure.
 2. Make the smallest change that correctly satisfies the task.
 3. Follow the conventions in the project's CLAUDE.md and any path-scoped

@@ -688,6 +688,31 @@ export async function addEventAction(formData: FormData): Promise<void> {
   revalidatePath(`/trips/${data.data.tripId}`);
 }
 
+export async function updateEventAction(formData: FormData): Promise<void> {
+  const eventId = Number(formData.get("eventId"));
+  const tripId = Number(formData.get("tripId"));
+
+  if (!Number.isFinite(eventId) || !Number.isFinite(tripId)) {
+    throw new Error("Invalid event or trip ID");
+  }
+
+  const data = eventSchema.partial().safeParse({
+    label: formData.get("label"),
+    startDate: formData.get("startDate"),
+    endDate: formData.get("endDate"),
+    kind: formData.get("kind"),
+    notes: formData.get("notes"),
+  });
+
+  if (!data.success) throw new Error("Invalid event data");
+  if (data.data.startDate && data.data.endDate && data.data.startDate > data.data.endDate) {
+    throw new Error("Start date must be before end date");
+  }
+
+  await eventsStore.updateEvent(eventId, data.data);
+  revalidatePath(`/trips/${tripId}`);
+}
+
 export async function deleteEventAction(formData: FormData): Promise<void> {
   const eventId = Number(formData.get("eventId"));
   const tripId = Number(formData.get("tripId"));
@@ -707,34 +732,44 @@ const budgetItemSchema = z.object({
   tripId: z.coerce.number().int().positive(),
   category: z.string().trim().min(1).max(100),
   label: z.string().trim().min(1).max(200),
-  estimatedUsd: z.coerce.number().nonnegative().optional(),
-  bookedUsd: z.coerce.number().nonnegative().optional(),
+  estimatedAmount: optionalNumber,
+  bookedAmount: optionalNumber,
+  currency: z.string().trim().toUpperCase().default("USD"),
   dueOn: optionalDate,
+  paid: z.union([z.literal("on"), z.literal("true"), z.null(), z.undefined()]).transform((v) => v === "on" || v === "true").optional(),
+  refundableUntil: optionalDate,
   notes: z.string().trim().max(1000),
 });
 
 export async function createBudgetItemAction(formData: FormData): Promise<void> {
   const { createBudgetItem } = await import("@/lib/db/budget");
+  const { money } = await import("@/lib/money");
 
   const data = budgetItemSchema.safeParse({
     tripId: formData.get("tripId"),
     category: formData.get("category"),
     label: formData.get("label"),
-    estimatedUsd: formData.get("estimatedUsd") ? Number(formData.get("estimatedUsd")) : undefined,
-    bookedUsd: formData.get("bookedUsd") ? Number(formData.get("bookedUsd")) : undefined,
+    estimatedAmount: formData.get("estimatedAmount") ? Number(formData.get("estimatedAmount")) : undefined,
+    bookedAmount: formData.get("bookedAmount") ? Number(formData.get("bookedAmount")) : undefined,
+    currency: formData.get("currency") ?? "USD",
     dueOn: formData.get("dueOn") ?? "",
+    paid: formData.get("paid"),
+    refundableUntil: formData.get("refundableUntil") ?? "",
     notes: formData.get("notes"),
   });
 
   if (!data.success) throw new Error("Invalid budget item data");
 
+  const estimated = data.data.estimatedAmount ? money(Math.round(data.data.estimatedAmount * 100), data.data.currency) : null;
+
   await createBudgetItem(
     data.data.tripId,
     data.data.category,
     data.data.label,
-    data.data.estimatedUsd ?? null,
+    estimated,
     data.data.dueOn,
     data.data.notes,
+    data.data.refundableUntil,
   );
 
   revalidatePath(`/trips/${data.data.tripId}`);
@@ -742,6 +777,7 @@ export async function createBudgetItemAction(formData: FormData): Promise<void> 
 
 export async function updateBudgetItemAction(formData: FormData): Promise<void> {
   const { updateBudgetItem } = await import("@/lib/db/budget");
+  const { money } = await import("@/lib/money");
 
   const budgetId = z.coerce.number().int().positive().safeParse(formData.get("budgetId"));
   const tripId = z.coerce.number().int().positive().safeParse(formData.get("tripId"));
@@ -753,22 +789,29 @@ export async function updateBudgetItemAction(formData: FormData): Promise<void> 
   const data = budgetItemSchema.partial().safeParse({
     category: formData.get("category"),
     label: formData.get("label"),
-    estimatedUsd: formData.get("estimatedUsd") ? Number(formData.get("estimatedUsd")) : undefined,
-    bookedUsd: formData.get("bookedUsd") ? Number(formData.get("bookedUsd")) : undefined,
+    estimatedAmount: formData.get("estimatedAmount") ? Number(formData.get("estimatedAmount")) : undefined,
+    bookedAmount: formData.get("bookedAmount") ? Number(formData.get("bookedAmount")) : undefined,
+    currency: formData.get("currency") ?? "USD",
     dueOn: formData.get("dueOn") ?? "",
+    paid: formData.get("paid"),
+    refundableUntil: formData.get("refundableUntil") ?? "",
     notes: formData.get("notes"),
   });
 
   if (!data.success) throw new Error("Invalid budget item data");
 
-  await updateBudgetItem(budgetId.data, {
-    category: data.data.category,
-    label: data.data.label,
-    estimatedUsd: data.data.estimatedUsd ?? null,
-    bookedUsd: data.data.bookedUsd ?? null,
-    dueOn: data.data.dueOn,
-    notes: data.data.notes,
-  });
+  const updates: Partial<Omit<any, "id" | "tripId" | "createdAt">> = {};
+  if (data.data.category !== undefined) updates.category = data.data.category;
+  if (data.data.label !== undefined) updates.label = data.data.label;
+  const currency = data.data.currency ?? "USD";
+  if (data.data.estimatedAmount !== undefined) updates.estimated = data.data.estimatedAmount ? money(Math.round(data.data.estimatedAmount * 100), currency) : null;
+  if (data.data.bookedAmount !== undefined) updates.booked = data.data.bookedAmount ? money(Math.round(data.data.bookedAmount * 100), currency) : null;
+  if (data.data.dueOn !== undefined && data.data.dueOn !== null) updates.dueOn = data.data.dueOn;
+  if (data.data.paid !== undefined) updates.paid = data.data.paid;
+  if (data.data.refundableUntil !== undefined && data.data.refundableUntil !== null) updates.refundableUntil = data.data.refundableUntil;
+  if (data.data.notes !== undefined) updates.notes = data.data.notes;
+
+  await updateBudgetItem(budgetId.data, updates);
 
   revalidatePath(`/trips/${tripId.data}`);
 }
@@ -1161,7 +1204,7 @@ export async function acceptInviteAction(formData: FormData): Promise<{ error?: 
     }
 
     // Get or create user (signed in or need to sign up)
-    let user = await getCurrentUser();
+    const user = await getCurrentUser();
     if (!user) {
       // User is not signed in, they need to sign up or sign in
       return { error: "You must sign in or create an account to accept this invitation" };
@@ -1248,16 +1291,18 @@ const flightBookingSchema = z.object({
   cabin: z.string().trim().max(50),
   confirmation: z.string().trim().max(50),
   notes: z.string().trim().max(2000),
-  costUsd: optionalNumber,
+  costAmount: optionalNumber,
+  currency: z.string().trim().toUpperCase().default("USD"),
   status: bookingStatusEnum,
 });
 
 const hotelBookingSchema = z.object({
   bookingId: z.coerce.number().int().positive(),
   name: z.string().trim().min(1).max(200),
-  nightlyUsd: optionalNumber,
-  taxesUsd: optionalNumber,
-  resortFeeUsd: optionalNumber,
+  nightlyAmount: optionalNumber,
+  taxesAmount: optionalNumber,
+  resortFeeAmount: optionalNumber,
+  currency: z.string().trim().toUpperCase().default("USD"),
   refundable: z.union([z.literal("on"), z.literal("true"), z.null(), z.undefined()]).transform((v) => v === "on" || v === "true"),
   cancelBy: optionalDate,
   breakfastIncluded: z.union([z.literal("on"), z.literal("true"), z.null(), z.undefined()]).transform((v) => v === "on" || v === "true"),
@@ -1266,9 +1311,10 @@ const hotelBookingSchema = z.object({
   status: bookingStatusEnum,
 });
 
-export async function createFlightBookingAction(formData: FormData): Promise<void> {
+export async function updateFlightBookingAction(formData: FormData): Promise<void> {
   const { updateFlightBooking } = await import("@/lib/db/bookings");
-  
+  const { money } = await import("@/lib/money");
+
   const parsed = flightBookingSchema.safeParse({
     bookingId: formData.get("bookingId"),
     airline: formData.get("airline") ?? "",
@@ -1276,7 +1322,8 @@ export async function createFlightBookingAction(formData: FormData): Promise<voi
     cabin: formData.get("cabin") ?? "",
     confirmation: formData.get("confirmation") ?? "",
     notes: formData.get("notes") ?? "",
-    costUsd: formData.get("costUsd") ?? "",
+    costAmount: formData.get("costAmount") ?? "",
+    currency: formData.get("currency") ?? "USD",
     status: formData.get("status") ?? "option",
   });
 
@@ -1285,6 +1332,8 @@ export async function createFlightBookingAction(formData: FormData): Promise<voi
   const tripId = Number(formData.get("tripId"));
   if (!Number.isFinite(tripId)) throw new Error("Invalid trip ID");
 
+  const cost = parsed.data.costAmount ? money(Math.round(parsed.data.costAmount * 100), parsed.data.currency) : null;
+
   await updateFlightBooking(
     parsed.data.bookingId,
     parsed.data.airline,
@@ -1292,22 +1341,24 @@ export async function createFlightBookingAction(formData: FormData): Promise<voi
     parsed.data.cabin,
     parsed.data.confirmation,
     parsed.data.notes,
-    parsed.data.costUsd,
+    cost,
     parsed.data.status,
   );
 
   revalidatePath(`/trips/${tripId}`);
 }
 
-export async function createHotelBookingAction(formData: FormData): Promise<void> {
+export async function updateHotelBookingAction(formData: FormData): Promise<void> {
   const { updateHotelBooking } = await import("@/lib/db/bookings");
-  
+  const { money } = await import("@/lib/money");
+
   const parsed = hotelBookingSchema.safeParse({
     bookingId: formData.get("bookingId"),
     name: formData.get("name") ?? "",
-    nightlyUsd: formData.get("nightlyUsd") ?? "",
-    taxesUsd: formData.get("taxesUsd") ?? "",
-    resortFeeUsd: formData.get("resortFeeUsd") ?? "",
+    nightlyAmount: formData.get("nightlyAmount") ?? "",
+    taxesAmount: formData.get("taxesAmount") ?? "",
+    resortFeeAmount: formData.get("resortFeeAmount") ?? "",
+    currency: formData.get("currency") ?? "USD",
     refundable: formData.get("refundable"),
     cancelBy: formData.get("cancelBy") ?? "",
     breakfastIncluded: formData.get("breakfastIncluded"),
@@ -1321,18 +1372,101 @@ export async function createHotelBookingAction(formData: FormData): Promise<void
   const tripId = Number(formData.get("tripId"));
   if (!Number.isFinite(tripId)) throw new Error("Invalid trip ID");
 
+  const nightly = parsed.data.nightlyAmount ? money(Math.round(parsed.data.nightlyAmount * 100), parsed.data.currency) : null;
+  const taxes = parsed.data.taxesAmount ? money(Math.round(parsed.data.taxesAmount * 100), parsed.data.currency) : null;
+  const resortFee = parsed.data.resortFeeAmount ? money(Math.round(parsed.data.resortFeeAmount * 100), parsed.data.currency) : null;
+
   await updateHotelBooking(
     parsed.data.bookingId,
     parsed.data.name,
-    parsed.data.nightlyUsd,
-    parsed.data.taxesUsd,
-    parsed.data.resortFeeUsd,
+    nightly,
+    taxes,
+    resortFee,
     parsed.data.refundable,
-    parsed.data.cancelBy,
+    parsed.data.cancelBy ?? null,
     parsed.data.breakfastIncluded,
     parsed.data.confirmation,
     parsed.data.notes,
     parsed.data.status,
+  );
+
+  revalidatePath(`/trips/${tripId}`);
+}
+
+const createFlightBookingSchema = z.object({
+  origin: z.string().trim().max(10),
+  destination: z.string().trim().max(10),
+  airline: z.string().trim().max(100),
+  flightNumber: z.string().trim().max(20),
+  costAmount: optionalNumber,
+  currency: z.string().trim().toUpperCase().default("USD"),
+});
+
+export async function createFlightBookingAction(formData: FormData): Promise<void> {
+  const { createFlightBooking } = await import("@/lib/db/bookings");
+  const { money } = await import("@/lib/money");
+
+  const parsed = createFlightBookingSchema.safeParse({
+    origin: formData.get("origin") ?? "",
+    destination: formData.get("destination") ?? "",
+    airline: formData.get("airline") ?? "",
+    flightNumber: formData.get("flightNumber") ?? "",
+    costAmount: formData.get("costAmount") ?? "",
+    currency: formData.get("currency") ?? "USD",
+  });
+
+  if (!parsed.success) throw new Error(parsed.error.issues.map((i) => i.message).join("; "));
+
+  const tripId = Number(formData.get("tripId"));
+  if (!Number.isFinite(tripId)) throw new Error("Invalid trip ID");
+
+  const cost = parsed.data.costAmount ? money(Math.round(parsed.data.costAmount * 100), parsed.data.currency) : null;
+
+  await createFlightBooking(
+    tripId,
+    "outbound",
+    parsed.data.origin,
+    parsed.data.destination,
+    parsed.data.airline,
+    parsed.data.flightNumber,
+    null,
+    0,
+    cost,
+  );
+
+  revalidatePath(`/trips/${tripId}`);
+}
+
+const createHotelBookingSchema = z.object({
+  destinationId: z.string().trim().min(1),
+  name: z.string().trim().min(1).max(200),
+  nightlyAmount: optionalNumber,
+  currency: z.string().trim().toUpperCase().default("USD"),
+});
+
+export async function createHotelBookingAction(formData: FormData): Promise<void> {
+  const { createHotelBooking } = await import("@/lib/db/bookings");
+  const { money } = await import("@/lib/money");
+
+  const parsed = createHotelBookingSchema.safeParse({
+    destinationId: formData.get("destinationId") ?? "",
+    name: formData.get("name") ?? "",
+    nightlyAmount: formData.get("nightlyAmount") ?? "",
+    currency: formData.get("currency") ?? "USD",
+  });
+
+  if (!parsed.success) throw new Error(parsed.error.issues.map((i) => i.message).join("; "));
+
+  const tripId = Number(formData.get("tripId"));
+  if (!Number.isFinite(tripId)) throw new Error("Invalid trip ID");
+
+  const nightly = parsed.data.nightlyAmount ? money(Math.round(parsed.data.nightlyAmount * 100), parsed.data.currency) : null;
+
+  await createHotelBooking(
+    tripId,
+    parsed.data.destinationId,
+    parsed.data.name,
+    nightly,
   );
 
   revalidatePath(`/trips/${tripId}`);

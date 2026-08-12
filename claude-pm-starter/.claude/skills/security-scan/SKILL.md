@@ -4,6 +4,7 @@ description: Fast first-pass security and standards check across the monorepo â€
 allowed-tools: Bash, Read, Grep
 argument-hint: [path]
 ---
+
 Run `scripts/scan.sh` with the optional path argument (defaults to the
 whole repo). It checks, in order:
 
@@ -18,6 +19,7 @@ whole repo). It checks, in order:
    `eval(`.
 
 Report format:
+
 - **Findings**: `file:line` plus a one-line reason, grouped by category
 - **Severity**: flag secrets and `shell=True`/`eval` as high priority;
   bare `except:` and dependency CVEs at whatever severity `pip-audit`

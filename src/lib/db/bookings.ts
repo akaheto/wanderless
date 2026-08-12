@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Row } from "@libsql/client";
 import { db } from "./client";
+import { type Money, money } from "@/lib/money";
 
 export type BookingStatus = "option" | "tentative" | "confirmed" | "cancelled";
 
@@ -20,7 +21,7 @@ export interface FlightBooking {
   connections: number;
   totalMinutes: number | null;
   status: BookingStatus;
-  costUsd: number | null;
+  cost: Money | null;
   confirmation: string;
   notes: string;
   createdAt: string;
@@ -33,9 +34,9 @@ export interface HotelBooking {
   name: string;
   checkIn: string | null;
   checkOut: string | null;
-  nightlyUsd: number | null;
-  taxesUsd: number | null;
-  resortFeeUsd: number | null;
+  nightly: Money | null;
+  taxes: Money | null;
+  resortFee: Money | null;
   refundable: boolean;
   cancelBy: string | null;
   breakfastIncluded: boolean;
@@ -46,6 +47,7 @@ export interface HotelBooking {
 }
 
 function toFlightBooking(row: Row): FlightBooking {
+  const currency = String(row.currency ?? "USD").toUpperCase();
   return {
     id: Number(row.id),
     tripId: Number(row.trip_id),
@@ -61,7 +63,7 @@ function toFlightBooking(row: Row): FlightBooking {
     connections: Number(row.connections ?? 0),
     totalMinutes: row.total_minutes === null ? null : Number(row.total_minutes),
     status: String(row.status) as BookingStatus,
-    costUsd: row.cost_usd === null ? null : Number(row.cost_usd),
+    cost: row.cost_minor === null ? null : money(Number(row.cost_minor), currency),
     confirmation: String(row.confirmation ?? ""),
     notes: String(row.notes ?? ""),
     createdAt: String(row.created_at),
@@ -69,6 +71,7 @@ function toFlightBooking(row: Row): FlightBooking {
 }
 
 function toHotelBooking(row: Row): HotelBooking {
+  const currency = String(row.currency ?? "USD").toUpperCase();
   return {
     id: Number(row.id),
     tripId: Number(row.trip_id),
@@ -76,9 +79,9 @@ function toHotelBooking(row: Row): HotelBooking {
     name: String(row.name),
     checkIn: row.check_in === null ? null : String(row.check_in),
     checkOut: row.check_out === null ? null : String(row.check_out),
-    nightlyUsd: row.nightly_usd === null ? null : Number(row.nightly_usd),
-    taxesUsd: row.taxes_usd === null ? null : Number(row.taxes_usd),
-    resortFeeUsd: row.resort_fee_usd === null ? null : Number(row.resort_fee_usd),
+    nightly: row.nightly_minor === null ? null : money(Number(row.nightly_minor), currency),
+    taxes: row.taxes_minor === null ? null : money(Number(row.taxes_minor), currency),
+    resortFee: row.resort_fee_minor === null ? null : money(Number(row.resort_fee_minor), currency),
     refundable: Number(row.refundable) === 1,
     cancelBy: row.cancel_by === null ? null : String(row.cancel_by),
     breakfastIncluded: Number(row.breakfast_included) === 1,
@@ -98,14 +101,15 @@ export async function createFlightBooking(
   flightNumber: string,
   totalMinutes: number | null = null,
   connections: number = 0,
-  costUsd: number | null = null,
+  cost: Money | null = null,
 ): Promise<FlightBooking> {
   const now = new Date().toISOString();
   const client = await db();
+  const currency = cost?.currency ?? "USD";
   const row = await client.execute({
-    sql: `INSERT INTO flights (trip_id, direction, origin, destination, airline, flight_number, connections, total_minutes, cost_usd, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    args: [tripId, direction, origin, destination, airline, flightNumber, connections, totalMinutes, costUsd, now],
+    sql: `INSERT INTO flights (trip_id, direction, origin, destination, airline, flight_number, connections, total_minutes, currency, cost_minor, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [tripId, direction, origin, destination, airline, flightNumber, connections, totalMinutes, currency, cost?.amount ?? null, now],
   });
 
   return {
@@ -123,7 +127,7 @@ export async function createFlightBooking(
     connections,
     totalMinutes,
     status: "option",
-    costUsd,
+    cost: cost ?? null,
     confirmation: "",
     notes: "",
     createdAt: now,
@@ -134,14 +138,15 @@ export async function createHotelBooking(
   tripId: number,
   destinationId: string,
   name: string,
-  nightlyUsd: number | null = null,
+  nightly: Money | null = null,
 ): Promise<HotelBooking> {
   const now = new Date().toISOString();
   const client = await db();
+  const currency = nightly?.currency ?? "USD";
   const row = await client.execute({
-    sql: `INSERT INTO hotels (trip_id, destination_id, name, nightly_usd, created_at)
-          VALUES (?, ?, ?, ?, ?)`,
-    args: [tripId, destinationId, name, nightlyUsd, now],
+    sql: `INSERT INTO hotels (trip_id, destination_id, name, currency, nightly_minor, created_at)
+          VALUES (?, ?, ?, ?, ?, ?)`,
+    args: [tripId, destinationId, name, currency, nightly?.amount ?? null, now],
   });
 
   return {
@@ -151,9 +156,9 @@ export async function createHotelBooking(
     name,
     checkIn: null,
     checkOut: null,
-    nightlyUsd,
-    taxesUsd: null,
-    resortFeeUsd: null,
+    nightly: nightly ?? null,
+    taxes: null,
+    resortFee: null,
     refundable: true,
     cancelBy: null,
     breakfastIncluded: false,
@@ -223,15 +228,15 @@ export async function updateFlightBooking(
   cabin: string,
   confirmation: string,
   notes: string,
-  costUsd: number | null,
+  cost: Money | null,
   status: BookingStatus,
 ): Promise<FlightBooking> {
   const client = await db();
   await client.execute({
-    sql: `UPDATE flights 
-          SET airline = ?, flight_number = ?, cabin = ?, confirmation = ?, notes = ?, cost_usd = ?, status = ?
+    sql: `UPDATE flights
+          SET airline = ?, flight_number = ?, cabin = ?, confirmation = ?, notes = ?, cost_minor = ?, status = ?
           WHERE id = ?`,
-    args: [airline, flightNumber, cabin, confirmation, notes, costUsd, status, id],
+    args: [airline, flightNumber, cabin, confirmation, notes, cost?.amount ?? null, status, id],
   });
 
   const rows = await client.execute({
@@ -240,15 +245,15 @@ export async function updateFlightBooking(
   });
 
   if (rows.rows.length === 0) throw new Error(`Flight booking ${id} not found`);
-  return toFlightBooking(rows.rows[0]);
+  return toFlightBooking(rows.rows[0] as Row);
 }
 
 export async function updateHotelBooking(
   id: number,
   name: string,
-  nightlyUsd: number | null,
-  taxesUsd: number | null,
-  resortFeeUsd: number | null,
+  nightly: Money | null,
+  taxes: Money | null,
+  resortFee: Money | null,
   refundable: boolean,
   cancelBy: string | null,
   breakfastIncluded: boolean,
@@ -258,10 +263,10 @@ export async function updateHotelBooking(
 ): Promise<HotelBooking> {
   const client = await db();
   await client.execute({
-    sql: `UPDATE hotels 
-          SET name = ?, nightly_usd = ?, taxes_usd = ?, resort_fee_usd = ?, refundable = ?, cancel_by = ?, breakfast_included = ?, confirmation = ?, notes = ?, status = ?
+    sql: `UPDATE hotels
+          SET name = ?, nightly_minor = ?, taxes_minor = ?, resort_fee_minor = ?, refundable = ?, cancel_by = ?, breakfast_included = ?, confirmation = ?, notes = ?, status = ?
           WHERE id = ?`,
-    args: [name, nightlyUsd, taxesUsd, resortFeeUsd, refundable ? 1 : 0, cancelBy, breakfastIncluded ? 1 : 0, confirmation, notes, status, id],
+    args: [name, nightly?.amount ?? null, taxes?.amount ?? null, resortFee?.amount ?? null, refundable ? 1 : 0, cancelBy, breakfastIncluded ? 1 : 0, confirmation, notes, status, id],
   });
 
   const rows = await client.execute({

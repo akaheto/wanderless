@@ -2,6 +2,7 @@
 name: new-feature
 description: Interview the user about a new feature before writing any code, then turn the answers into a scoped story. Use for larger or ambiguous features where the approach isn't obvious.
 ---
+
 Interview the user in detail about the feature they want, using the
 AskUserQuestion tool. Cover technical implementation, UI/UX, edge cases,
 concerns, and tradeoffs. Don't ask obvious questions — dig into the parts

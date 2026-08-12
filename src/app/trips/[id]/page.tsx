@@ -60,13 +60,15 @@ import { buildItinerary } from "@/lib/itinerary";
 import { comparisonQueryString } from "@/lib/scoring/params";
 import { scoreDestination } from "@/lib/scoring/engine";
 import { formatDateRange, nightsBetween, daysUntil } from "@/lib/dates";
+import { fetchRates } from "@/lib/money/rates";
+import { summariseBudget, byCategory, upcomingPayments, type BudgetItem as BudgetItemType } from "@/lib/money/budget";
 
 export default async function TripPage({ params }: { params: Promise<{ id: string }> }) {
   const id = Number((await params).id);
   const trip = Number.isFinite(id) ? await getTrip(id) : null;
   if (!trip) notFound();
 
-  const [candidates, links, preferences, stops, flightSearches, hotelSearches, events, flightBookings, hotelBookings, budgetItems, shares, owner, collaborators, invites] =
+  const [candidates, links, preferences, stops, flightSearches, hotelSearches, events, flightBookings, hotelBookings, budgetItems, shares, owner, collaborators, invites, exchangeRates] =
     await Promise.all([
       listCandidates(trip.id),
       listLinks(trip.id),
@@ -82,6 +84,19 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
       getUserById(trip.ownerId),
       listCollaborators(trip.id),
       listInvitesForTrip(trip.id),
+      // Fetch exchange rates for currency conversion
+      (async (): Promise<Awaited<ReturnType<typeof fetchRates>>> => {
+        const allBudget = await listBudgetItems(trip.id);
+        const currencies = [
+          trip.currency,
+          ...allBudget.map((b) => b.estimated?.currency || b.booked?.currency).filter((c): c is string => c !== undefined),
+        ]
+          .filter((c, i, arr) => arr.indexOf(c) === i)
+          .filter((c) => c !== trip.currency);
+
+        if (currencies.length === 0) return [];
+        return fetchRates({ sources: currencies, target: trip.currency });
+      })(),
     ]);
   
   const currentUser = await getCurrentUser();
@@ -244,14 +259,55 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
 
           <EventsPanel events={events} tripId={trip.id} trip={trip} />
 
-          <TripBudgetPanel
-            flightBookings={flightBookings}
-            hotelBookings={hotelBookings}
-            budgetItems={budgetItems}
-            stops={stops}
-            estimatedNightlyUsd={selectedScore?.estimatedNightlyUSD}
-            tripCurrency={trip.currency}
-          />
+          {(() => {
+            // Convert bookings and budget items to the money/budget format
+            const budgetForCalc = [
+              // Flights as line items
+              ...flightBookings.map((flight) => ({
+                id: flight.id,
+                tripId: trip.id,
+                category: "flights" as const,
+                label: `${flight.airline} ${flight.flightNumber}`,
+                estimated: null,
+                booked: flight.cost,
+                refundable: flight.status !== "confirmed",
+                refundableUntil: null,
+                dueOn: null,
+                paid: false,
+              })),
+              // Hotels as line items
+              ...hotelBookings.map((hotel) => ({
+                id: hotel.id,
+                tripId: trip.id,
+                category: "lodging" as const,
+                label: hotel.name || "Hotel",
+                estimated: null,
+                booked: hotel.nightly
+                  ? {
+                      amount: (hotel.nightly.amount + (hotel.taxes?.amount || 0) + (hotel.resortFee?.amount || 0)) *
+                        (hotel.checkIn && hotel.checkOut
+                          ? Math.ceil((new Date(hotel.checkOut).getTime() - new Date(hotel.checkIn).getTime()) / (1000 * 60 * 60 * 24))
+                          : 0),
+                      currency: hotel.nightly.currency,
+                    }
+                  : null,
+                refundable: hotel.refundable,
+                refundableUntil: hotel.cancelBy,
+                dueOn: null,
+                paid: false,
+              })),
+              // Budget items - cast to the money/budget type (structurally compatible)
+              ...(budgetItems as BudgetItemType[]),
+            ];
+
+            return (
+              <TripBudgetPanel
+                totals={summariseBudget(budgetForCalc, trip.currency, exchangeRates)}
+                byCategory={byCategory(budgetForCalc, trip.currency, exchangeRates)}
+                upcomingPayments={upcomingPayments(budgetForCalc)}
+              />
+            );
+          })()}
 
 
           <FlightBookingsPanel tripId={trip.id} bookings={flightBookings} />

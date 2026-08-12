@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import type { HotelBooking } from "@/lib/db/bookings";
+import type { Money } from "@/lib/money";
+import { toMajorUnits } from "@/lib/money";
 import { Badge, Card, CardHeader } from "./ui";
 import { HotelBookingForm } from "./HotelBookingForm";
 import { formatDate } from "@/lib/dates";
@@ -31,12 +33,17 @@ export function HotelBookingsPanel({ tripId, bookings }: HotelBookingsPanelProps
     return 0;
   };
 
-  const getTotalNightCost = (booking: HotelBooking): number => {
+  const getTotalNightCost = (booking: HotelBooking): Money | null => {
     const nights = getNights(booking);
-    const nightly = booking.nightlyUsd || 0;
-    const taxes = booking.taxesUsd || 0;
-    const resort = booking.resortFeeUsd || 0;
-    return (nightly + taxes + resort) * nights;
+    if (nights === 0) return null;
+
+    const nightly = booking.nightly?.amount || 0;
+    const taxes = booking.taxes?.amount || 0;
+    const resort = booking.resortFee?.amount || 0;
+    const total = (nightly + taxes + resort) * nights;
+
+    const currency = booking.nightly?.currency || "USD";
+    return total > 0 ? { amount: total, currency } : null;
   };
 
   return (
@@ -84,11 +91,11 @@ export function HotelBookingsPanel({ tripId, bookings }: HotelBookingsPanelProps
                           {formatDate(booking.checkIn, { year: false })} – {formatDate(booking.checkOut, { year: false })} · {nights} night{nights === 1 ? "" : "s"}
                         </span>
                       )}
-                      {booking.nightlyUsd && (
-                        <span>${booking.nightlyUsd.toFixed(2)}/night</span>
+                      {booking.nightly && (
+                        <span>{booking.nightly.currency} {toMajorUnits(booking.nightly).toFixed(2)}/night</span>
                       )}
-                      {totalCost > 0 && (
-                        <span className="font-medium text-ink-2">${totalCost.toFixed(2)}</span>
+                      {totalCost && (
+                        <span className="font-medium text-ink-2">{totalCost.currency} {toMajorUnits(totalCost).toFixed(2)}</span>
                       )}
                       {booking.refundable && <span className="text-ink-4">refundable</span>}
                       {booking.breakfastIncluded && <span className="text-ink-4">breakfast included</span>}

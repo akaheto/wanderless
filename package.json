@@ -11,7 +11,10 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "add:destination": "tsx scripts/add-destination.ts",
+    "verify:destination": "tsx scripts/verify-destination.ts",
+    "publish:destination": "tsx scripts/publish-destination.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",

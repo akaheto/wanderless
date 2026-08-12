@@ -2,6 +2,7 @@
 name: definition-of-done
 description: Run before marking any story or task complete. Checks verification evidence, backlog status, and documentation against the project's definition of done.
 ---
+
 Check the current work against the definition of done in the root
 `CLAUDE.md`. For each item, don't just assert it's satisfied — show the
 evidence:

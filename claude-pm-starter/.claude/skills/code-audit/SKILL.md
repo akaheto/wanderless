@@ -4,6 +4,7 @@ description: Runs the full quality gate for the monorepo — backend (ruff, mypy
 allowed-tools: Bash, Read
 argument-hint: [backend|frontend]
 ---
+
 Run `scripts/audit.sh` with an optional scope argument (`backend` or
 `frontend`; defaults to both). For backend it runs, in order:
 `ruff check`, `ruff format --check`, `mypy`, `pytest`. For frontend:
@@ -12,6 +13,7 @@ at the first failing stage — fix and re-run narrower first rather than
 letting every stage fail in sequence.
 
 Report format:
+
 - **Stage**: which of the four failed (or "all clean")
 - **Findings**: terse `file:line` list, not full command output pasted
   wholesale — summarize, don't dump

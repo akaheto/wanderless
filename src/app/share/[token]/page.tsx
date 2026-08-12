@@ -12,6 +12,7 @@ import { PlacesPanel } from "@/components/PlacesPanel";
 import { TripBudgetPanel } from "@/components/TripBudgetPanel";
 import { buildItinerary } from "@/lib/itinerary";
 import { formatDateRange, nightsBetween } from "@/lib/dates";
+import { summariseBudget, byCategory, upcomingPayments, type BudgetItem as BudgetItemType } from "@/lib/money/budget";
 
 export default async function SharedTripPage({ params }: { params: Promise<{ token: string }> }) {
   const token = (await params).token;
@@ -100,12 +101,51 @@ export default async function SharedTripPage({ params }: { params: Promise<{ tok
           />
         )}
 
-        <TripBudgetPanel
-          flightBookings={flightBookings}
-          hotelBookings={hotelBookings}
-          stops={stops}
-          estimatedNightlyUsd={250}
-        />
+        {(() => {
+          // Convert bookings to budget items for display
+          const budgetForDisplay: BudgetItemType[] = [
+            ...flightBookings.map((flight) => ({
+              id: flight.id,
+              tripId: trip.id,
+              category: "flights" as const,
+              label: `${flight.airline} ${flight.flightNumber}`,
+              estimated: null,
+              booked: flight.cost,
+              refundable: flight.status !== "confirmed",
+              refundableUntil: null,
+              dueOn: null,
+              paid: false,
+            })),
+            ...hotelBookings.map((hotel) => ({
+              id: hotel.id,
+              tripId: trip.id,
+              category: "lodging" as const,
+              label: hotel.name || "Hotel",
+              estimated: null,
+              booked: hotel.nightly
+                ? {
+                    amount: (hotel.nightly.amount + (hotel.taxes?.amount || 0) + (hotel.resortFee?.amount || 0)) *
+                      (hotel.checkIn && hotel.checkOut
+                        ? Math.ceil((new Date(hotel.checkOut).getTime() - new Date(hotel.checkIn).getTime()) / (1000 * 60 * 60 * 24))
+                        : 0),
+                    currency: hotel.nightly.currency,
+                  }
+                : null,
+              refundable: hotel.refundable,
+              refundableUntil: hotel.cancelBy,
+              dueOn: null,
+              paid: false,
+            })),
+          ];
+
+          return (
+            <TripBudgetPanel
+              totals={summariseBudget(budgetForDisplay, trip.currency, [])}
+              byCategory={byCategory(budgetForDisplay, trip.currency, [])}
+              upcomingPayments={upcomingPayments(budgetForDisplay)}
+            />
+          );
+        })()}
 
         {places.length > 0 && (
           <PlacesPanel

@@ -2,7 +2,8 @@
 
 import { useTransition } from "react";
 import type { FlightBooking } from "@/lib/db/bookings";
-import { createFlightBookingAction } from "@/app/actions";
+import { updateFlightBookingAction } from "@/app/actions";
+import { toMajorUnits } from "@/lib/money";
 import { Button, Card, CardHeader } from "./ui";
 
 export interface FlightBookingFormProps {
@@ -17,7 +18,7 @@ export function FlightBookingForm({ tripId, booking }: FlightBookingFormProps) {
     startTransition(async () => {
       formData.set("tripId", String(tripId));
       formData.set("bookingId", String(booking.id));
-      await createFlightBookingAction(formData);
+      await updateFlightBookingAction(formData);
     });
   };
 
@@ -119,18 +120,33 @@ export function FlightBookingForm({ tripId, booking }: FlightBookingFormProps) {
             />
           </div>
 
-          <div>
-            <label className="block text-[12px] font-medium text-ink-3 uppercase tracking-wide mb-1">
-              Cost (USD)
-            </label>
-            <input
-              type="number"
-              name="costUsd"
-              defaultValue={booking.costUsd ?? ""}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-[12px] font-medium text-ink-3 uppercase tracking-wide mb-1">
+                Cost Amount
+              </label>
+              <input
+                type="number"
+                name="costAmount"
+                defaultValue={booking.cost ? toMajorUnits(booking.cost) : ""}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-ink-3 uppercase tracking-wide mb-1">
+                Currency
+              </label>
+              <input
+                type="text"
+                name="currency"
+                defaultValue={booking.cost?.currency ?? "USD"}
+                placeholder="USD"
+                maxLength={3}
+                className="uppercase"
+              />
+            </div>
           </div>
 
           <div>

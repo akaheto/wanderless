@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { FlightBooking } from "@/lib/db/bookings";
+import { toMajorUnits } from "@/lib/money";
 import { Badge, Card, CardHeader } from "./ui";
 import { FlightBookingForm } from "./FlightBookingForm";
 
@@ -60,8 +61,8 @@ export function FlightBookingsPanel({ tripId, bookings }: FlightBookingsPanelPro
                     {booking.connections >= 0 && (
                       <span>{booking.connections} stop{booking.connections === 1 ? "" : "s"}</span>
                     )}
-                    {booking.costUsd && (
-                      <span className="font-medium text-ink-2">${booking.costUsd.toFixed(2)}</span>
+                    {booking.cost && (
+                      <span className="font-medium text-ink-2">{booking.cost.currency} {toMajorUnits(booking.cost).toFixed(2)}</span>
                     )}
                     {booking.confirmation && <span className="text-ink-4">{booking.confirmation}</span>}
                   </div>

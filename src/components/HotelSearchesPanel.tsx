@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { StoredHotelSearch } from "@/lib/db/searches";
-import { deleteHotelSearchAction } from "@/app/actions";
+import { deleteHotelSearchAction, createHotelBookingAction } from "@/app/actions";
 import { searchAge } from "@/lib/hotels";
 import type { HotelSearchResult } from "@/lib/hotels";
 import { Badge, Button, Card, CardHeader } from "./ui";
@@ -23,6 +23,21 @@ export function HotelSearchesPanel({ searches, tripId }: HotelSearchesPanelProps
       formData.set("searchId", String(searchId));
       formData.set("tripId", String(tripId));
       await deleteHotelSearchAction(formData);
+    });
+  };
+
+  const handleBookHotel = (search: StoredHotelSearch, result: HotelSearchResult, hotelIndex: number) => {
+    startTransition(async () => {
+      const hotel = result.hotels[hotelIndex];
+
+      const formData = new FormData();
+      formData.set("tripId", String(tripId));
+      formData.set("destinationId", search.destinationId);
+      formData.set("name", hotel.name);
+      formData.set("nightlyAmount", String(hotel.pricePerNight));
+      formData.set("currency", hotel.currency);
+
+      await createHotelBookingAction(formData);
     });
   };
 
@@ -94,6 +109,15 @@ export function HotelSearchesPanel({ searches, tripId }: HotelSearchesPanelProps
                             {hotel.currency === "USD" ? "$" : "€"} for {result.nights} night{result.nights === 1 ? "" : "s"}
                           </div>
                         </div>
+                        <Button
+                          type="button"
+                          variant="primary"
+                          onClick={() => handleBookHotel(search, result, idx)}
+                          disabled={pending}
+                          className="shrink-0"
+                        >
+                          Book
+                        </Button>
                       </div>
                       <div className="mt-1.5 text-ink-4">
                         <div className="text-[11px]">

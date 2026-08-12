@@ -25,6 +25,7 @@ their voice or content:
   release.
 
 When invoked:
+
 1. Confirm what actually changed (read the diff or ask if unclear) —
    don't guess at behavior you haven't verified.
 2. Write only to the doc(s) the change actually affects. Most changes

@@ -7,6 +7,7 @@ Release 8: Multi-user collaboration and anonymous sharing. Enables teams to plan
 ### Added
 
 **Release 8 — Accounts & Sharing:**
+
 - **Users table** (migration 0009): Email-based user identity. System user "0" owns initial data.
 - **Trip ownership** (`owner_id`): Every trip has an owner. Backfilled with system user.
 - **Trip collaborators**: Owner can add editors/viewers. Editors can modify trip, viewers can only read.
@@ -18,16 +19,19 @@ Release 8: Multi-user collaboration and anonymous sharing. Enables teams to plan
 ### Architecture
 
 **Collaboration model (Decision 1: Option A)**
+
 - Multiple editors per trip
 - Changes synchronized across collaborators
 - Owner can manage permissions
 
 **Anonymous sharing (Decision 2: Option B)**
+
 - No login required to view shared trips
 - Excludes: notes, priorities, rejected destinations, weights
 - Includes: destination choice, itinerary, confirmed bookings, saved places
 
 **Curated visibility (Decision 3: Option B)**
+
 - Shared view shows only: destination, itinerary, bookings, places
 - Hidden: personal notes, comparison weights, rejected options, search history
 
@@ -38,16 +42,19 @@ Complete Release 5 (bookings foundation) and Release 4 (events) plus Release 6 (
 ### Added
 
 **Release 5 — Flights & Hotels Booking Layer:**
+
 - **Flight and hotel search storage** (migration 0007, `src/lib/db/searches.ts`). Both stored with retrieval timestamp. Supports any provider via JSON payload. Staleness: fares ≥3d, schedules ≥30d.
 - **Flight and hotel booking storage** (migration 0003, `src/lib/db/bookings.ts`). Full CRUD for recording bookings with status (option/tentative/confirmed/cancelled), confirmation numbers, and costs.
 - **FlightSearchesPanel** & **HotelSearchesPanel** components. Display stored searches with staleness badges, expandable details, delete capability.
 - **SearchComparisonPanel** component. Shows searched itineraries vs curated estimates. Flags material contradictions (≥3h difference or nonstop mismatch) as staleness signals.
 
 **Release 4 — Events Framework:**
+
 - **Trip events** (migration 0008, `src/lib/db/events.ts`). Date-constrained events at trip level (visa deadlines, festivals, school holidays), tagged constraint/opportunity. Full CRUD with validation.
 - **EventsPanel** component. Display, add form (ready), delete capability.
 
 **Release 6 — Budget Tracking:**
+
 - **TripBudgetPanel** component. Shows flight costs (booked), hotel costs (booked vs estimated), total trip cost. Compares booked against estimated nightly rate with savings indicator.
 
 ### Changed
@@ -68,7 +75,7 @@ end to end. No API key required, and none added.
 
 - **Forecasts, live, on a trip inside 16 days.** Shown against the normal in two labelled
   columns and never merged — the normal is what ranked the destination, the forecast is what
-  is currently predicted. Outside the window the panel explains *why* there is no forecast
+  is currently predicted. Outside the window the panel explains _why_ there is no forecast
   rather than rendering empty, and a failed fetch says so instead of quietly showing the
   normal in a forecast's clothing.
 - **A flight-search layer** (`src/lib/flights/`) behind an interface with a null
@@ -173,7 +180,7 @@ provenance to know which ones still hold.
   checked.
 - **Staleness graded per category.** A restaurant goes stale in eighteen months; a beach
   takes five years, because a beach does not close. A place never checked shows as
-  *never verified*, which is a distinct state from stale and a worse one.
+  _never verified_, which is a distinct state from stale and a worse one.
 - **Re-verification** that refreshes the fetched fields and the date and **cannot touch
   your notes or priority** — enforced by there being no write path that does both.
 - Places on a trip **grouped under the stop they fall in**, derived from the destination
@@ -251,6 +258,7 @@ Release 2, first half: a trip is no longer a single date range.
 ### Added
 
 **Itinerary and stops (Phase 4)**
+
 - Trips hold an ordered list of stops, each a catalog destination with a number of nights.
   Stops can be added, removed and reordered.
 - Stop dates are derived from the trip's start plus the nights before them, so an itinerary
@@ -295,6 +303,7 @@ Phase 2 comparison engine, and the Phase 3 climate layer the comparison depends 
 ### Added
 
 **Foundation (Phase 0)**
+
 - Next.js App Router application shell with navigation, light/dark theming, and a
   provenance page at `/sources`.
 - Database schema and self-applying migrations covering the core records — trips,
@@ -304,6 +313,7 @@ Phase 2 comparison engine, and the Phase 3 climate layer the comparison depends 
   as a tier mark on every scoring factor.
 
 **Trip workspace (Phase 1)**
+
 - Create, edit, duplicate, archive and delete trips.
 - Dates with a flexibility setting, purpose, priorities, notes, traveller count, and a
   configurable departure airport defaulting to JFK.
@@ -315,6 +325,7 @@ Phase 2 comparison engine, and the Phase 3 climate layer the comparison depends 
 - Choosing a destination advances the planning status automatically.
 
 **Comparison engine (Phase 2)**
+
 - Deterministic scoring across seven categories — weather, seasonal, travel, lodging,
   experience, practicality and personal fit — each decomposing into named factors with
   their own value, sub-score and weight.
@@ -331,6 +342,7 @@ Phase 2 comparison engine, and the Phase 3 climate layer the comparison depends 
   still scored and explained, but never ranked above one that fits.
 
 **Climate (Phase 3)**
+
 - 2015–2024 daily normals for 27 destinations plus a New York baseline, smoothed over a
   ±7-day window so an exact-date lookup rests on roughly 150 observations.
 - Exact-date aggregation, monthly profiles, sea surface temperature for coastal
@@ -343,6 +355,7 @@ Phase 2 comparison engine, and the Phase 3 climate layer the comparison depends 
 - Forecasts deliberately excluded until a trip is close enough for them to mean anything.
 
 **Data pipeline**
+
 - `npm run build:data` regenerates the measured tier from Open-Meteo and Nager.Date.
   Resumable, backs off when rate-limited, and fails loudly rather than shipping a gap.
 

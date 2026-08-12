@@ -9,6 +9,7 @@ paths:
 # Frontend standards (Next.js / TypeScript / Tailwind)
 
 ## Toolchain
+
 - **npm** (or the project's chosen package manager — stay consistent,
   don't mix lockfiles).
 - **ESLint** (`next/core-web-vitals` + `next/typescript`) — linting.
@@ -19,6 +20,7 @@ paths:
 - **Vitest + React Testing Library** — component/unit tests.
 
 Before considering any frontend task done:
+
 ```
 npm run lint
 npm run format:check
@@ -27,6 +29,7 @@ npm run test
 ```
 
 ## Code style
+
 - **No `any`.** If the type is genuinely unknown, use `unknown` and
   narrow it — `any` defeats the type checker silently.
 - **Props: explicit interfaces, no boolean prop proliferation.** Don't
@@ -44,6 +47,7 @@ npm run test
   etc. before reaching for ARIA attributes to patch a `<div>`.
 
 ## Tailwind
+
 - Tailwind v4 uses CSS-first config (`@theme` in `globals.css`), not
   `tailwind.config.js` — see the comment in `globals.css`.
 - Utility classes in markup, not new custom CSS files, for anything a
@@ -52,6 +56,7 @@ npm run test
 - Let `prettier-plugin-tailwindcss` sort classes; don't fight it.
 
 ## Accessibility (non-negotiable baseline)
+
 - Minimum 4.5:1 contrast ratio for text (3:1 for large text).
 - Every interactive element reachable and operable by keyboard; visible
   focus states — don't remove the focus ring without replacing it.
@@ -61,6 +66,7 @@ npm run test
 - Status/error states aren't conveyed by color alone.
 
 ## Performance
+
 - Avoid request waterfalls — fetch what you can in parallel; use
   Suspense to stream rather than blocking on everything before render.
 - `next/image` for images, `next/dynamic` for heavy client components
@@ -71,12 +77,14 @@ npm run test
   reach for `useMemo`/`React.memo` by default.
 
 ## Testing
+
 - Every component with logic (not pure presentation) gets a test.
 - Test behavior and accessibility roles (`getByRole`, `getByLabelText`),
   not implementation details like class names or internal state.
 - Mock network calls; don't hit the real backend in unit tests.
 
 ## Security
+
 - Never render unsanitized user input with `dangerouslySetInnerHTML`.
 - Validate/sanitize anything from the URL, form input, or an external
   API before using it in a query, redirect, or rendered output.

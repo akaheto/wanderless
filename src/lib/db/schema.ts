@@ -426,4 +426,47 @@ export const MIGRATIONS: { name: string; statements: string[] }[] = [
       `CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users (verification_token)`,
     ],
   },
+  {
+    /*
+     * Release 6/11. Money as integer minor units with explicit currency (ADR 0013).
+     * Replaces all *_usd REAL columns with currency-aware integer minor units.
+     * This prevents float rounding errors that compound silently across a budget.
+     * Backfill: all legacy rows are implicitly USD, so multiply by 100 and round.
+     */
+    name: "0015_money_minor_units",
+    statements: [
+      // budget_items: add currency and minor-unit columns, backfill, drop old columns
+      `ALTER TABLE budget_items ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'`,
+      `ALTER TABLE budget_items ADD COLUMN estimated_minor INTEGER`,
+      `ALTER TABLE budget_items ADD COLUMN booked_minor INTEGER`,
+      `ALTER TABLE budget_items ADD COLUMN paid INTEGER NOT NULL DEFAULT 0`,
+      `ALTER TABLE budget_items ADD COLUMN refundable_until TEXT`,
+
+      // Backfill: convert from USD decimals to minor units (× 100, rounded)
+      `UPDATE budget_items SET estimated_minor = CAST(ROUND(COALESCE(estimated_usd, 0) * 100) AS INTEGER) WHERE estimated_usd IS NOT NULL`,
+      `UPDATE budget_items SET booked_minor = CAST(ROUND(COALESCE(booked_usd, 0) * 100) AS INTEGER) WHERE booked_usd IS NOT NULL`,
+
+      // Drop old columns (following the additive-migration pattern from 0004)
+      `ALTER TABLE budget_items DROP COLUMN estimated_usd`,
+      `ALTER TABLE budget_items DROP COLUMN booked_usd`,
+
+      // flights: add currency and cost_minor, backfill, drop old column
+      `ALTER TABLE flights ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'`,
+      `ALTER TABLE flights ADD COLUMN cost_minor INTEGER`,
+      `UPDATE flights SET cost_minor = CAST(ROUND(COALESCE(cost_usd, 0) * 100) AS INTEGER) WHERE cost_usd IS NOT NULL`,
+      `ALTER TABLE flights DROP COLUMN cost_usd`,
+
+      // hotels: add currency and minor-unit columns, backfill, drop old columns
+      `ALTER TABLE hotels ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'`,
+      `ALTER TABLE hotels ADD COLUMN nightly_minor INTEGER`,
+      `ALTER TABLE hotels ADD COLUMN taxes_minor INTEGER`,
+      `ALTER TABLE hotels ADD COLUMN resort_fee_minor INTEGER`,
+      `UPDATE hotels SET nightly_minor = CAST(ROUND(COALESCE(nightly_usd, 0) * 100) AS INTEGER) WHERE nightly_usd IS NOT NULL`,
+      `UPDATE hotels SET taxes_minor = CAST(ROUND(COALESCE(taxes_usd, 0) * 100) AS INTEGER) WHERE taxes_usd IS NOT NULL`,
+      `UPDATE hotels SET resort_fee_minor = CAST(ROUND(COALESCE(resort_fee_usd, 0) * 100) AS INTEGER) WHERE resort_fee_usd IS NOT NULL`,
+      `ALTER TABLE hotels DROP COLUMN nightly_usd`,
+      `ALTER TABLE hotels DROP COLUMN taxes_usd`,
+      `ALTER TABLE hotels DROP COLUMN resort_fee_usd`,
+    ],
+  },
 ];

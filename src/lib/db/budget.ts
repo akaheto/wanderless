@@ -3,30 +3,36 @@ import "server-only";
 import type { Row } from "@libsql/client";
 import { db } from "./client";
 import { isValidDate } from "@/lib/dates";
+import { type Money, money, toMajorUnits } from "@/lib/money";
 
 export interface BudgetItem {
   id: number;
   tripId: number;
   category: string;
   label: string;
-  estimatedUsd: number | null;
-  bookedUsd: number | null;
+  estimated: Money | null;
+  booked: Money | null;
   refundable: boolean;
+  refundableUntil: string | null;
   dueOn: string | null;
+  paid: boolean;
   notes: string;
   createdAt: string;
 }
 
 function toBudgetItem(row: Row): BudgetItem {
+  const currency = String(row.currency ?? "USD").toUpperCase();
   return {
     id: Number(row.id),
     tripId: Number(row.trip_id),
     category: String(row.category),
     label: String(row.label),
-    estimatedUsd: row.estimated_usd === null ? null : Number(row.estimated_usd),
-    bookedUsd: row.booked_usd === null ? null : Number(row.booked_usd),
+    estimated: row.estimated_minor === null ? null : money(Number(row.estimated_minor), currency),
+    booked: row.booked_minor === null ? null : money(Number(row.booked_minor), currency),
     refundable: Number(row.refundable) === 1,
+    refundableUntil: row.refundable_until === null ? null : String(row.refundable_until),
     dueOn: row.due_on === null ? null : String(row.due_on),
+    paid: Number(row.paid) === 1,
     notes: String(row.notes ?? ""),
     createdAt: String(row.created_at),
   };
@@ -36,20 +42,25 @@ export async function createBudgetItem(
   tripId: number,
   category: string,
   label: string,
-  estimatedUsd: number | null = null,
+  estimated: Money | null = null,
   dueOn: string | null = null,
   notes: string = "",
+  refundableUntil: string | null = null,
 ): Promise<BudgetItem> {
   if (dueOn && !isValidDate(dueOn)) {
     throw new Error("Invalid due date format");
   }
+  if (refundableUntil && !isValidDate(refundableUntil)) {
+    throw new Error("Invalid refundable-until date format");
+  }
 
   const now = new Date().toISOString();
   const client = await db();
+  const currency = estimated?.currency ?? "USD";
   const row = await client.execute({
-    sql: `INSERT INTO budget_items (trip_id, category, label, estimated_usd, due_on, notes, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    args: [tripId, category, label, estimatedUsd, dueOn, notes, now],
+    sql: `INSERT INTO budget_items (trip_id, category, label, currency, estimated_minor, due_on, refundable_until, notes, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [tripId, category, label, currency, estimated?.amount ?? null, dueOn, refundableUntil, notes, now],
   });
 
   return {
@@ -57,10 +68,12 @@ export async function createBudgetItem(
     tripId,
     category,
     label,
-    estimatedUsd,
-    bookedUsd: null,
+    estimated: estimated ?? null,
+    booked: null,
     refundable: true,
+    refundableUntil,
     dueOn,
+    paid: false,
     notes,
     createdAt: now,
   };
@@ -96,6 +109,9 @@ export async function updateBudgetItem(
   if (updates.dueOn && !isValidDate(updates.dueOn)) {
     throw new Error("Invalid due date format");
   }
+  if (updates.refundableUntil && !isValidDate(updates.refundableUntil)) {
+    throw new Error("Invalid refundable-until date format");
+  }
 
   const fields = [];
   const args = [];
@@ -108,13 +124,13 @@ export async function updateBudgetItem(
     fields.push("category = ?");
     args.push(updates.category);
   }
-  if (updates.estimatedUsd !== undefined) {
-    fields.push("estimated_usd = ?");
-    args.push(updates.estimatedUsd);
+  if (updates.estimated !== undefined) {
+    fields.push("estimated_minor = ?");
+    args.push(updates.estimated?.amount ?? null);
   }
-  if (updates.bookedUsd !== undefined) {
-    fields.push("booked_usd = ?");
-    args.push(updates.bookedUsd);
+  if (updates.booked !== undefined) {
+    fields.push("booked_minor = ?");
+    args.push(updates.booked?.amount ?? null);
   }
   if (updates.refundable !== undefined) {
     fields.push("refundable = ?");
@@ -123,6 +139,14 @@ export async function updateBudgetItem(
   if (updates.dueOn !== undefined) {
     fields.push("due_on = ?");
     args.push(updates.dueOn);
+  }
+  if (updates.refundableUntil !== undefined) {
+    fields.push("refundable_until = ?");
+    args.push(updates.refundableUntil);
+  }
+  if (updates.paid !== undefined) {
+    fields.push("paid = ?");
+    args.push(updates.paid ? 1 : 0);
   }
   if (updates.notes !== undefined) {
     fields.push("notes = ?");

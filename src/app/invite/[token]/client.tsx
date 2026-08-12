@@ -75,11 +75,11 @@ export function InvitePageClient({ token, invite, tripName, ownerEmail }: Invite
           <div className="border-t border-line pt-4">
             {invite.role === "editor" ? (
               <p className="text-[12px] text-ink-3">
-                As an <strong>editor</strong>, you'll be able to view and edit this trip's details, itinerary, bookings, and places.
+                As an <strong>editor</strong>, you&apos;ll be able to view and edit this trip&apos;s details, itinerary, bookings, and places.
               </p>
             ) : (
               <p className="text-[12px] text-ink-3">
-                As a <strong>viewer</strong>, you'll be able to view this trip's details, itinerary, bookings, and places.
+                As a <strong>viewer</strong>, you&apos;ll be able to view this trip&apos;s details, itinerary, bookings, and places.
               </p>
             )}
           </div>

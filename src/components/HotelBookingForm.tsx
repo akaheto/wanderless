@@ -2,7 +2,8 @@
 
 import { useTransition } from "react";
 import type { HotelBooking } from "@/lib/db/bookings";
-import { createHotelBookingAction } from "@/app/actions";
+import { updateHotelBookingAction } from "@/app/actions";
+import { toMajorUnits } from "@/lib/money";
 import { Button, Card, CardHeader } from "./ui";
 
 export interface HotelBookingFormProps {
@@ -18,7 +19,7 @@ export function HotelBookingForm({ tripId, booking, nights }: HotelBookingFormPr
     startTransition(async () => {
       formData.set("tripId", String(tripId));
       formData.set("bookingId", String(booking.id));
-      await createHotelBookingAction(formData);
+      await updateHotelBookingAction(formData);
     });
   };
 
@@ -45,10 +46,10 @@ export function HotelBookingForm({ tripId, booking, nights }: HotelBookingFormPr
                 <span className="font-medium text-ink-2">{booking.checkOut}</span>
               </div>
             )}
-            {booking.nightlyUsd && (
+            {booking.nightly && (
               <div className="flex justify-between">
                 <span>Nightly rate:</span>
-                <span className="font-medium text-ink-2">${booking.nightlyUsd.toFixed(2)}</span>
+                <span className="font-medium text-ink-2">{booking.nightly.currency} {toMajorUnits(booking.nightly).toFixed(2)}</span>
               </div>
             )}
             {nights && (
@@ -76,15 +77,15 @@ export function HotelBookingForm({ tripId, booking, nights }: HotelBookingFormPr
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="block text-[12px] font-medium text-ink-3 uppercase tracking-wide mb-1">
-                Nightly rate (USD)
+                Nightly amount
               </label>
               <input
                 type="number"
-                name="nightlyUsd"
-                defaultValue={booking.nightlyUsd ?? ""}
+                name="nightlyAmount"
+                defaultValue={booking.nightly ? toMajorUnits(booking.nightly) : ""}
                 placeholder="0.00"
                 step="0.01"
                 min="0"
@@ -93,12 +94,26 @@ export function HotelBookingForm({ tripId, booking, nights }: HotelBookingFormPr
 
             <div>
               <label className="block text-[12px] font-medium text-ink-3 uppercase tracking-wide mb-1">
-                Taxes (USD)
+                Taxes
               </label>
               <input
                 type="number"
-                name="taxesUsd"
-                defaultValue={booking.taxesUsd ?? ""}
+                name="taxesAmount"
+                defaultValue={booking.taxes ? toMajorUnits(booking.taxes) : ""}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[12px] font-medium text-ink-3 uppercase tracking-wide mb-1">
+                Resort fee
+              </label>
+              <input
+                type="number"
+                name="resortFeeAmount"
+                defaultValue={booking.resortFee ? toMajorUnits(booking.resortFee) : ""}
                 placeholder="0.00"
                 step="0.01"
                 min="0"
@@ -108,15 +123,15 @@ export function HotelBookingForm({ tripId, booking, nights }: HotelBookingFormPr
 
           <div>
             <label className="block text-[12px] font-medium text-ink-3 uppercase tracking-wide mb-1">
-              Resort fee (USD)
+              Currency
             </label>
             <input
-              type="number"
-              name="resortFeeUsd"
-              defaultValue={booking.resortFeeUsd ?? ""}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
+              type="text"
+              name="currency"
+              defaultValue={booking.nightly?.currency ?? "USD"}
+              placeholder="USD"
+              maxLength={3}
+              className="uppercase"
             />
           </div>
 

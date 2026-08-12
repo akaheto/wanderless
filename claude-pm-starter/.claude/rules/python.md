@@ -7,6 +7,7 @@ paths:
 # Python standards
 
 ## Toolchain (2026 default stack)
+
 - **uv** — environments, dependency install/lock, running scripts/commands.
   Don't use bare `pip install`; use `uv add` / `uv sync` so the lockfile
   stays authoritative.
@@ -24,6 +25,7 @@ paths:
 
 Before considering any Python task done (run from `backend/`, or use
 the `/code-audit` skill which does this for the whole monorepo):
+
 ```
 uv run ruff check --fix .
 uv run ruff format .
@@ -32,6 +34,7 @@ uv run pytest
 ```
 
 ## Code style
+
 - **Type hints on every function signature** — parameters and return
   type. Use built-in generics (`list[str]`, `dict[str, int]`) and `|` for
   unions (`str | None`), not `typing.List`/`typing.Optional` — this
@@ -71,6 +74,7 @@ uv run pytest
   beyond a throwaway script.
 
 ## Project layout
+
 ```
 backend/
 ├── pyproject.toml
@@ -81,10 +85,12 @@ backend/
     ├── unit/
     └── integration/
 ```
+
 This lives under `backend/` in the monorepo — see the root `CLAUDE.md`
 for how it relates to `frontend/`.
 
 ## Testing
+
 - Every new function with non-trivial logic gets a test.
 - Unit tests (`tests/unit/`) should run fast and not touch the network,
   filesystem, or a real database — mock those boundaries.
@@ -95,6 +101,7 @@ for how it relates to `frontend/`.
   necessarily blocking — use judgment.
 
 ## Security
+
 - Never commit secrets; read from environment variables or a secrets
   manager.
 - Run `uv run pip-audit` before release or when adding a new dependency.

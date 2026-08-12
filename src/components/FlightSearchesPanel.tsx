@@ -2,10 +2,11 @@
 
 import { useState, useTransition } from "react";
 import type { StoredFlightSearch } from "@/lib/db/searches";
-import { deleteFlightSearchAction } from "@/app/actions";
+import { deleteFlightSearchAction, createFlightBookingAction } from "@/app/actions";
 import { searchAge } from "@/lib/flights";
 import { Badge, Button, Card, CardHeader } from "./ui";
 import { formatDate } from "@/lib/dates";
+import { toMajorUnits } from "@/lib/money";
 
 export interface FlightSearchesPanelProps {
   searches: StoredFlightSearch[];
@@ -22,6 +23,26 @@ export function FlightSearchesPanel({ searches, tripId }: FlightSearchesPanelPro
       formData.set("searchId", String(searchId));
       formData.set("tripId", String(tripId));
       await deleteFlightSearchAction(formData);
+    });
+  };
+
+  const handleBookFlight = (search: StoredFlightSearch, itineraryIndex: number) => {
+    startTransition(async () => {
+      const it = search.result.itineraries[itineraryIndex];
+      const firstSegment = it.segments[0];
+
+      const formData = new FormData();
+      formData.set("tripId", String(tripId));
+      formData.set("origin", search.origin);
+      formData.set("destination", search.destinationAirport);
+      formData.set("airline", firstSegment?.airline ?? "");
+      formData.set("flightNumber", firstSegment?.flightNumber ?? "");
+      if (it.priceMinorUnits && it.currency) {
+        formData.set("costAmount", String(toMajorUnits({ amount: it.priceMinorUnits, currency: it.currency })));
+        formData.set("currency", it.currency);
+      }
+
+      await createFlightBookingAction(formData);
     });
   };
 
@@ -77,24 +98,37 @@ export function FlightSearchesPanel({ searches, tripId }: FlightSearchesPanelPro
               </div>
 
               {isExpanded && (
-                <div className="mt-3 space-y-2 border-t border-line pt-3">
+                <div className="mt-3 space-y-3 border-t border-line pt-3">
                   {search.result.itineraries.map((it, idx) => (
                     <div key={it.id} className="text-[12px]">
-                      <div className="font-medium text-ink-2">
-                        Option {idx + 1} · {Math.floor(it.totalMinutes / 60)}h {it.totalMinutes % 60}m
-                        {it.stops === 0 ? " (nonstop)" : ` (${it.stops} stop${it.stops === 1 ? "" : "s"})`}
-                      </div>
-                      {it.priceMinorUnits && it.currency && (
-                        <div className="text-ink-3">
-                          {(it.priceMinorUnits / 100).toFixed(2)} {it.currency}
-                        </div>
-                      )}
-                      <div className="mt-1 text-ink-3">
-                        {it.segments.map((seg, i) => (
-                          <div key={i}>
-                            {seg.airline} {seg.flightNumber} · {seg.from} → {seg.to}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <div className="font-medium text-ink-2">
+                            Option {idx + 1} · {Math.floor(it.totalMinutes / 60)}h {it.totalMinutes % 60}m
+                            {it.stops === 0 ? " (nonstop)" : ` (${it.stops} stop${it.stops === 1 ? "" : "s"})`}
                           </div>
-                        ))}
+                          {it.priceMinorUnits && it.currency && (
+                            <div className="text-ink-3">
+                              {(it.priceMinorUnits / 100).toFixed(2)} {it.currency}
+                            </div>
+                          )}
+                          <div className="mt-1 text-ink-3">
+                            {it.segments.map((seg, i) => (
+                              <div key={i}>
+                                {seg.airline} {seg.flightNumber} · {seg.from} → {seg.to}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="primary"
+                          onClick={() => handleBookFlight(search, idx)}
+                          disabled={pending}
+                          className="shrink-0"
+                        >
+                          Book
+                        </Button>
                       </div>
                     </div>
                   ))}
