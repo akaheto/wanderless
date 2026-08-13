@@ -225,3 +225,52 @@ as `STORY-<slug>.md`.
 - **ADRs**: 0019
 - **Stories**: `STORY-offline-app-shell.md`, `STORY-offline-destination-downloads.md`,
   `STORY-offline-city-guides.md`, `STORY-offline-sync-queue.md`
+
+---
+
+### Epic: Destination discovery & curation
+- **Status**: planned
+- **Release**: TBD (post-7)
+- **Goal**: Expand the destination catalog beyond 47 cities and enable community contributions for catalog growth.
+- **Why now**: Catalog is underrepresenting Africa, South Asia, and Southeast Asia; community suggestions can accelerate regional expansion.
+- **Scope**:
+  - Curated expansion to 100+ destinations (Phase 1: manual curation of underrepresented regions)
+  - User-facing "Suggest a destination" form in the catalog page
+  - Admin moderation dashboard for pending suggestions
+  - Auto-validation: duplicate checks, geocoding, basic feasibility checks
+  - Integration with research automation (ADR 0013) for data pipeline
+  - Community voting on suggestions (future phase)
+- **Out of scope**: Crowdsourced content (tips, photos) — Phase 2 work.
+- **Acceptance criteria**:
+  - [ ] Catalog grows to 100+ cities with balanced regional coverage
+  - [ ] Users can submit destination suggestions from the app
+  - [ ] Suggestions are validated and require admin approval before curation
+  - [ ] Approved suggestions trigger automatic climate/rating data fetch
+  - [ ] Users notified when their suggestion is approved
+- **ADRs**: 0013 (curation workflow)
+- **Stories**: `STORY-destination-catalog-expansion.md`
+
+---
+
+### Epic: Authentication, authorization & compliance
+- **Status**: planned
+- **Release**: TBD (post-7)
+- **Goal**: Enforce authentication, implement role-based access control, and maintain audit logs for compliance and security.
+- **Why now**: App is currently accessible without login; admin features needed for account management; audit logs required for compliance and debugging.
+- **Scope**:
+  - Enforce authentication on all routes (no unauthenticated access)
+  - Email verification and new-account notifications
+  - Three-tier role system (user / admin / owner) with permissions
+  - Complete audit logging of user and admin actions
+  - Admin dashboard for monitoring and compliance
+- **Out of scope**: Multi-factor authentication (future), IP whitelisting (future), advanced threat detection (future).
+- **Acceptance criteria**:
+  - [ ] All protected routes require authentication
+  - [ ] Unauthenticated users redirected to login
+  - [ ] Email notifications work for verification and new accounts
+  - [ ] Admin can view audit logs and user list
+  - [ ] Role-based access control enforced on API and frontend
+  - [ ] Audit logs retained for 90+ days
+  - [ ] Admin dashboard accessible only to admin+ users
+- **ADRs**: 0006 (auth tier separation)
+- **Stories**: `STORY-authentication-enforcement.md`, `STORY-email-notifications.md`, `STORY-access-levels.md`, `STORY-audit-logs.md`
