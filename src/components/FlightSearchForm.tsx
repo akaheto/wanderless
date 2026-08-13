@@ -82,11 +82,16 @@ export function FlightSearchForm({
     }
     formData.set("travellers", String(travellers));
 
+    console.log(`[Flight Search] Searching from ${Array.from(selectedOrigins).join(',')} to ${destination} on ${departDate}`);
+
     startTransition(async () => {
       try {
         await searchFlightsAction(formData);
+        console.log(`[Flight Search] Search completed - check the "Flight searches" section below`);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Search failed");
+        const message = err instanceof Error ? err.message : "Search failed";
+        console.error(`[Flight Search] Error: ${message}`);
+        setError(message);
       }
     });
   };
