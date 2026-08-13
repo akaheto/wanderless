@@ -47,6 +47,11 @@ export default function DestinationsPage() {
         />
       </div>
 
+      {/* Destination count display */}
+      <div className="mb-6 text-sm text-ink-2">
+        Showing <span className="font-semibold">{regions.reduce((sum, r) => sum + r.items.length, 0)}</span> destinations for <span className="font-semibold">{startDate}</span> to <span className="font-semibold">{endDate}</span>
+      </div>
+
       <div className="space-y-8">
         {regions.map((group) => (
           <section key={group.region}>
@@ -59,6 +64,14 @@ export default function DestinationsPage() {
                 );
                 const jan = monthClimate(d.id, 1);
                 const jul = monthClimate(d.id, 7);
+
+                // Determine season emoji based on best month
+                const getSeasonEmoji = (month: number) => {
+                  if ([12, 1, 2].includes(month)) return '❄️'; // Winter
+                  if ([3, 4, 5].includes(month)) return '🌸'; // Spring
+                  if ([6, 7, 8].includes(month)) return '☀️'; // Summer
+                  return '🍂'; // Fall
+                };
 
                 return (
                   <Card key={d.id} className="p-4">
@@ -78,6 +91,9 @@ export default function DestinationsPage() {
                       </div>
                       <div className="flex shrink-0 gap-1.5">
                         <Badge>{d.archetype}</Badge>
+                        <span title={`Best in ${MONTH_ABBR[best.month - 1]}`}>
+                          <Badge>{getSeasonEmoji(best.month)}</Badge>
+                        </span>
                         {d.travel.nonstop && <Badge tone="accent">nonstop</Badge>}
                       </div>
                     </div>

@@ -18,7 +18,42 @@ export function DateRangePicker({ startDate, endDate, onRangeChange }: DateRange
   const [startError, setStartError] = useState('');
   const [endError, setEndError] = useState('');
   const [focusedDateIndex, setFocusedDateIndex] = useState<number | null>(null);
+  const [visibleMonthOffset, setVisibleMonthOffset] = useState(0);
   const calendarButtonsRef = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Quick-pick date ranges
+  const getQuickPickRanges = () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const thisWeekEnd = new Date(today);
+    thisWeekEnd.setDate(thisWeekEnd.getDate() + (6 - today.getDay()));
+
+    const nextWeekStart = new Date(thisWeekEnd);
+    nextWeekStart.setDate(nextWeekStart.getDate() + 1);
+    const nextWeekEnd = new Date(nextWeekStart);
+    nextWeekEnd.setDate(nextWeekEnd.getDate() + 6);
+
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    return {
+      thisWeekend: { start: today, end: thisWeekEnd },
+      nextWeek: { start: nextWeekStart, end: nextWeekEnd },
+      thisMonth: { start: today, end: monthEnd },
+    };
+  };
+
+  const setQuickPickRange = (start: Date, end: Date) => {
+    const startStr = start.toISOString().split('T')[0];
+    const endStr = end.toISOString().split('T')[0];
+    setTempStart(startStr);
+    setTempEnd(endStr);
+    onRangeChange(startStr, endStr);
+    setAnnouncement(`Quick pick: ${formatDate(startStr)} to ${formatDate(endStr)}`);
+  };
+
+  const quickPicks = getQuickPickRanges();
 
   // Handle direct "from" field change
   const handleFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,6 +226,28 @@ export function DateRangePicker({ startDate, endDate, onRangeChange }: DateRange
         </div>
       </div>
 
+      {/* Quick-pick buttons */}
+      <div className="grid grid-cols-3 gap-2">
+        <button
+          onClick={() => setQuickPickRange(quickPicks.thisWeekend.start, quickPicks.thisWeekend.end)}
+          className="rounded-lg border border-line bg-surface-1 px-3 py-2 text-xs font-medium text-ink-2 hover:bg-surface-3 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 transition-colors"
+        >
+          This week
+        </button>
+        <button
+          onClick={() => setQuickPickRange(quickPicks.nextWeek.start, quickPicks.nextWeek.end)}
+          className="rounded-lg border border-line bg-surface-1 px-3 py-2 text-xs font-medium text-ink-2 hover:bg-surface-3 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 transition-colors"
+        >
+          Next week
+        </button>
+        <button
+          onClick={() => setQuickPickRange(quickPicks.thisMonth.start, quickPicks.thisMonth.end)}
+          className="rounded-lg border border-line bg-surface-1 px-3 py-2 text-xs font-medium text-ink-2 hover:bg-surface-3 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 transition-colors"
+        >
+          This month
+        </button>
+      </div>
+
       {/* Toggle calendar button on mobile, always show on desktop via CSS */}
       <div className="sm:hidden">
         <button
@@ -212,11 +269,42 @@ export function DateRangePicker({ startDate, endDate, onRangeChange }: DateRange
           Click twice to select a range, or use arrow keys to navigate
         </p>
 
-        {/* Calendar with month headers */}
+        {/* Calendar navigation buttons (mobile pagination) */}
+        <div className="flex items-center justify-between gap-2 mb-4 sm:hidden">
+          <button
+            onClick={() => setVisibleMonthOffset(Math.max(-11, visibleMonthOffset - 1))}
+            disabled={visibleMonthOffset === -11}
+            className="rounded px-2 py-1 text-xs font-medium border border-line bg-surface-1 hover:bg-surface-3 disabled:opacity-50 disabled:cursor-default transition-colors"
+            aria-label="Previous month"
+          >
+            ←
+          </button>
+          <span className="text-xs font-semibold text-ink-2">
+            {new Date(
+              new Date().getFullYear(),
+              new Date().getMonth() + visibleMonthOffset,
+              1
+            ).toLocaleString('default', { month: 'short', year: 'numeric' })}
+          </span>
+          <button
+            onClick={() => setVisibleMonthOffset(Math.min(11, visibleMonthOffset + 1))}
+            disabled={visibleMonthOffset === 11}
+            className="rounded px-2 py-1 text-xs font-medium border border-line bg-surface-1 hover:bg-surface-3 disabled:opacity-50 disabled:cursor-default transition-colors"
+            aria-label="Next month"
+          >
+            →
+          </button>
+        </div>
+
+        {/* Calendar with month headers - desktop shows all, mobile shows one via pagination */}
         <div className="space-y-4">
-          {groupCalendarByMonth(generateCalendarDays(tempStart, tempEnd)).map(
-            (monthGroup) => (
-              <div key={monthGroup.month}>
+          {(() => {
+            const allMonths = groupCalendarByMonth(generateCalendarDays(tempStart, tempEnd));
+            return allMonths.map((monthGroup, monthIdx) => (
+              <div
+                key={monthGroup.month}
+                className={`sm:block ${monthIdx === visibleMonthOffset ? 'block' : 'hidden'} sm:!block`}
+              >
                 {/* Month header */}
                 <h3 className="text-xs font-semibold text-ink-2 uppercase tracking-wide mb-2 px-1">
                   {monthGroup.month}
@@ -284,8 +372,8 @@ export function DateRangePicker({ startDate, endDate, onRangeChange }: DateRange
                   ))}
                 </div>
               </div>
-            )
-          )}
+            ));
+          })()}
         </div>
       </div>
 
