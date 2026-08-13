@@ -72,17 +72,17 @@ export async function signUp(email: string, password: string): Promise<{ user: U
   const verificationToken = randomBytes(32).toString("hex");
   const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
 
-  // In demo mode, auto-verify emails so users can immediately login
-  // Production should require email verification
-  const isDemo = process.env.NODE_ENV !== 'production' || process.env.DEMO_MODE === 'true';
+  // Auto-verify emails on signup so users can immediately login
+  // (This is a public demo — no email backend available)
+  const autoVerifyEmail = true;
 
   await client.execute({
     sql: "INSERT INTO users (id, email, password_hash, created_at, email_verified, verification_token, verification_token_expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    args: [userId, email, passwordHash, now, isDemo ? 1 : 0, verificationToken, tokenExpiresAt],
+    args: [userId, email, passwordHash, now, autoVerifyEmail ? 1 : 0, verificationToken, tokenExpiresAt],
   });
 
   return {
-    user: { id: userId, email, createdAt: now, emailVerified: isDemo },
+    user: { id: userId, email, createdAt: now, emailVerified: autoVerifyEmail },
     verificationToken
   };
 }
