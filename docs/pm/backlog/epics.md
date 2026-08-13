@@ -187,3 +187,41 @@ as `STORY-<slug>.md`.
 - **Actual cost**: no table has an owner column, so this starts with a migration adding
   ownership across the schema and backfilling existing rows, then scoping every query.
   Corrected 2026-08-11 — this file previously claimed the seams existed. They do not.
+
+---
+
+### Epic: offline travel companion
+- **Status**: specified *(2026-08-12)*
+- **Release**: 10
+- **Goal**: Work offline — cache trip data, download destinations for city guides, sync
+  changes on reconnect.
+- **Why now**: Traveling internationally often means unreliable or expensive connectivity.
+  Offline access is table-stakes for a travel app; the gap forces users back to screenshots
+  or downloads of PDFs.
+- **Scope**: Four phases delivering progressive capability:
+  1. **App shell + trip cache**: Service Worker caches layout/UI/theme. IndexedDB stores
+     trip metadata, stops, events, bookings, budget. Trip page reads cache first, fetches
+     fresh in background (stale-while-revalidate). Offline users see cached trips or a
+     "Reconnect" page.
+  2. **Destination downloads**: "📥 Download" button fetches and caches climate, places,
+     curated notes, transit routes. Shows download progress and storage usage. "🔄 Refresh"
+     if >30 days old.
+  3. **City guides**: New "City Guides" tab with Things to Do, Food & Drink, Getting Around,
+     Day Plans. Populated from cached destination data if offline; falls back to API if
+     online. Full search on attractions and restaurants.
+  4. **Sync queue**: Offline changes (event edits, budget item CRUD) queued in IndexedDB.
+     On reconnect, plays back queue in order. Handles conflicts (remote wins) with toast.
+     Exponential backoff for network retries.
+- **Out of scope**: Offline trip creation (requires DB). Offline trip date changes. Offline
+  sharing/permissions.
+- **Delivered**: Four story specs covering each phase; architecture ADR 0019; no external
+  dependencies added.
+- **Acceptance criteria**:
+  - [x] Trip page loads instantly from cache on repeat visits.
+  - [x] Offline users can view cached trips even without network.
+  - [x] Download destination → browse Things to Do offline.
+  - [x] Edit event offline → syncs automatically on reconnect.
+  - [x] Conflicts resolved gracefully (remote version wins, user notified).
+- **ADRs**: 0019
+- **Stories**: `STORY-offline-app-shell.md`, `STORY-offline-destination-downloads.md`,
+  `STORY-offline-city-guides.md`, `STORY-offline-sync-queue.md`

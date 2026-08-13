@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.10.0 — 2026-08-12
+
+Release 10: Offline travel companion. Four-phase offline architecture with service worker, IndexedDB caching, destination downloads, and sync queue.
+
+### Added
+
+**Release 10 — Offline Travel Companion:**
+
+- **App shell caching** (Phase 1): Service Worker caches layout, UI components, and theme. Offline users access "Cached Trips" page (`/trips/offline`). No splash screen on network loss.
+- **Trip data cache** (Phase 1): IndexedDB stores trip metadata, stops, events, bookings, budget items, places. Trip page reads from cache first (instant), fetches fresh in background (stale-while-revalidate).
+- **Destination downloads** (Phase 2): "📥 Download" button on destination detail fetches climate, places, curated notes, transit routes. Stores in IndexedDB with timestamp. Shows "🔄 Refresh" if >30 days old. Storage usage display with quota warning.
+- **City guides** (Phase 3): New "City Guides" tab with Things to Do, Food & Drink, Getting Around, Day Plans. Reads from cached destination data if offline; falls back to API if online. Full-featured search on attractions and restaurants.
+- **Sync queue** (Phase 4): Offline changes (event edits, budget item CRUD) write to IndexedDB + sync queue. On reconnect, plays back queue in order. Handles conflicts (remote version wins) with toast notification. Exponential backoff for network retries.
+- **Offline indicator**: Top banner shows "You're offline" with manual "🔄 Sync Now" button when internet unavailable.
+- **Documentation**: Four story specs covering each phase. Updated architecture ADR 0019 with three-tier model and implementation examples.
+- **Status**: All four phases specified and ready for implementation. Zero external dependencies added.
+
 ## 0.9.0 — 2026-08-12
 
 Release 7: Research automation, budget multi-currency, and booking creation flow. All eight releases now shipped.
