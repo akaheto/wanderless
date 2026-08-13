@@ -1,13 +1,34 @@
+'use client';
+
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { destinationsByRegion } from "@/data/destinations";
 import { SuitabilityStrip } from "@/components/charts";
 import { Badge, Card, PageHeader } from "@/components/ui";
 import { monthClimate } from "@/lib/climate";
-import { MONTH_ABBR } from "@/lib/dates";
-
-export const metadata = { title: "Destination catalog · Travel Intelligence Hub" };
+import { MONTH_ABBR, isValidDate } from "@/lib/dates";
+import { defaultDates } from "@/lib/scoring/params";
+import { DateRangePicker } from "@/components/DateRangePicker";
 
 export default function DestinationsPage() {
+  const searchParams = useSearchParams();
+  const queryStart = searchParams.get("start");
+  const queryEnd = searchParams.get("end");
+
+  const defaults = defaultDates();
+  const [startDate, setStartDate] = useState(
+    queryStart && isValidDate(queryStart) ? queryStart : defaults.startDate
+  );
+  const [endDate, setEndDate] = useState(
+    queryEnd && isValidDate(queryEnd) ? queryEnd : defaults.endDate
+  );
+
+  const handleDateChange = (start: string, end: string) => {
+    setStartDate(start);
+    setEndDate(end);
+  };
+
   const regions = destinationsByRegion();
 
   return (
@@ -16,6 +37,15 @@ export default function DestinationsPage() {
         title="Destination catalog"
         lede="The set of places the comparison engine will ever recommend. Keeping it curated is what stops a ranking from surfacing somewhere technically warm but not worth the flight."
       />
+
+      <div className="mb-8 rounded-lg border border-line bg-surface-1 p-6">
+        <h2 className="mb-4 text-sm font-semibold text-ink-2">Filter by travel dates</h2>
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onRangeChange={handleDateChange}
+        />
+      </div>
 
       <div className="space-y-8">
         {regions.map((group) => (
@@ -35,7 +65,10 @@ export default function DestinationsPage() {
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="min-w-0">
                         <h3 className="text-[15px] font-semibold tracking-tight">
-                          <Link href={`/destinations/${d.id}`} className="hover:text-accent">
+                          <Link
+                            href={`/destinations/${d.id}?start=${startDate}&end=${endDate}`}
+                            className="hover:text-accent"
+                          >
                             {d.name}
                           </Link>
                         </h3>
