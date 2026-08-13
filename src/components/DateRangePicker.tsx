@@ -302,9 +302,9 @@ function generateCalendarDays(startDate: string, endDate: string): CalendarDay[]
   const year = today.getFullYear();
   const month = today.getMonth();
 
-  // Generate next 180 days (6 months) to support planning trips far in advance
+  // Generate next 380 days (~1 year) to support planning trips far in advance
   const days = [];
-  for (let i = 0; i < 180; i++) {
+  for (let i = 0; i < 380; i++) {
     const date = new Date(year, month, today.getDate() + i);
     const dateStr = date.toISOString().split('T')[0];
     const label = String(date.getDate()).padStart(2, ' ');
