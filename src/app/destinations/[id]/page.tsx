@@ -79,7 +79,7 @@ export default async function DestinationPage({
         {d.coastal && <Badge>coastal</Badge>}
       </div>
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile
           label={`${formatDate(startDate, { year: false })}–${formatDate(endDate, { year: false })}`}
           value={`${window.avgHighF}° / ${window.avgLowF}°F`}

@@ -357,9 +357,13 @@ export function DailyComfortChart({
   const y = (v: number) => bottom - ((v - min) / (max - min)) * (bottom - top);
   const n = dates.length;
 
+  // Responsive width: more compact on mobile for long date ranges
+  const pixelsPerDay = n > 60 ? 12 : n > 30 ? 18 : 24;
+  const minWidth = Math.max(320, n * pixelsPerDay);
+
   return (
     <div className="scroll-x">
-      <div style={{ minWidth: Math.max(420, n * 24) }}>
+      <div style={{ minWidth }}>
         <figure className="m-0">
           <figcaption className="mb-1 text-[12px] text-ink-2">
             Typical conditions day by day, {formatDate(startDate)} – {formatDate(endDate, { year: false })}.

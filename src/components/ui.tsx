@@ -313,15 +313,15 @@ export function StatTile({
   tone?: string;
 }) {
   return (
-    <div className="rounded-lg border border-line bg-surface-1 px-3.5 py-3">
-      <div className="text-[11.5px] tracking-wide text-ink-3 uppercase">{label}</div>
+    <div className="rounded-lg border border-line bg-surface-1 px-2.5 py-2 sm:px-3.5 sm:py-3">
+      <div className="text-[10px] sm:text-[11.5px] tracking-wide text-ink-3 uppercase">{label}</div>
       <div
-        className="tnum mt-1 text-[21px] leading-tight font-semibold tracking-tight"
+        className="tnum mt-1 text-[18px] sm:text-[21px] leading-tight font-semibold tracking-tight"
         style={tone ? { color: tone } : undefined}
       >
         {value}
       </div>
-      {sub && <div className="mt-0.5 text-[12.5px] text-ink-3">{sub}</div>}
+      {sub && <div className="mt-0.5 text-[11px] sm:text-[12.5px] text-ink-3">{sub}</div>}
     </div>
   );
 }
