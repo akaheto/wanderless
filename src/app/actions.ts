@@ -110,11 +110,16 @@ export async function createTripAction(formData: FormData): Promise<void> {
     ownerId: user?.id,
   });
 
-  void logAudit(user?.id ?? null, id, "trip_created", {
-    name: input.name,
-    status: input.status,
-    travelers: input.travelers,
-  });
+  if (user) {
+    void logAudit(user.id, 'TRIP_CREATED', 'trip', {
+      resourceId: String(id),
+      changes: {
+        name: input.name,
+        status: input.status,
+        travelers: input.travelers,
+      },
+    });
+  }
 
   revalidatePath("/trips");
   revalidatePath("/");
@@ -128,10 +133,15 @@ export async function updateTripAction(formData: FormData): Promise<void> {
   const input = readTripForm(formData);
   await store.updateTrip(id, input);
 
-  void logAudit(user?.id ?? null, id, "trip_updated", {
-    name: input.name,
-    status: input.status,
-  });
+  if (user) {
+    void logAudit(user.id, 'TRIP_UPDATED', 'trip', {
+      resourceId: String(id),
+      changes: {
+        name: input.name,
+        status: input.status,
+      },
+    });
+  }
 
   revalidatePath(`/trips/${id}`);
   revalidatePath("/trips");
@@ -146,7 +156,9 @@ export async function setTripStatusAction(formData: FormData): Promise<void> {
   const status = z.enum(PLANNING_STATUSES).parse(formData.get("status"));
   await store.setTripStatus(id, status);
 
-  void logAudit(user?.id ?? null, id, "trip_updated", { status });
+  if (user) {
+    void logAudit(user.id, 'TRIP_UPDATED', 'trip', { resourceId: String(id), changes: { status } });
+  }
 
   revalidatePath(`/trips/${id}`);
   revalidatePath("/trips");
@@ -160,9 +172,12 @@ export async function setArchivedAction(formData: FormData): Promise<void> {
   const archived = String(formData.get("archived")) === "1";
   await store.setArchived(id, archived);
 
-  void logAudit(user?.id ?? null, id, archived ? "trip_archived" : "trip_updated", {
-    archived,
-  });
+  if (user) {
+    void logAudit(user.id, archived ? 'TRIP_UPDATED' : 'TRIP_UPDATED', 'trip', {
+      resourceId: String(id),
+      changes: { archived },
+    });
+  }
 
   revalidatePath("/trips");
   revalidatePath("/");
@@ -175,9 +190,12 @@ export async function duplicateTripAction(formData: FormData): Promise<void> {
   const oldId = readTripId(formData);
   const newId = await store.duplicateTrip(oldId);
 
-  void logAudit(user?.id ?? null, newId, "trip_created", {
-    duplicatedFrom: oldId,
-  });
+  if (user) {
+    void logAudit(user.id, 'TRIP_CREATED', 'trip', {
+      resourceId: String(newId),
+      changes: { duplicatedFrom: oldId },
+    });
+  }
 
   revalidatePath("/trips");
   redirect(`/trips/${newId}`);
@@ -188,9 +206,12 @@ export async function deleteTripAction(formData: FormData): Promise<void> {
   const user = await getCurrentUser();
   const id = readTripId(formData);
 
-  void logAudit(user?.id ?? null, id, "trip_deleted", {
-    deletedAt: new Date().toISOString(),
-  });
+  if (user) {
+    void logAudit(user.id, 'TRIP_DELETED', 'trip', {
+      resourceId: String(id),
+      changes: { deletedAt: new Date().toISOString() },
+    });
+  }
 
   await store.deleteTrip(id);
   revalidatePath("/trips");
@@ -219,11 +240,12 @@ export async function setCandidateStatusAction(formData: FormData): Promise<void
 
   await store.setCandidateStatus(id, destinationId, status);
 
-  const actionType = status === "selected" ? "destination_selected" : status === "rejected" ? "destination_rejected" : "trip_updated";
-  void logAudit(user?.id ?? null, id, actionType, {
-    destination: destinationId,
-    status,
-  });
+  if (user) {
+    void logAudit(user.id, 'TRIP_UPDATED', 'trip', {
+      resourceId: String(id),
+      changes: { destination: destinationId, status },
+    });
+  }
 
   // Choosing a destination is a planning milestone; move the trip on with it rather than
   // leaving the status to be updated by hand and quietly going stale.
@@ -843,9 +865,12 @@ export async function createShareLinkAction(formData: FormData): Promise<void> {
 
   await usersStore.createShareLink(tripId, createdBy, null, note);
 
-  void logAudit(user?.id ?? null, tripId, "trip_shared", {
-    note,
-  });
+  if (user) {
+    void logAudit(user.id, 'TRIP_UPDATED', 'trip', {
+      resourceId: String(tripId),
+      changes: { shared: true, note },
+    });
+  }
 
   revalidatePath(`/trips/${tripId}`);
 }
@@ -1048,11 +1073,7 @@ export async function signInAction(formData: FormData): Promise<{ user: any; req
 }
 
 export async function signOutAction(): Promise<void> {
-  const { getCurrentUser } = await import("@/lib/auth");
-  const user = await getCurrentUser();
   const { signOut } = await import("@/lib/auth");
-
-  void logAudit(user?.id ?? null, null, "user_signed_out", {});
 
   await signOut();
   revalidatePath("/trips");
