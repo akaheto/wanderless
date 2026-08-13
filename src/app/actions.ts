@@ -1005,9 +1005,9 @@ export async function signUpAction(formData: FormData): Promise<{ user: any; ver
     // Send verification email
     await sendVerificationEmail(email, verificationToken);
 
-    void logAudit(user?.id ?? null, null, "user_signed_up", {
-      email,
-    });
+    if (user) {
+      void logAudit(user.id, 'SIGNUP', 'user', { changes: { email } });
+    }
 
     revalidatePath("/trips");
     revalidatePath("/");
@@ -1030,9 +1030,9 @@ export async function signInAction(formData: FormData): Promise<{ user: any; req
 
     const user = await signIn(email, password);
 
-    void logAudit(user?.id ?? null, null, "user_signed_in", {
-      email,
-    });
+    if (user) {
+      void logAudit(user.id, 'LOGIN', 'user', { changes: { email } });
+    }
 
     revalidatePath("/trips");
     revalidatePath("/");

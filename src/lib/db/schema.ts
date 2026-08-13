@@ -469,4 +469,41 @@ export const MIGRATIONS: { name: string; statements: string[] }[] = [
       `ALTER TABLE hotels DROP COLUMN resort_fee_usd`,
     ],
   },
+  {
+    /*
+     * Release 14. Role-based access control (RBAC).
+     * Users can be: 'user' (default), 'admin' (can moderate), or 'owner' (can manage app).
+     * First account should be promoted to 'owner' manually.
+     */
+    name: "0016_rbac_roles",
+    statements: [
+      `ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'`,
+      `CREATE INDEX IF NOT EXISTS idx_users_role ON users (role)`,
+    ],
+  },
+  {
+    /*
+     * Release 14. Audit logging for compliance.
+     * Append-only record of all significant user actions.
+     * Never auto-deleted; archived after retention period.
+     */
+    name: "0017_audit_logs",
+    statements: [
+      `CREATE TABLE IF NOT EXISTS audit_logs (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        action TEXT NOT NULL,
+        resource_type TEXT NOT NULL,
+        resource_id TEXT,
+        changes TEXT,
+        ip_address TEXT,
+        user_agent TEXT,
+        timestamp TEXT NOT NULL
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs (user_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs (action)`,
+      `CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs (timestamp)`,
+      `CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON audit_logs (resource_type, resource_id)`,
+    ],
+  },
 ];

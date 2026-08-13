@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signInAction, resendVerificationAction } from "@/app/actions";
 import { Button } from "@/components/ui";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/trips";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -30,7 +33,7 @@ export default function LoginPage() {
         setError(result.error);
         setRequiresVerification(result.requiresVerification || false);
       } else {
-        router.push("/trips");
+        router.push(redirectTo);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -76,6 +79,12 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
+
+      {redirectTo !== "/trips" && (
+        <div className="rounded bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          Sign in to access that page.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (

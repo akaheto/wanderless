@@ -1,35 +1,141 @@
+import 'server-only';
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@travel-intelligence-hub.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://travel-intelligence-hub.vercel.app';
+
+interface SendEmailParams {
+  to: string;
+  subject: string;
+  html: string;
+  from?: string;
+}
+
 /**
- * Email sending utility.
- *
- * For now, logs to console. Ready for integration with Resend or SendGrid:
- * - Resend: https://resend.com
- * - SendGrid: https://sendgrid.com
+ * Send email using Resend API (or log if not configured)
  */
+export async function sendEmail({ to, subject, html, from = FROM_EMAIL }: SendEmailParams): Promise<boolean> {
+  if (!RESEND_API_KEY) {
+    console.warn(`[EMAIL] Skipping email (no RESEND_API_KEY): to=${to}, subject=${subject}`);
+    return true; // Don't fail silently
+  }
 
-export async function sendVerificationEmail(email: string, token: string): Promise<void> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const verifyUrl = `${baseUrl}/verify?token=${token}`;
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to,
+        subject,
+        html,
+      }),
+    });
 
-  const emailBody = `
-Hi there,
+    if (!response.ok) {
+      const error = await response.text();
+      console.error(`[EMAIL] Failed to send: ${response.status} - ${error}`);
+      return false;
+    }
 
-Welcome to Travel Intelligence Hub! Please verify your email address to get started.
+    console.log(`[EMAIL] Sent to ${to}: ${subject}`);
+    return true;
+  } catch (error) {
+    console.error('[EMAIL] Error sending:', error);
+    return false;
+  }
+}
 
-Click the link below to verify your email:
-${verifyUrl}
+/**
+ * Send account verification email
+ */
+export async function sendVerificationEmail(email: string, verificationToken: string): Promise<boolean> {
+  const verificationUrl = `${APP_URL}/verify?token=${verificationToken}`;
 
-This link expires in 24 hours.
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #f5f5f5; padding: 20px; border-radius: 4px; margin-bottom: 20px; }
+          .button { background: #0066cc; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; }
+          .footer { color: #666; font-size: 12px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Verify your email</h1>
+          </div>
+          <p>Welcome to Travel Intelligence Hub! Click the link below to verify your email address and complete your registration.</p>
+          <p>
+            <a href="${verificationUrl}" class="button">Verify Email</a>
+          </p>
+          <p>Or paste this link in your browser:<br><code>${verificationUrl}</code></p>
+          <p>This link expires in 24 hours.</p>
+          <div class="footer">
+            <p>If you didn't create this account, you can ignore this email.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
 
-If you didn't create this account, you can safely ignore this email.
+  return sendEmail({
+    to: email,
+    subject: 'Verify your Travel Intelligence Hub account',
+    html,
+  });
+}
 
-Best,
-Travel Intelligence Hub
-  `.trim();
+/**
+ * Send admin notification for new account signup
+ */
+export async function sendAdminNewAccountAlert(email: string, createdAt: string): Promise<boolean> {
+  if (!ADMIN_EMAIL) {
+    console.warn('[EMAIL] Skipping admin alert (no ADMIN_EMAIL configured)');
+    return true;
+  }
 
-  // Log email (ready to swap for real email service)
-  console.log(`[EMAIL VERIFICATION]`);
-  console.log(`To: ${email}`);
-  console.log(`Subject: Verify your Travel Intelligence Hub email`);
-  console.log(`Body:\n${emailBody}`);
-  console.log(`---`);
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .alert { background: #f0f7ff; padding: 15px; border-left: 4px solid #0066cc; border-radius: 4px; margin-bottom: 20px; }
+          .details { background: #f5f5f5; padding: 15px; border-radius: 4px; font-family: monospace; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="alert">
+            <strong>New account signup</strong>
+          </div>
+          <div class="details">
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Created:</strong> ${new Date(createdAt).toISOString()}</p>
+          </div>
+          <p>
+            <a href="${APP_URL}/admin/users">View in admin dashboard</a>
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: ADMIN_EMAIL,
+    subject: `New account signup: ${email}`,
+    html,
+  });
 }

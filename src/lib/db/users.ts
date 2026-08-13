@@ -4,9 +4,12 @@ import type { Row } from "@libsql/client";
 import { db } from "./client";
 import { randomBytes } from "node:crypto";
 
+export type UserRole = "user" | "admin" | "owner";
+
 export interface User {
   id: string;
   email: string;
+  role: UserRole;
   createdAt: string;
   emailVerified?: boolean;
 }
@@ -33,6 +36,7 @@ function toUser(row: Row): User {
   return {
     id: String(row.id),
     email: String(row.email),
+    role: (String(row.role || 'user') as UserRole),
     createdAt: String(row.created_at),
     emailVerified: row.email_verified === 1 || Boolean(row.email_verified),
   };
@@ -78,11 +82,11 @@ export async function getOrCreateUser(email: string): Promise<User> {
   const now = new Date().toISOString();
 
   await client.execute({
-    sql: `INSERT INTO users (id, email, created_at) VALUES (?, ?, ?)`,
-    args: [userId, email, now],
+    sql: `INSERT INTO users (id, email, created_at, role) VALUES (?, ?, ?, ?)`,
+    args: [userId, email, now, 'user'],
   });
 
-  return { id: userId, email, createdAt: now };
+  return { id: userId, email, role: 'user', createdAt: now };
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {

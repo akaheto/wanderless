@@ -1,14 +1,14 @@
 import { getCurrentUser } from "@/lib/auth";
+import { isAdmin } from "@/lib/auth/roles";
 import { getRecentAuditLogs } from "@/lib/audit";
 import { redirect } from "next/navigation";
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? "").split(",").filter(Boolean);
-
 export default async function AuditPage() {
   const user = await getCurrentUser();
+  const isUserAdmin = await isAdmin();
 
   // Check if user is admin
-  if (!user || !ADMIN_EMAILS.includes(user.email)) {
+  if (!user || !isUserAdmin) {
     redirect("/");
   }
 
@@ -24,8 +24,8 @@ export default async function AuditPage() {
             <tr>
               <th className="px-4 py-2 text-left font-semibold">Time</th>
               <th className="px-4 py-2 text-left font-semibold">User</th>
-              <th className="px-4 py-2 text-left font-semibold">Trip ID</th>
               <th className="px-4 py-2 text-left font-semibold">Action</th>
+              <th className="px-4 py-2 text-left font-semibold">Resource</th>
               <th className="px-4 py-2 text-left font-semibold">Details</th>
             </tr>
           </thead>
@@ -33,29 +33,24 @@ export default async function AuditPage() {
             {logs.map((entry) => (
               <tr key={entry.id} className="border-b border-gray-200 hover:bg-gray-50">
                 <td className="px-4 py-2 text-xs text-gray-600 whitespace-nowrap">
-                  {new Date(entry.createdAt).toLocaleString()}
+                  {new Date(entry.timestamp).toLocaleString()}
                 </td>
                 <td className="px-4 py-2 text-xs">
-                  {entry.userId ? <code className="bg-gray-100 px-1 py-0.5 rounded">{entry.userId}</code> : "—"}
-                </td>
-                <td className="px-4 py-2 text-xs">
-                  {entry.tripId ? (
-                    <a href={`/trips/${entry.tripId}`} className="text-blue-600 hover:underline">
-                      {entry.tripId}
-                    </a>
-                  ) : (
-                    "—"
-                  )}
+                  <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">{entry.userId.slice(0, 8)}</code>
                 </td>
                 <td className="px-4 py-2 text-xs font-medium">
                   <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded">
                     {entry.action}
                   </span>
                 </td>
+                <td className="px-4 py-2 text-xs">
+                  {entry.resourceType}
+                  {entry.resourceId ? ` #${entry.resourceId}` : ""}
+                </td>
                 <td className="px-4 py-2 text-xs text-gray-600">
-                  {entry.details ? (
+                  {entry.changes ? (
                     <code className="bg-gray-100 px-1 py-0.5 rounded text-xs overflow-auto max-w-xs block">
-                      {JSON.stringify(entry.details, null, 2)}
+                      {JSON.stringify(entry.changes, null, 2)}
                     </code>
                   ) : (
                     "—"

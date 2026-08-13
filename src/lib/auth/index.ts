@@ -5,6 +5,8 @@ import { randomBytes } from "node:crypto";
 import { db } from "@/lib/db/client";
 import type { User } from "@/lib/db/users";
 import { hashPassword, verifyPassword } from "./password";
+import { sendVerificationEmail, sendAdminNewAccountAlert } from "@/lib/email";
+import { logAudit } from "@/lib/audit";
 import type { Row } from "@libsql/client";
 
 const SESSION_COOKIE_NAME = "tih-session";
@@ -32,6 +34,7 @@ function toUser(row: Row): User {
   return {
     id: String(row.id),
     email: String(row.email),
+    role: String(row.role || 'user') as 'user' | 'admin' | 'owner',
     createdAt: String(row.created_at),
     emailVerified: row.email_verified === 1 || Boolean(row.email_verified),
   };
@@ -77,12 +80,25 @@ export async function signUp(email: string, password: string): Promise<{ user: U
   const autoVerifyEmail = true;
 
   await client.execute({
-    sql: "INSERT INTO users (id, email, password_hash, created_at, email_verified, verification_token, verification_token_expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    args: [userId, email, passwordHash, now, autoVerifyEmail ? 1 : 0, verificationToken, tokenExpiresAt],
+    sql: "INSERT INTO users (id, email, password_hash, created_at, email_verified, verification_token, verification_token_expires_at, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    args: [userId, email, passwordHash, now, autoVerifyEmail ? 1 : 0, verificationToken, tokenExpiresAt, 'user'],
   });
 
+  const user = { id: userId, email, role: 'user' as const, createdAt: now, emailVerified: autoVerifyEmail };
+
+  // Send verification email (if not auto-verified)
+  if (!autoVerifyEmail) {
+    await sendVerificationEmail(email, verificationToken);
+  }
+
+  // Send admin alert
+  await sendAdminNewAccountAlert(email, now);
+
+  // Log signup event
+  await logAudit(userId, 'SIGNUP', 'user', { resourceId: userId });
+
   return {
-    user: { id: userId, email, createdAt: now, emailVerified: autoVerifyEmail },
+    user,
     verificationToken
   };
 }
@@ -146,6 +162,9 @@ export async function signIn(email: string, password: string): Promise<User> {
     path: "/",
   });
 
+  // Log login event
+  await logAudit(user.id, 'LOGIN', 'user', { resourceId: user.id });
+
   return user;
 }
 
@@ -185,6 +204,7 @@ export async function getCurrentUser(): Promise<User | null> {
  * Sign out the current user by clearing the session cookie.
  */
 export async function signOut(): Promise<void> {
+  const user = await getCurrentUser();
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
@@ -194,6 +214,11 @@ export async function signOut(): Promise<void> {
       sql: "DELETE FROM sessions WHERE token = ?",
       args: [sessionToken],
     });
+  }
+
+  // Log logout event if user was authenticated
+  if (user) {
+    await logAudit(user.id, 'LOGOUT', 'user', { resourceId: user.id });
   }
 
   cookieStore.delete(SESSION_COOKIE_NAME);

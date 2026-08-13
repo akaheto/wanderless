@@ -1,150 +1,183 @@
-import "server-only";
+import 'server-only';
 
-import { db } from "@/lib/db/client";
+import { db } from '@/lib/db/client';
+import type { Row } from '@libsql/client';
 
 export type AuditAction =
-  | "trip_created"
-  | "trip_updated"
-  | "trip_archived"
-  | "trip_deleted"
-  | "trip_shared"
-  | "trip_accessed"
-  | "destination_selected"
-  | "destination_rejected"
-  | "collaborator_added"
-  | "collaborator_removed"
-  | "user_signed_up"
-  | "user_signed_in"
-  | "user_signed_out"
-  | "flight_booked"
-  | "hotel_booked"
-  | "place_added"
-  | "place_updated"
-  | "place_deleted"
-  | "stop_added"
-  | "stop_updated"
-  | "stop_removed"
-  | "event_added"
-  | "event_deleted"
-  | "preferences_updated"
-  | "search_executed";
+  | 'LOGIN'
+  | 'LOGOUT'
+  | 'SIGNUP'
+  | 'EMAIL_VERIFIED'
+  | 'PASSWORD_CHANGED'
+  | 'ROLE_MODIFIED'
+  | 'TRIP_CREATED'
+  | 'TRIP_UPDATED'
+  | 'TRIP_DELETED'
+  | 'DESTINATION_DOWNLOADED'
+  | 'SYNC_QUEUE_REPLAYED'
+  | 'ADMIN_ACTION';
 
-export interface AuditDetails {
-  [key: string]: unknown;
+export interface AuditLog {
+  id: string;
+  userId: string;
+  action: AuditAction;
+  resourceType: string;
+  resourceId?: string;
+  changes?: Record<string, unknown>;
+  ipAddress?: string;
+  userAgent?: string;
+  timestamp: string;
+}
+
+function toAuditLog(row: Row): AuditLog {
+  return {
+    id: String(row.id),
+    userId: String(row.user_id),
+    action: String(row.action) as AuditAction,
+    resourceType: String(row.resource_type),
+    resourceId: row.resource_id ? String(row.resource_id) : undefined,
+    changes: row.changes ? JSON.parse(String(row.changes)) : undefined,
+    ipAddress: row.ip_address ? String(row.ip_address) : undefined,
+    userAgent: row.user_agent ? String(row.user_agent) : undefined,
+    timestamp: String(row.timestamp),
+  };
 }
 
 /**
- * Log an audit event. Fire-and-forget: errors do not block the calling action.
- *
- * Never use await on this in a server action unless you specifically need the result.
- * Audit is append-only and never deleted. Every significant user action gets logged
- * so the audit trail is a searchable history of what happened, when, and by whom.
- *
- * @param userId - The ID of the user performing the action (null = anonymous/system)
- * @param tripId - The ID of the affected trip, if any (null = account-level actions)
- * @param action - The action being performed (e.g. 'trip_created')
- * @param details - Optional object with extra context (what changed, who was involved, etc.)
+ * Log an audit event
  */
 export async function logAudit(
-  userId: string | null,
-  tripId: number | null,
+  userId: string,
   action: AuditAction,
-  details?: AuditDetails,
-): Promise<void> {
-  try {
-    const client = await db();
-    const detailsJson = details ? JSON.stringify(details) : null;
-    const createdAt = new Date().toISOString();
-
-    await client.execute(
-      `INSERT INTO audit_log (user_id, trip_id, action, details, created_at)
-       VALUES (?, ?, ?, ?, ?)`,
-      [userId, tripId, action, detailsJson, createdAt],
-    );
-  } catch (error) {
-    // Log to stderr but do not throw. Audit failure should not break the user action.
-    console.error("[audit] Failed to log action:", { error, action, userId, tripId });
+  resourceType: string,
+  options?: {
+    resourceId?: string;
+    changes?: Record<string, unknown>;
+    ipAddress?: string;
+    userAgent?: string;
   }
+): Promise<void> {
+  const client = await db();
+  const { randomBytes } = await import('crypto');
+  const id = randomBytes(12).toString('hex');
+  const timestamp = new Date().toISOString();
+
+  await client.execute({
+    sql: `INSERT INTO audit_logs (id, user_id, action, resource_type, resource_id, changes, ip_address, user_agent, timestamp)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      id,
+      userId,
+      action,
+      resourceType,
+      options?.resourceId ?? null,
+      options?.changes ? JSON.stringify(options.changes) : null,
+      options?.ipAddress ?? null,
+      options?.userAgent ?? null,
+      timestamp,
+    ],
+  });
 }
 
 /**
- * Retrieve audit logs for a trip. Used by the admin audit viewer.
- * Returns the most recent logs first.
+ * Get audit logs with optional filtering
  */
-export async function getAuditLogForTrip(tripId: number, limit = 100): Promise<AuditEntry[]> {
+export async function getAuditLogs(options?: {
+  userId?: string;
+  action?: AuditAction;
+  resourceType?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<AuditLog[]> {
   const client = await db();
-  const rows = await client.execute(
-    `SELECT id, user_id, trip_id, action, details, created_at
-     FROM audit_log
-     WHERE trip_id = ?
-     ORDER BY created_at DESC
-     LIMIT ?`,
-    [tripId, limit],
-  );
+  let sql = 'SELECT * FROM audit_logs WHERE 1=1';
+  const args: (string | number)[] = [];
 
-  return rows.rows.map((row) => ({
-    id: Number(row.id),
-    userId: row.user_id ? String(row.user_id) : null,
-    tripId: row.trip_id ? Number(row.trip_id) : null,
-    action: String(row.action) as AuditAction,
-    details: row.details ? JSON.parse(String(row.details)) : null,
-    createdAt: String(row.created_at),
-  }));
+  if (options?.userId) {
+    sql += ' AND user_id = ?';
+    args.push(options.userId);
+  }
+
+  if (options?.action) {
+    sql += ' AND action = ?';
+    args.push(options.action);
+  }
+
+  if (options?.resourceType) {
+    sql += ' AND resource_type = ?';
+    args.push(options.resourceType);
+  }
+
+  sql += ' ORDER BY timestamp DESC';
+
+  if (options?.limit) {
+    sql += ' LIMIT ?';
+    args.push(options.limit);
+    if (options?.offset) {
+      sql += ' OFFSET ?';
+      args.push(options.offset);
+    }
+  }
+
+  const result = await client.execute({
+    sql,
+    args: args as (string | number | null)[],
+  });
+  return result.rows.map((row: Row) => toAuditLog(row));
 }
 
 /**
- * Retrieve audit logs for a user. Returns the most recent logs first.
+ * Get total count of audit logs (for pagination)
  */
-export async function getAuditLogForUser(userId: string, limit = 100): Promise<AuditEntry[]> {
+export async function countAuditLogs(options?: {
+  userId?: string;
+  action?: AuditAction;
+  resourceType?: string;
+}): Promise<number> {
   const client = await db();
-  const rows = await client.execute(
-    `SELECT id, user_id, trip_id, action, details, created_at
-     FROM audit_log
-     WHERE user_id = ?
-     ORDER BY created_at DESC
-     LIMIT ?`,
-    [userId, limit],
-  );
+  let sql = 'SELECT COUNT(*) as count FROM audit_logs WHERE 1=1';
+  const args: (string | number)[] = [];
 
-  return rows.rows.map((row) => ({
-    id: Number(row.id),
-    userId: row.user_id ? String(row.user_id) : null,
-    tripId: row.trip_id ? Number(row.trip_id) : null,
-    action: String(row.action) as AuditAction,
-    details: row.details ? JSON.parse(String(row.details)) : null,
-    createdAt: String(row.createdAt),
-  }));
+  if (options?.userId) {
+    sql += ' AND user_id = ?';
+    args.push(options.userId);
+  }
+
+  if (options?.action) {
+    sql += ' AND action = ?';
+    args.push(options.action);
+  }
+
+  if (options?.resourceType) {
+    sql += ' AND resource_type = ?';
+    args.push(options.resourceType);
+  }
+
+  const result = await client.execute({
+    sql,
+    args: args as (string | number | null)[],
+  });
+  return Number(result.rows[0]?.count || 0);
 }
 
 /**
- * Retrieve recent audit logs (all users). Used by the admin dashboard.
- * Returns the most recent logs first.
+ * Archive old audit logs (keep last N days)
  */
-export async function getRecentAuditLogs(limit = 100): Promise<AuditEntry[]> {
+export async function archiveOldAuditLogs(retentionDays: number = 90): Promise<number> {
   const client = await db();
-  const rows = await client.execute(
-    `SELECT id, user_id, trip_id, action, details, created_at
-     FROM audit_log
-     ORDER BY created_at DESC
-     LIMIT ?`,
-    [limit],
-  );
+  const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000).toISOString();
 
-  return rows.rows.map((row) => ({
-    id: Number(row.id),
-    userId: row.user_id ? String(row.user_id) : null,
-    tripId: row.trip_id ? Number(row.trip_id) : null,
-    action: String(row.action) as AuditAction,
-    details: row.details ? JSON.parse(String(row.details)) : null,
-    createdAt: String(row.created_at),
-  }));
+  const result = await client.execute({
+    sql: 'DELETE FROM audit_logs WHERE timestamp < ?',
+    args: [cutoffDate],
+  });
+
+  return result.rowsAffected;
 }
 
-export interface AuditEntry {
-  id: number;
-  userId: string | null;
-  tripId: number | null;
-  action: AuditAction;
-  details: AuditDetails | null;
-  createdAt: string;
+/**
+ * Get recent audit logs (convenience function)
+ */
+export async function getRecentAuditLogs(limit: number = 50): Promise<AuditLog[]> {
+  return getAuditLogs({ limit });
 }
