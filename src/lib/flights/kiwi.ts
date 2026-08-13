@@ -55,6 +55,8 @@ export class KiwiFlightSearch implements FlightSearch {
       });
 
       const url = `${this.baseUrl}/search?${params}`;
+      console.log(`[Kiwi] Searching: ${url}`);
+
       const response = await fetch(url, {
         headers: {
           "Content-Type": "application/json",
@@ -62,7 +64,8 @@ export class KiwiFlightSearch implements FlightSearch {
       });
 
       if (!response.ok) {
-        console.error(`Kiwi API error for ${origin}: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`[Kiwi] API error for ${origin}: ${response.status} ${response.statusText} - ${errorText}`);
         return null;
       }
 
@@ -71,6 +74,7 @@ export class KiwiFlightSearch implements FlightSearch {
 
       // Handle empty results
       if (!data.data || data.data.length === 0) {
+        console.log(`[Kiwi] No flights found for ${origin} → ${query.destinationAirport} on ${query.departDate}`);
         return {
           origin: typedOrigin,
           destinationAirport: query.destinationAirport,
@@ -81,6 +85,8 @@ export class KiwiFlightSearch implements FlightSearch {
           provider: "kiwi",
         };
       }
+
+      console.log(`[Kiwi] Found ${data.data.length} flights for ${origin} → ${query.destinationAirport}`);
 
       const itineraries = (data.data as KiwiApiFlightData[])
         .map((flight: KiwiApiFlightData, index: number) => this.convertFlight(flight, typedOrigin, query, index))
