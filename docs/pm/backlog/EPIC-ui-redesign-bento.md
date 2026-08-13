@@ -1,9 +1,10 @@
 # EPIC: Bento Box UI Redesign — Travel Dashboard Overhaul
 
-**Status**: Planned  
-**Scope**: Release 9 (Post-Release 7)  
+**Status**: Ready for implementation  
+**Scope**: Release 9 (Post-Release 8)  
 **Priority**: Medium (visual enhancement, not blocking travel planning core)  
-**Effort**: L (large, multi-phase visual rewrite)
+**Effort**: L (large, multi-phase visual rewrite)  
+**Last updated**: 2026-08-12
 
 ## Problem
 
@@ -150,7 +151,19 @@ navigable and inspiring.
 
 ## Related Stories
 
-- STORY-destination-explorer.md (detailed hero card spec)
-- STORY-flight-itinerary-timeline.md (detailed timeline interaction spec)
-- STORY-micro-discovery-cards.md (weather, budget, events card specs)
-- ADR-0018-bento-grid-layout.md (if decision record needed)
+- STORY-destination-explorer.md ✅ (detailed hero card spec — created 2026-08-12)
+- STORY-flight-itinerary-timeline.md ✅ (detailed timeline interaction spec — created 2026-08-12)
+- STORY-micro-discovery-cards.md ✅ (weather, budget, events card specs — created 2026-08-12)
+- STORY-comparison-engine-redesign.md ✅ (side-by-side destination cards — created 2026-08-12)
+
+## Implementation Readiness
+
+All four story specs are complete with:
+- Detailed acceptance criteria
+- Visual design specifications (colors, typography, spacing)
+- Component prop interfaces and TypeScript types
+- Interaction patterns (desktop/mobile/dark mode)
+- Testing checklists
+- Dependencies and notes
+
+Ready to begin Phase 1 (Hero & Comparison) as soon as prioritized.
