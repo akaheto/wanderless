@@ -2,20 +2,62 @@
 
 ## 0.10.0 — 2026-08-12
 
-Release 10: Offline travel companion. Four-phase offline architecture with service worker, IndexedDB caching, destination downloads, and sync queue.
+Release 10: Offline travel companion. Complete four-phase offline-first implementation with Service Worker app shell, IndexedDB trip/destination caching, destination downloads, and sync queue for offline changes.
 
 ### Added
 
 **Release 10 — Offline Travel Companion:**
 
-- **App shell caching** (Phase 1): Service Worker caches layout, UI components, and theme. Offline users access "Cached Trips" page (`/trips/offline`). No splash screen on network loss.
-- **Trip data cache** (Phase 1): IndexedDB stores trip metadata, stops, events, bookings, budget items, places. Trip page reads from cache first (instant), fetches fresh in background (stale-while-revalidate).
-- **Destination downloads** (Phase 2): "📥 Download" button on destination detail fetches climate, places, curated notes, transit routes. Stores in IndexedDB with timestamp. Shows "🔄 Refresh" if >30 days old. Storage usage display with quota warning.
-- **City guides** (Phase 3): New "City Guides" tab with Things to Do, Food & Drink, Getting Around, Day Plans. Reads from cached destination data if offline; falls back to API if online. Full-featured search on attractions and restaurants.
-- **Sync queue** (Phase 4): Offline changes (event edits, budget item CRUD) write to IndexedDB + sync queue. On reconnect, plays back queue in order. Handles conflicts (remote version wins) with toast notification. Exponential backoff for network retries.
-- **Offline indicator**: Top banner shows "You're offline" with manual "🔄 Sync Now" button when internet unavailable.
-- **Documentation**: Four story specs covering each phase. Updated architecture ADR 0019 with three-tier model and implementation examples.
-- **Status**: All four phases specified and ready for implementation. Zero external dependencies added.
+**Phase 1: App Shell & Trip Data Cache (✓ Complete)**
+- Service Worker (`public/service-worker.js`): Network-first for APIs, cache-first for static assets, stale-while-revalidate for HTML
+- IndexedDB wrapper (`src/lib/offline/db.ts`): Abstracts three stores (trips, destinations, syncQueue) with full CRUD operations
+- OfflineProvider context (`src/lib/offline/context.tsx`): Manages online/offline state, sync queue, retry logic
+- OfflineBanner component: Visual indicator when offline, "🔄 Sync Now" button
+- ServiceWorkerRegistry: Auto-registers Service Worker on app load
+- /trips/offline page: Lists cached trips with timestamps, storage info, clear-all option
+- CachedTrip interface: Trip metadata + stops, events, flightBookings, hotelBookings, budgetItems
+
+**Phase 2: Destination Downloads (✓ Complete)**
+- DestinationDownloadButton: Download/refresh/delete UI for cached destinations
+- Download progress tracking with percentage (25% → 50% → 75% → 100%)
+- Storage size display (e.g., "✓ Downloaded • 8.3 MB")
+- Automatic staleness detection (>30 days shows "🔄 Refresh" button)
+- Downloads utility (`src/lib/offline/downloads.ts`): Fetch destination data, calculate size, format bytes
+- Storage quota estimation via navigator.storage.estimate()
+- CachedDestination interface: Destination + climate + places + transit routes + timestamp
+
+**Phase 3: City Guides (✓ Complete)**
+- CityGuidesTab component: Four-section tab interface
+- **Things to Do**: Filter attractions by name, show ratings, distance, hours, admission
+- **Food & Drink**: Search restaurants by name/cuisine, display type, price range, hours, address
+- **Getting Around**: Transit routes (airport→city, etc.) with duration, cost, transport modes
+- **Day Plans**: Curated itineraries with stops and timing (e.g., "Museum & Café Tour, 9:00 AM → ...")
+- Real-time search filtering (client-side, no API call)
+- Offline fallback: "Download {destination} to browse guides offline"
+- Responsive mobile layout: Tab navigation stacks on small screens
+
+**Phase 4: Sync Queue (✓ Complete)**
+- OfflineContext sync logic: Sequential queue processing with exponential backoff (1s → 2s → 4s → 8s)
+- SyncQueueItem interface: Supports event:update, event:delete, budgetItem:create/update/delete
+- Compound key: [tripId, action, resourceId] prevents duplicate queue entries
+- Conflict handling: Remote version wins, user sees toast "Event was updated online. Your offline change was overridden."
+- Automatic retry on transient errors, manual retry possible via "Sync Now" button
+- Persistent queue: Survives browser restart, syncs on next online connection
+
+**Cross-Phase Features:**
+- OfflineBanner: Top-of-page indicator with queued change count
+- Zero breaking changes: All existing on-network behavior preserved
+- Zero new dependencies: Uses native browser APIs only (Service Worker, IndexedDB, Storage API)
+- Type-safe: Full TypeScript across all offline modules
+- Error resilient: No silent failures, all errors logged or shown to user
+
+**Documentation:**
+- Comprehensive implementation spec (`docs/technical/specs/offline-implementation.md`)
+- Updated ADR 0019 with real implementation details
+- Four story specs in `docs/pm/backlog/` with acceptance criteria
+- Integration testing checklist
+
+**Status**: All four phases implemented, tested, and deployed to production (v0.10.0).
 
 ## 0.9.0 — 2026-08-12
 
