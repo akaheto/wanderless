@@ -1039,8 +1039,11 @@ export async function signInAction(formData: FormData): Promise<{ user: any; req
     return { user };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Sign in failed";
-    const isVerificationError = message.includes("Email not verified");
-    return { error: message, requiresVerification: isVerificationError };
+    const isVerificationError = message === "email_not_verified";
+    const displayMessage = isVerificationError
+      ? "Email not verified. Check your inbox for a verification link."
+      : message;
+    return { error: displayMessage, requiresVerification: isVerificationError };
   }
 }
 

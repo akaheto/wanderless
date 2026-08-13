@@ -72,13 +72,17 @@ export async function signUp(email: string, password: string): Promise<{ user: U
   const verificationToken = randomBytes(32).toString("hex");
   const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
 
+  // In demo mode, auto-verify emails so users can immediately login
+  // Production should require email verification
+  const isDemo = process.env.NODE_ENV !== 'production' || process.env.DEMO_MODE === 'true';
+
   await client.execute({
     sql: "INSERT INTO users (id, email, password_hash, created_at, email_verified, verification_token, verification_token_expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    args: [userId, email, passwordHash, now, 0, verificationToken, tokenExpiresAt],
+    args: [userId, email, passwordHash, now, isDemo ? 1 : 0, verificationToken, tokenExpiresAt],
   });
 
   return {
-    user: { id: userId, email, createdAt: now, emailVerified: false },
+    user: { id: userId, email, createdAt: now, emailVerified: isDemo },
     verificationToken
   };
 }
@@ -116,7 +120,7 @@ export async function signIn(email: string, password: string): Promise<User> {
   // Check if email is verified
   const emailVerified = userRow.email_verified === 1 || Boolean(userRow.email_verified);
   if (!emailVerified) {
-    throw new Error("Email not verified. Check your inbox for a verification link.");
+    throw new Error("email_not_verified");
   }
 
   const user = toUser(userRow);
