@@ -98,7 +98,7 @@ export function generateDraft(
 
     const currentRating = destination.suitability[month - 1] ?? 3;
     const suggestedRating = calculateRatingFromClimate(climate, destination.coastal);
-    const currentNote = (destination.monthNotes?.[String(month) as never] ?? "") as string;
+    const currentNote = destination.monthNotes[month] ?? "";
     const suggestedNote = generateNoteFromClimate(climate, MONTH_NAMES[month - 1]);
 
     const hasChange = Math.abs(currentRating - suggestedRating) >= 0.5;
