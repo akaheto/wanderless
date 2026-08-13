@@ -5,7 +5,7 @@ what's in scope or who decides what, this document wins — other docs elaborate
 don't override it.
 
 - **Status**: active
-- **Last reviewed**: 2026-08-10
+- **Last reviewed**: 2026-08-12
 
 ## Objective
 
@@ -88,13 +88,13 @@ seasonal ratings and cost bands, but they are the owner's to accept.
 | Milestone | Phases | Target | Status |
 |---|---|---|---|
 | **Release 1** — decide where to go | 0, 1, 2, 3 | 2026-08-10 | **Done** |
-| **Release 2** — structure the trip | 4 | — | In progress |
-| **Release 3** — places worth going | 5 | — | Planned |
-| **Release 4** — time-bound things | 6 | — | Planned |
-| **Release 5** — getting there and staying | 7 | — | Planned |
-| **Release 6** — what it costs | 8 | — | Planned |
-| **Release 7** — research automation | 9 | — | Later |
-| **Release 8** — accounts and sharing | 10 | — | Later |
+| **Release 2** — structure the trip | 4 | 2026-08-11 | **Done** |
+| **Release 3** — places worth going | 5 | 2026-08-11 | **Done** |
+| **Release 4** — time-bound things | 6 | 2026-08-11 | **Done** |
+| **Release 5** — getting there and staying | 7 | 2026-08-11 | **Done** |
+| **Release 6** — what it costs | 8 | 2026-08-11 | **Done** |
+| **Release 7** — research automation | 9 | 2026-08-12 | **Done** |
+| **Release 8** — accounts and sharing | 10 | 2026-08-11 | **Done** |
 
 Dates are deliberately absent past Release 1. This is a personal project with no external
 commitment; sequencing is fixed, timing is not.

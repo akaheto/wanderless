@@ -382,8 +382,6 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
               </div>
             </Card>
           )}
-
-          <NotYetBuilt />
         </div>
 
         <div className="min-w-0 space-y-6">
@@ -640,31 +638,3 @@ function LinksCard({ trip, links }: { trip: Trip; links: { id: number; label: st
   );
 }
 
-/**
- * Honest placeholders. Phase 0 asks for the shell of the whole product; showing these as
- * empty sections with a release note is more useful than pretending the trip record is
- * complete, and stops "no flights listed" reading as "no flights booked".
- */
-function NotYetBuilt() {
-  const sections = [
-    { title: "Flights and hotels", note: "Options, bookings, upgrade status and card benefits.", release: "Release 5" },
-    { title: "Budget", note: "Estimated against booked, refundable exposure and payment deadlines.", release: "Release 6" },
-  ];
-
-  return (
-    <Card>
-      <CardHeader title="Not built yet" note="These attach to the trip in later releases." />
-      <ul className="divide-y divide-line">
-        {sections.map((s) => (
-          <li key={s.title} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-2.5">
-            <div>
-              <div className="text-[13.5px] font-medium text-ink-2">{s.title}</div>
-              <div className="text-[12.5px] text-ink-3">{s.note}</div>
-            </div>
-            <Badge>{s.release}</Badge>
-          </li>
-        ))}
-      </ul>
-    </Card>
-  );
-}

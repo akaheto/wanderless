@@ -179,35 +179,28 @@ export default function SourcesPage() {
         </Card>
 
         <Card>
-          <CardHeader title="Planned integrations" note="Keyed services, wired up as later phases need them." />
+          <CardHeader title="Live keyed integrations" />
           <div className="scroll-x">
             <table className="w-full min-w-[620px] border-collapse text-[13px]">
               <thead>
                 <tr className="border-b border-line text-left">
                   <th className="px-4 py-2.5 font-medium text-ink-3">Capability</th>
-                  <th className="px-4 py-2.5 font-medium text-ink-3">Intended provider</th>
-                  <th className="px-4 py-2.5 font-medium text-ink-3">Needed for</th>
+                  <th className="px-4 py-2.5 font-medium text-ink-3">Provider</th>
+                  <th className="px-4 py-2.5 font-medium text-ink-3">Release</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  ["Maps and place details", "Google Maps Platform", "Release 3 — places and dossiers"],
-                  ["Destination places", "Google Places → Foursquare", "Release 3"],
-                  ["Attractions and tours", "Amadeus Activities → Viator", "Release 4"],
-                  ["Events", "Ticketmaster Discovery → PredictHQ", "Release 4"],
-                  ["Ground routes", "Google Routes", "Release 2 — transfer burden"],
-                  ["Flight search", "Amadeus Self-Service → Duffel", "Release 5"],
-                  ["Flight status", "AeroDataBox → FlightAware", "Release 5"],
-                  ["Hotels", "Amadeus Hotels → Expedia Rapid", "Release 5"],
-                  ["Current forecasts", "Open-Meteo", "Release 5 — near-departure only"],
-                  ["Currency conversion", "Frankfurter", "Release 6 — budgets"],
-                  ["Entry requirements", "Official sources → Sherpa", "Release 5"],
-                ].map(([capability, provider, need]) => (
+                  ["Places discovery", "Google Places (optional, fully functional without it)", "Release 3"],
+                  ["Flight search", "Kiwi.com", "Release 5"],
+                  ["Hotel search", "Hotel booking APIs (results stored and compared)", "Release 5"],
+                  ["Currency conversion", "Frankfurter (Open-source, ECB reference rates)", "Release 6"],
+                ].map(([capability, provider, release]) => (
                   <tr key={capability} className="border-b border-line last:border-0">
                     <td className="px-4 py-2.5 font-medium">{capability}</td>
                     <td className="px-4 py-2.5 text-ink-2">{provider}</td>
                     <td className="px-4 py-2.5">
-                      <Badge>{need}</Badge>
+                      <Badge>{release}</Badge>
                     </td>
                   </tr>
                 ))}
@@ -215,9 +208,30 @@ export default function SourcesPage() {
             </table>
           </div>
           <p className="border-t border-line px-4 py-3 text-[12.5px] text-ink-3">
-            None of these are called today. Every source currently in use is free and keyless, so the app has
-            no secrets to manage and no per-request cost.
+            Every keyed integration is optional. The app maintains zero shared secrets: APIs are keyed
+            in user environments, not stored server-side. Frankfurter is open-source with no key required.
           </p>
+        </Card>
+
+        <Card>
+          <CardHeader title="Withdrawn integrations" note="See ADR 0011 and 0014 for rationale." />
+          <ul className="divide-y divide-line text-[13px]">
+            <li className="px-4 py-3">
+              <span className="font-medium">Ground routes (Google Routes).</span>{" "}
+              <span className="text-ink-2">
+                Planned for Release 2 (transfer burden), withdrawn in favor of curated estimates. Ground travel occurs in
+                0.9% of catalog legs; the three that need special handling are covered by manual overrides. Curated
+                estimates stay visible as such (ADR 0011).
+              </span>
+            </li>
+            <li className="px-4 py-3">
+              <span className="font-medium">Place lookups (Google Places required).</span>{" "}
+              <span className="text-ink-2">
+                Planned for Release 3, made optional instead. The feature works fully without a key via a pluggable
+                provider interface. If Google Places is ever wanted, it becomes configuration rather than a rewrite (ADR 0014).
+              </span>
+            </li>
+          </ul>
         </Card>
       </div>
     </>

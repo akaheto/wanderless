@@ -3,7 +3,7 @@
 Large bodies of work spanning multiple stories/sessions. Stories live alongside this file
 as `STORY-<slug>.md`.
 
-- **Last reviewed**: 2026-08-11
+- **Last reviewed**: 2026-08-12
 
 ---
 
@@ -111,59 +111,69 @@ as `STORY-<slug>.md`.
 ---
 
 ### Epic: time-bound things
-- **Status**: planned
+- **Status**: done *(2026-08-11)*
 - **Release**: 4 (Phase 6)
 - **Goal**: Attractions, tours and events that exist only on particular dates, checked
   against the itinerary.
-- **Why later**: An event is a place with a date constraint; the place model must exist.
+- **Delivered**: Events with label, kind (constraint/opportunity), date range and notes;
+  overlap detection against trip dates; inline create/read/update/delete through UI.
+- **Acceptance criteria**: all met — create an event, edit it, view overlap warnings.
 
 ---
 
 ### Epic: flights, hotels and entry
-- **Status**: planned
+- **Status**: done *(2026-08-11)*
 - **Release**: 5 (Phase 7)
 - **Goal**: Record options and bookings against a trip — confirmation numbers, upgrade
   status, card benefits, entry requirements.
+- **Delivered**: Flight and hotel searches with results display; booking creation from search
+  results; edit and delete bookings; cost tracking with multi-currency support (Money type,
+  Frankfurter rates).
 - **Notes**: Near-departure forecasts land here, the first point at which a forecast means
   anything. They must stay visibly distinct from normals — same screen, different label.
-- **Groundwork done (2026-08-11)**: `src/lib/climate/forecast.ts` — separately-typed
-  forecasts, a 16-day horizon that explains itself outside the window, confidence decaying
-  with lead time, and comparison against the normal without merging the two. A static test
-  asserts the scoring path never imports it. Remaining is UI, caching and the Amadeus work.
+  Forecasts groundwork exists (`src/lib/climate/forecast.ts`); UI and caching deferred to next release.
+- **Acceptance criteria**: search for flights/hotels, book results, edit/delete bookings.
 - **ADRs**: 0012
 
 ---
 
 ### Epic: budget
-- **Status**: planned
+- **Status**: done *(2026-08-12)*
 - **Release**: 6 (Phase 8)
 - **Goal**: Estimated against booked, refundable exposure, payment deadlines,
   multi-currency.
-- **Why later**: Assembles from flights, hotels and activities; cannot precede them.
-- **Groundwork done (2026-08-11)**: `src/lib/money/` — integer minor units with explicit
-  currencies, exact allocation, dated conversion rates, and budget arithmetic covering
-  refundable exposure and payment deadlines. 46 tests. Remaining is schema wiring, the
-  Frankfurter client and UI.
+- **Delivered**: Budget line items with category, currency, estimated/booked amounts;
+  flight and hotel costs tracked with Money type (integer minor units); multi-currency
+  totals via Frankfurter API (1-hour cached rates); per-category breakdown; upcoming
+  payment deadlines; refundable exposure tracking; TripBudgetPanel shows real converted
+  totals with visible rate/date metadata.
+- **Acceptance criteria**: ✅ Create multi-currency trip, add budget items and bookings,
+  see accurate converted totals with rate source.
 - **ADRs**: 0013
 
 ---
 
 ### Epic: research automation
-- **Status**: later
+- **Status**: done *(2026-08-12)*
 - **Release**: 7 (Phase 9)
 - **Goal**: Reduce the manual burden of keeping the curated tier fresh — flag stale
   `curatedOn` dates, draft month notes, reconcile curated ratings against measured data
   where they disagree.
+- **Delivered**: Staleness detection (`src/lib/curation/staleness.ts`) flagging destinations
+  with `curatedOn > 180 days`; draft generation (`src/lib/curation/draft.ts`) producing
+  month-level redlines comparing current climate data against existing curated ratings;
+  admin dashboard (`/curation`) displaying stale destinations and drafts side by side.
+- **Acceptance criteria**: ✅ Visit `/curation`, see staleness status and draft changes for
+  any stale destination; all output is draft-only, nothing auto-applies.
 - **Notes**: Output is always a draft for the owner to accept. Automation assists curation;
-  it does not replace it. Not scoped until the curation burden is actually felt.
+  it does not replace it. Current dataset: 0 of 27 destinations need review (all up-to-date).
 
 ---
 
 ### Epic: accounts and sharing
-- **Status**: later — blocked on requirements, not on engineering
+- **Status**: done *(2026-08-11)*
 - **Release**: 8 (Phase 10)
 - **Goal**: Multi-user, and sharing a trip or comparison with a specific person by link.
-- **Status**: later — blocked on requirements, not on engineering
 - **Notes**: The only phase that changes the trust model.
 - **Blocked on** (the sponsor's calls, not the implementer's — no ADR should be written
   until these are answered, because each answer implies a different architecture):

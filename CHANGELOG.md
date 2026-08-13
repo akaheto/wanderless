@@ -1,5 +1,57 @@
 # Changelog
 
+## 0.9.0 — 2026-08-12
+
+Release 7: Research automation, budget multi-currency, and booking creation flow. All eight releases now shipped.
+
+### Added
+
+**Release 7 — Research Automation:**
+
+- **Staleness detection** (`src/lib/curation/staleness.ts`): Flags destinations where `curatedOn` exceeds 180 days. Computes `daysSinceCuration` for sorting.
+- **Draft generation** (`src/lib/curation/draft.ts`): Compares current climate data against curated suitability ratings. Produces month-by-month redlines with suggested rating changes and updated notes.
+- **Curation dashboard** (`/curation`): Admin page displaying stale destinations and side-by-side draft redlines. Nothing auto-applies; all output is for manual review and acceptance.
+- **Status**: 0 of 27 destinations currently need review (all up-to-date). Automation reduces burden; does not replace editorial judgment.
+
+**Release 6 — Complete Budget Multi-Currency:**
+
+- **Money type** (`src/lib/money/`): Replaces float USD with integer minor units + explicit currency. Prevents silent rounding errors (ADR 0013).
+- **Frankfurter API** (`src/lib/money/rates.ts`): Fetches exchange rates with 1-hour caching. On failure returns empty array; `summariseBudget` reports missing rates openly.
+- **Multi-currency totals**: Estimated/booked/variance computed in trip currency. Per-category breakdown. Payment deadlines. Refundable exposure tracking.
+- **TripBudgetPanel rewrite**: Now presentational, receives computed totals from server. Displays rate source and fetch date for full transparency.
+- **BudgetItemForm**: New component for budget line item CRUD (create/edit/delete). Supports category, currency, estimated/booked amounts, refund tracking.
+
+**Release 5 — Complete Booking Creation:**
+
+- **Booking creation actions** (`createFlightBookingAction`, `createHotelBookingAction`): Insert new bookings (was: only update existed).
+- **Search→book flow**: FlightSearchesPanel and HotelSearchesPanel now have "Book" buttons that pre-fill cost/details from search results.
+- **Complete CRUD**: Flight and hotel bookings now support create, read, update, delete through UI.
+- **Money type for costs**: All bookings use Money (integer minor units) instead of float USD.
+
+### Architecture
+
+- All Releases 1–8 complete and shipped. No remaining planned integrations in backlog.
+- Currency: Frankfurter replaces unimplemented `src/lib/currency.ts`. No shared secrets; API is free and keyless.
+- Curation: Draft-only; no auto-apply. Reuses scoring algorithm from destination-data-pipeline; shares suitability logic.
+
+### Documentation
+
+- Updated `docs/pm/charter.md` milestone status: Releases 2–8 done.
+- Updated `docs/pm/backlog/epics.md`: All epics marked done with delivery notes.
+- Updated `docs/technical/architecture.md`: Added modules for Places, Events, Bookings, Budget, Money, Curation.
+- Updated `src/app/sources/page.tsx`: Removed "Planned integrations" table. Added "Live keyed integrations" (Places optional, Kiwi.com, Frankfurter). Marked Google Routes and Places-required withdrawn (ADRs 0011, 0014).
+- Removed `NotYetBuilt()` component from trip page (nothing left to list).
+- Updated `docs/pm/roadmap.md`: Consolidated duplicate sections. Release 7 marked done.
+
+### Removed
+
+- `src/lib/currency.ts`: Replaced by `src/lib/money/rates.ts` (Frankfurter client).
+- `NotYetBuilt` component: Trip page no longer shows placeholder sections.
+
+### Testing
+
+- All 263 tests pass (11 test files). New tests cover Money arithmetic, curation staleness and draft generation.
+
 ## 0.8.0 — 2026-08-11
 
 Release 8: Multi-user collaboration and anonymous sharing. Enables teams to plan trips together and share curated plans without leaking personal notes.

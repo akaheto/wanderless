@@ -3,7 +3,7 @@
 Current state of the system. Kept accurate rather than historical — for *why* a decision
 was made, see `adr/`.
 
-- **Last reviewed**: 2026-08-10
+- **Last reviewed**: 2026-08-12
 
 ## Shape
 
@@ -69,6 +69,32 @@ every mutation renumbers.
 **`src/components/`** — `ui.tsx` is the kit; `charts.tsx` is hand-written SVG (ADR 0008).
 Only `ThemeToggle` is a Client Component.
 
+**`src/lib/places/`** — place discovery and staleness. `provider.ts` plugs in a lookup
+backend (default: null, fully functional with no API key). Staleness graded per category —
+a two-year-old beach reads as fine, a two-year-old restaurant does not. Re-verification
+refreshes fetched fields only; personal notes are never touched.
+
+**`src/lib/db/bookings.ts`** — flight and hotel booking records, search storage, and cost
+tracking. Uses Money type (integer minor units with explicit currency) instead of bare
+USD. Search staleness indicators. Supports multi-currency via Frankfurter rates.
+
+**`src/lib/db/events.ts`** — time-bound events: visa deadlines, festivals, school holidays.
+Tagged constraint/opportunity. Overlaps with trip dates are detected and flagged in the UI.
+
+**`src/lib/money/`** — currency and budget arithmetic. `index.ts` defines the Money type
+(amount as integer minor units, currency as string) and prevents silent float rounding
+errors (ADR 0013). `budget.ts` computes trip totals (estimated, booked, variance, exposure,
+recoverable), per-category breakdowns, and payment deadlines. `rates.ts` fetches Frankfurter
+API for exchange rates with 1-hour caching. 46 tests verify allocation correctness.
+
+**`src/lib/curation/`** — research automation. `staleness.ts` flags destinations whose
+`curatedOn` date exceeds the threshold (180 days). `draft.ts` generates month-level redlines
+comparing curated suitability ratings against measured climate data, producing suggested
+changes and updated notes for manual review.
+
+**`src/lib/db/budget.ts`** — budget line items with category, currency, estimated/booked
+amounts, refund tracking, and payment deadlines. Uses Money type throughout.
+
 ## The scoring engine
 
 Seven categories — weather, seasonal, travel, lodging, experience, practicality, personal
@@ -112,7 +138,7 @@ limiting. Fails loudly rather than writing a partial corpus.
 
 ## Testing
 
-62 tests (`npm test`, vitest). Three files:
+263 tests (`npm test`, vitest) across 11 test files. Core suites:
 
 - `dates.test.ts` — the leap-calendar contract, DST-safe night counting, date validation.
 - `climate.test.ts` — invariants across the whole generated corpus (lows never exceed
@@ -121,6 +147,10 @@ limiting. Fails loudly rather than writing a partial corpus.
 - `engine.test.ts` — score integrity, determinism, and the design-rule regressions: the
   Vietnam March/November inversion, the Thai coasts on opposite monsoons, Stockholm kept
   out of the top half in January, and the travel-limit partition.
+- `money.test.ts` — Money type arithmetic, allocation, refundable exposure, payment
+  deadlines, multi-currency conversions, and the invariant that totals never exceed budget.
+- `stops.test.ts`, `places.test.ts`, `events.test.ts`, `bookings.test.ts` — CRUD and state
+  validation for itinerary, places, events, and bookings.
 
 The regression tests are the point. They assert behaviour the product exists to guarantee,
 and each names the failure it prevents.
