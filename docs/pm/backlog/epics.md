@@ -273,4 +273,60 @@ as `STORY-<slug>.md`.
   - [ ] Audit logs retained for 90+ days
   - [ ] Admin dashboard accessible only to admin+ users
 - **ADRs**: 0006 (auth tier separation)
-- **Stories**: `STORY-authentication-enforcement.md`, `STORY-email-notifications.md`, `STORY-access-levels.md`, `STORY-audit-logs.md`
+- **Stories**: `STORY-authentication-enforcement.md`, `STORY-email-notifications.md`, `STORY-access-levels.md`, `STORY-audit-logs.md`, `STORY-admin-dashboard.md`, `STORY-email-resend.md`, `STORY-compliance.md`
+
+---
+
+### Epic: Admin Features and Compliance
+
+- **Status**: planned
+- **Release**: TBD (post-14)
+- **Goal**: Build admin dashboard for user management and compliance reporting; implement data export, account deletion, and email resending for GDPR/SOC 2 compliance
+- **Why now**: These are non-negotiable for enterprise usage, legal compliance, and trust with users
+- **Scope**:
+  - Admin dashboard with user list, audit logs, system health, analytics
+  - Resend verification emails with rate limiting
+  - Account deletion with 7-day grace period
+  - User data export (ZIP format with all personal data)
+  - Compliance reports for auditors
+  - Data anonymization for deleted users
+- **Acceptance criteria**:
+  - [ ] Admin dashboard built and tested
+  - [ ] Verification email resending works with rate limiting
+  - [ ] Account deletion with grace period implemented
+  - [ ] Data export generates valid, portable JSON/ZIP
+  - [ ] Compliance reports exportable to PDF
+  - [ ] GDPR Article 17 (Right to Erasure) satisfied
+- **ADRs**: (none yet)
+- **Stories**: `STORY-admin-dashboard.md`, `STORY-email-resend.md`, `STORY-compliance.md`
+
+---
+
+### Epic: Visual Identity Redesign & Rebranding
+
+- **Status**: planned
+- **Release**: TBD (post-Compliance)
+- **Goal**: Transform from sterile "Travel Intelligence Hub" to a memorable, visually engaging brand with travel-themed aesthetic and distinctive personality
+- **Why now**: Current branding doesn't reflect the product's power or appeal. A cohesive visual identity increases memorability, user engagement, and positions app as premium travel planning tool
+- **Scope**:
+  - **Phase 1**: Brand naming strategy (20+ candidates → 1 winner)
+  - **Phase 2**: Visual design system (colors, typography, illustrations, imagery)
+  - **Phase 3**: Implementation rollout across all pages
+  - **Phase 4**: Polish, refinement, brand guidelines
+- **Key decisions**:
+  - New name: TBD (recommendation: Wanderwise)
+  - Color palette: Warm adventure theme (sunset orange, deep teal, cream)
+  - Imagery: Curated travel photography + custom illustrations
+  - Patterns: Subtle travel-themed watermarks (maps, passports, compasses)
+- **Acceptance criteria**:
+  - [ ] Brand name finalized with domain registered
+  - [ ] Logo designed and approved (3+ concepts)
+  - [ ] Design system in Figma with components
+  - [ ] 50+ travel images sourced/created
+  - [ ] All pages updated with new branding
+  - [ ] Dark mode variants tested and approved
+  - [ ] Brand guidelines documented
+  - [ ] User feedback positive (engagement metrics improved)
+- **ADRs**: (design system decisions TBD)
+- **Stories**: `STORY-brand-naming.md`, `STORY-visual-design.md`, `STORY-branding-implementation.md`
+- **Non-Goals**: Logo animation, mascot, marketing site redesign (Phase 2 work)
