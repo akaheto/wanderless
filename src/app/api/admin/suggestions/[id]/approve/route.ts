@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateCitySuggestion, getCitySuggestion } from "@/lib/db/city-suggestions";
 import { researchCity } from "@/lib/research/city-research";
+import { requireAdmin } from "@/lib/auth/roles";
 
 /**
  * POST /api/admin/suggestions/[id]/approve
- * Approve a city suggestion for Claude API research.
+ * Approve a city suggestion and trigger Claude API research.
+ *
+ * Protected: requires admin or owner role.
  */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // TODO: Add authentication check
+    await requireAdmin();
+
     const { id: idStr } = await params;
     const id = parseInt(idStr);
 
@@ -85,6 +89,16 @@ export async function POST(
       },
     });
   } catch (error) {
+    const isAuthError = error instanceof Error && error.message.includes("Unauthorized");
+
+    if (isAuthError) {
+      console.warn("[City Research Approve] Unauthorized access attempt");
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
+
     console.error("[Admin Approve API Error]", error);
     return NextResponse.json(
       { error: "Failed to process approval" },

@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateCitySuggestion, getCitySuggestion } from "@/lib/db/city-suggestions";
+import { requireAdmin } from "@/lib/auth/roles";
 
 /**
  * POST /api/admin/suggestions/[id]/reject
  * Reject a city suggestion (not suitable as a leisure destination).
+ *
+ * Protected: requires admin or owner role.
  */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // TODO: Add authentication check
+    await requireAdmin();
+
     const { id: idStr } = await params;
     const id = parseInt(idStr);
 
@@ -54,6 +58,16 @@ export async function POST(
       suggestion,
     });
   } catch (error) {
+    const isAuthError = error instanceof Error && error.message.includes("Unauthorized");
+
+    if (isAuthError) {
+      console.warn("[City Suggestion Reject] Unauthorized access attempt");
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
+
     console.error("[Admin Reject API Error]", error);
     return NextResponse.json(
       { error: "Failed to process rejection" },
