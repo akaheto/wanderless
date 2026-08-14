@@ -8,7 +8,7 @@ import type { TripEvent } from '@/lib/db/events';
 import type { FlightBooking, HotelBooking } from '@/lib/db/bookings';
 import type { BudgetItem } from '@/lib/db/budget';
 
-const DB_NAME = 'tih-offline';
+const DB_NAME = 'wanderless-offline';
 const DB_VERSION = 1;
 
 export const STORES = {

@@ -68,7 +68,7 @@ export default function SignupPage() {
         <div className="rounded bg-blue-50 px-4 py-3 text-sm text-blue-800">
           <p className="font-medium">What's next?</p>
           <p className="mt-2">
-            1. Check your inbox (and spam folder) for an email from Travel Intelligence Hub
+            1. Check your inbox (and spam folder) for an email from Wanderless
           </p>
           <p className="mt-2">
             2. Click the verification link in the email

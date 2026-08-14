@@ -1,9 +1,9 @@
 import 'server-only';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@travel-intelligence-hub.com';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@wanderless.app';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://travel-intelligence-hub.vercel.app';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://wanderless.vercel.app';
 
 interface SendEmailParams {
   to: string;
