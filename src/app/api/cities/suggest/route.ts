@@ -3,27 +3,36 @@ import {
   submitCitySuggestion,
   hasCitySuggestion,
 } from "@/lib/db/city-suggestions";
+import { checkSubmissionLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/cities/suggest
  * Submit a new city suggestion for research and possible inclusion in catalog.
  *
- * Workflow:
- * 1. Validate input (city and country required)
- * 2. Check if already suggested (prevent duplicates)
- * 3. Store in city_suggestions table with status='pending'
- * 4. Queue async Claude API research job (future: Vercel Queues)
- * 5. Return confirmation to user
+ * Rate limiting: 10 submissions per day per user
+ * Admins and owners: unlimited
  *
- * Future research via Claude:
- * - Real hotel pricing from Booking.com, Trip.com, Expedia
- * - Flight availability and nonstop routes
- * - Visa requirements per US State Dept
- * - Climate normals and seasonal patterns
- * - Return for manual review before adding to catalog
+ * Workflow:
+ * 1. Check rate limit (10/day for users, unlimited for admins)
+ * 2. Validate input (city and country required)
+ * 3. Check if already suggested (prevent duplicates)
+ * 4. Store in city_suggestions table with status='pending'
+ * 5. Return confirmation to user
  */
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit first
+    const rateLimit = await checkSubmissionLimit();
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: rateLimit.message || "Rate limit exceeded",
+          remaining: rateLimit.remaining,
+        },
+        { status: 429 }
+      );
+    }
+
     const { city, country } = await request.json();
 
     if (!city || !country) {
@@ -83,10 +92,8 @@ export async function POST(request: NextRequest) {
       city: suggestion.city,
       country: suggestion.country,
       status: suggestion.status,
+      remaining: rateLimit.remaining,
     });
-
-    // TODO: Queue Claude API research task
-    // await queueCityResearch(suggestion.id);
 
     return NextResponse.json(
       {
@@ -96,6 +103,7 @@ export async function POST(request: NextRequest) {
           country: suggestion.country,
           status: suggestion.status,
         },
+        remaining: rateLimit.remaining,
       },
       { status: 201 }
     );
