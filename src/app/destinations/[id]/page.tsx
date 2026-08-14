@@ -10,10 +10,12 @@ import { holidaysDuring, HOLIDAY_SOURCE, holidayDataAvailable } from "@/lib/holi
 import { listPlacesForDestination, listSources } from "@/lib/db/places";
 import { getEventsByCity } from "@/lib/integrations/ticketmaster";
 import { getRestaurantCategories } from "@/lib/integrations/yelp";
+import { getDemographics } from "@/lib/integrations/demographics";
 import { HOME } from "@/data/home";
 import { DestinationPlaces } from "@/components/DestinationPlaces";
 import { EventsGrid } from "@/components/EventCard";
 import { RestaurantCategories } from "@/components/RestaurantCard";
+import { DemographicsPanel } from "@/components/DemographicsPanel";
 import { DailyComfortChart, HomeDeltaChart, MonthlyClimateChart, SuitabilityStrip } from "@/components/charts";
 import {
   Badge,
@@ -62,9 +64,10 @@ export default async function DestinationPage({
     places.map((p) => p.sourceId).filter((id): id is number => id !== null),
   );
 
-  // Fetch events and restaurants (cached server-side via ISR)
+  // Fetch events, restaurants, and demographics (cached server-side via ISR)
   const events = await getEventsByCity(d.name, 6).catch(() => []);
   const restaurants = await getRestaurantCategories(d.name).catch(() => ({}));
+  const demographics = getDemographics(d.name);
 
   return (
     <>
@@ -259,6 +262,8 @@ export default async function DestinationPage({
               </ul>
             </Card>
           )}
+
+          {demographics && <DemographicsPanel demographics={demographics} />}
 
           <Card>
             <CardHeader title="Public holidays during your dates" />
