@@ -58,6 +58,30 @@ export default function SuggestionsAdminPage() {
     }
   };
 
+  const handleRetry = async (id: number) => {
+    try {
+      const response = await fetch(`/api/admin/suggestions/${id}/retry`, {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to retry");
+      await fetchSuggestions();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error retrying suggestion");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`/api/admin/suggestions/${id}/delete`, {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to delete");
+      await fetchSuggestions();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error deleting suggestion");
+    }
+  };
+
   const filteredSuggestions = statusFilter
     ? suggestions.filter((s) => s.status === statusFilter)
     : suggestions;
@@ -139,6 +163,8 @@ export default function SuggestionsAdminPage() {
                 suggestion={suggestion}
                 onApprove={handleApprove}
                 onReject={handleReject}
+                onRetry={handleRetry}
+                onDelete={handleDelete}
               />
             ))}
         </div>

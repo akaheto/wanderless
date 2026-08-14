@@ -175,3 +175,20 @@ export async function hasCitySuggestion(city: string, country: string): Promise<
     return false;
   }
 }
+
+/**
+ * Delete a suggestion by ID.
+ */
+export async function deleteCitySuggestion(id: number): Promise<boolean> {
+  try {
+    const client = await db();
+    await client.execute({
+      sql: "DELETE FROM city_suggestions WHERE id = ?",
+      args: [id],
+    });
+    return true;
+  } catch (err) {
+    console.error("[City Suggestion Delete Error]", err);
+    return false;
+  }
+}

@@ -8,6 +8,8 @@ interface CityCardProps {
   suggestion: CitySuggestion;
   onApprove: (id: number) => Promise<void>;
   onReject: (id: number, reason: string) => Promise<void>;
+  onRetry?: (id: number) => Promise<void>;
+  onDelete?: (id: number) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -19,6 +21,8 @@ export function CityCard({
   suggestion,
   onApprove,
   onReject,
+  onRetry,
+  onDelete,
   isLoading = false,
 }: CityCardProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -42,6 +46,27 @@ export function CityCard({
       await onReject(suggestion.id, rejectionReason || 'Not a suitable leisure destination');
       setShowRejectForm(false);
       setRejectionReason('');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleRetry = async () => {
+    if (!suggestion.id || !onRetry) return;
+    setIsProcessing(true);
+    try {
+      await onRetry(suggestion.id);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!suggestion.id || !onDelete) return;
+    if (!confirm('Are you sure you want to delete this suggestion?')) return;
+    setIsProcessing(true);
+    try {
+      await onDelete(suggestion.id);
     } finally {
       setIsProcessing(false);
     }
@@ -183,8 +208,34 @@ export function CityCard({
       )}
 
       {suggestion.status === 'reviewed' && (
-        <div className="text-xs text-ink-3">
-          Reviewed on {suggestion.reviewed_at ? new Date(suggestion.reviewed_at).toLocaleDateString() : 'N/A'}
+        <div className="space-y-2">
+          {suggestion.research_notes?.includes('failed') || suggestion.research_notes?.includes('Failed') ? (
+            <>
+              <div className="text-xs text-critical mb-3">
+                Research failed. You can retry or delete this suggestion.
+              </div>
+              <div className="flex gap-2 text-sm">
+                <Button
+                  onClick={handleRetry}
+                  disabled={isProcessing}
+                  variant="primary"
+                >
+                  {isProcessing ? 'Retrying...' : '↻ Retry Research'}
+                </Button>
+                <Button
+                  onClick={handleDelete}
+                  disabled={isProcessing}
+                  variant="danger"
+                >
+                  {isProcessing ? 'Deleting...' : '🗑 Delete'}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="text-xs text-ink-3">
+              Reviewed on {suggestion.reviewed_at ? new Date(suggestion.reviewed_at).toLocaleDateString() : 'N/A'}
+            </div>
+          )}
         </div>
       )}
     </div>
