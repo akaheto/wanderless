@@ -110,26 +110,36 @@ CLIMATE SEARCH RESULTS:
 ${climateSearch}
 `;
 
-    const prompt = `Based on the web search results below, extract structured data about ${city}, ${country} as a travel destination.
+    const prompt = `You are extracting travel data from web search results. Your job is to find and extract ACTUAL NUMBERS and facts, not estimate or guess.
 
+WEB SEARCH DATA FOR ${city.toUpperCase()}, ${country.toUpperCase()}:
 ${searchContext}
 
-Return ONLY a JSON object (no other text) with these exact fields. IMPORTANT: Extract actual numbers from the search results when available. If you cannot find a value, use null.
+EXTRACTION RULES:
+1. Hotel prices: Find and extract actual USD dollar amounts (look for "$" symbols and numbers)
+   - If you see "$237" and "$491", extract 237 and 491
+   - Do NOT estimate - only use numbers from the search results
+2. Flight duration: Find flight time in hours (look for "hours", "minutes", "4 hours 36 minutes")
+   - Convert to decimal hours if needed (4h 36m = 4.6 hours, round to 5)
+3. Nonstop flights: Look for "nonstop" or "direct" in flight results
+4. Visa info: Find visa requirement summary for US citizens traveling to this country
+5. Climate: Find temperature ranges and best seasons to visit
 
+RETURN ONLY THIS JSON (no markdown, no explanation):
 {
   "hotelData": {
-    "fourStarUSD": <number or null (estimated nightly rate in USD if not found)>,
-    "fiveStarUSD": <number or null (estimated nightly rate in USD if not found)>,
-    "source": "<website name or null>"
+    "fourStarUSD": <number from search results or null>,
+    "fiveStarUSD": <number from search results or null>,
+    "source": "<website or null>"
   },
   "flightData": {
-    "nonstop": <boolean or null>,
-    "typicalHours": <number or null (typical flight duration)>,
-    "source": "<airline or source or null>"
+    "nonstop": <true/false/null based on search results>,
+    "typicalHours": <number from search results or null>,
+    "source": "<airline or null>"
   },
-  "visaInfo": "<visa requirement summary for US citizens or null>",
-  "climateData": "<climate/weather summary (best season, temperature range) or null>",
-  "summary": "<1-sentence description of ${city} as a travel destination>"
+  "visaInfo": "<exact visa requirement summary or null>",
+  "climateData": "<exact climate/temperature summary or null>",
+  "summary": "<1-sentence description>"
 }`;
 
     const message = await client.messages.create({
