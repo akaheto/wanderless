@@ -82,9 +82,9 @@ export function DestinationDownloadButton({ destinationId, destinationName }: De
 
   if (isDownloading) {
     return (
-      <button disabled className="px-4 py-2 bg-surface-0 dark:bg-surface-0 text-gray-700 dark:text-gray-300 rounded-lg font-medium text-sm cursor-not-allowed">
+      <button disabled className="px-4 py-2 bg-surface-0 text-ink-2 rounded-lg font-medium text-sm cursor-not-allowed">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-line border-t-accent rounded-full animate-spin" />
           <span>Downloading... {progress}%</span>
         </div>
       </button>
@@ -94,12 +94,12 @@ export function DestinationDownloadButton({ destinationId, destinationName }: De
   if (cached && !isStale) {
     return (
       <div className="flex items-center gap-2">
-        <div className="px-3 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium">
+        <div className="px-3 py-2 bg-good/10 text-good rounded-lg text-sm font-medium">
           ✓ Downloaded • {formatBytes(cached.sizeBytes)}
         </div>
         <button
           onClick={handleDelete}
-          className="px-3 py-2 bg-critical/10 dark:bg-critical/10 text-critical dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg text-sm font-medium transition-colors"
+          className="px-3 py-2 bg-critical/10 text-critical hover:bg-critical/20 rounded-lg text-sm font-medium transition-colors"
           title="Remove cached data"
         >
           🗑️
@@ -113,7 +113,7 @@ export function DestinationDownloadButton({ destinationId, destinationName }: De
       <button
         onClick={handleRefresh}
         disabled={isDownloading}
-        className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+        className="px-4 py-2 bg-accent/10 text-accent hover:bg-accent/20 rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
       >
         🔄 Refresh
       </button>
@@ -125,11 +125,11 @@ export function DestinationDownloadButton({ destinationId, destinationName }: De
       <button
         onClick={handleDownload}
         disabled={isDownloading}
-        className="px-4 py-2 bg-accent dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-accent rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+        className="px-4 py-2 bg-accent text-white hover:brightness-110 rounded-lg font-medium text-sm transition-all disabled:opacity-50"
       >
         📥 Download for offline
       </button>
-      {error && <div className="text-critical dark:text-red-400 text-sm">{error}</div>}
+      {error && <div className="text-critical text-sm">{error}</div>}
     </div>
   );
 }

@@ -34,11 +34,11 @@ export function SeasonalGateBanner({
   const gatePercent = Math.round(gate * 100);
 
   return (
-    <div className="rounded-lg bg-critical/10 dark:bg-critical/10 border-l-4 border-red-500 p-4 mb-4">
+    <div className="rounded-lg bg-critical/10 border-l-4 border-critical p-4 mb-4">
       <div className="flex gap-3">
         <div className="text-2xl">⚠️</div>
         <div className="flex-1">
-          <div className="font-semibold text-red-900 dark:text-red-200">
+          <div className="font-semibold text-critical">
             Poor suitability in {monthName}
           </div>
           <div className="text-sm text-critical mt-1">

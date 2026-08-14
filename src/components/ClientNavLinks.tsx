@@ -12,7 +12,17 @@ const LINKS = [
   { href: "/sources", label: "Data & sources" },
 ];
 
-export function ClientNavLinks() {
+const ADMIN_LINKS = [
+  { href: "/admin/suggestions", label: "City suggestions", exact: false },
+  { href: "/admin/users", label: "Users", exact: false },
+  { href: "/admin/audit", label: "Audit log", exact: false },
+];
+
+interface ClientNavLinksProps {
+  showAdminLinks?: boolean;
+}
+
+export function ClientNavLinks({ showAdminLinks = false }: ClientNavLinksProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -72,7 +82,7 @@ export function ClientNavLinks() {
                   key={link.href}
                   href={link.href}
                   aria-current={active ? "page" : undefined}
-                  className={`px-4 py-3 text-[13.5px] transition-colors border-b border-line last:border-b-0 ${
+                  className={`px-4 py-3 text-[13.5px] transition-colors border-b border-line ${
                     active
                       ? "bg-accent-soft font-medium text-accent"
                       : "text-ink-2 hover:bg-surface-2 hover:text-ink"
@@ -82,6 +92,30 @@ export function ClientNavLinks() {
                 </Link>
               );
             })}
+            {showAdminLinks && (
+              <>
+                <div className="border-t border-line px-4 py-2">
+                  <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wide">Admin</div>
+                </div>
+                {ADMIN_LINKS.map((link) => {
+                  const active = link.exact ? pathname === link.href : pathname.startsWith(link.href);
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      aria-current={active ? "page" : undefined}
+                      className={`px-4 py-3 text-[13.5px] transition-colors border-b border-line last:border-b-0 ${
+                        active
+                          ? "bg-accent-soft font-medium text-accent"
+                          : "text-ink-2 hover:bg-surface-2 hover:text-ink"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </>
+            )}
           </nav>
         </div>
       )}
@@ -105,6 +139,31 @@ export function ClientNavLinks() {
             </Link>
           );
         })}
+        {showAdminLinks && (
+          <>
+            <div className="hidden lg:block border-t border-line my-2" />
+            <div className="hidden lg:block px-3 py-1.5">
+              <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wide">Admin</div>
+            </div>
+            {ADMIN_LINKS.map((link) => {
+              const active = link.exact ? pathname === link.href : pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`shrink-0 hidden lg:block rounded-md px-3 py-1.5 text-[13.5px] whitespace-nowrap transition-colors ${
+                    active
+                      ? "bg-accent-soft font-medium text-accent"
+                      : "text-ink-2 hover:bg-surface-2 hover:text-ink"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </>
+        )}
       </nav>
     </div>
   );

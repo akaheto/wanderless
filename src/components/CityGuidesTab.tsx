@@ -43,8 +43,8 @@ export function CityGuidesTab({ destinationId, destinationName }: CityGuidesTabP
 
   if (!isOnline && !cached) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
-        <div className="text-gray-400 dark:text-gray-500 mb-4">
+      <div className="bg-surface-1 rounded-lg p-8 text-center">
+        <div className="text-ink-3 mb-4">
           <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -54,15 +54,15 @@ export function CityGuidesTab({ destinationId, destinationName }: CityGuidesTabP
             />
           </svg>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">Download {destinationName} to browse guides offline.</p>
+        <p className="text-ink-2 mb-4">Download {destinationName} to browse guides offline.</p>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
-        <div className="w-8 h-8 border-4 border-gray-300 dark:border-gray-600 border-t-blue-600 rounded-full animate-spin mx-auto" />
+      <div className="bg-surface-1 rounded-lg p-8 text-center">
+        <div className="w-8 h-8 border-4 border-line border-t-accent rounded-full animate-spin mx-auto" />
       </div>
     );
   }
@@ -83,8 +83,8 @@ export function CityGuidesTab({ destinationId, destinationName }: CityGuidesTabP
             onClick={() => handleShowSection(s.id)}
             className={`whitespace-nowrap px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
               section === s.id
-                ? 'bg-accent dark:bg-blue-700 text-white'
-                : 'bg-surface-0 dark:bg-surface-0 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ? 'bg-accent text-white'
+                : 'bg-surface-0 text-ink-2 hover:bg-surface-2'
             }`}
           >
             {s.icon} {s.label}

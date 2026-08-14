@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
+import { isAdmin } from "@/lib/auth/roles";
 import { signOutAction } from "@/app/actions";
 import { ClientNavLinks } from "./ClientNavLinks";
 
 export async function NavLinks() {
   const user = await getCurrentUser();
+  const userIsAdmin = user ? await isAdmin() : false;
 
   return (
     <>
-      <ClientNavLinks />
+      <ClientNavLinks showAdminLinks={userIsAdmin} />
       <div className="border-t border-line px-3 py-4 lg:mt-4">
         {user ? (
           <div className="space-y-2">

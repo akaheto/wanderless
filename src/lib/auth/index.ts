@@ -3,7 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { randomBytes } from "node:crypto";
 import { db } from "@/lib/db/client";
-import type { User } from "@/lib/db/users";
+import type { User, UserRole } from "@/lib/db/users";
 import { hashPassword, verifyPassword } from "./password";
 import { sendVerificationEmail, sendAdminNewAccountAlert } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
@@ -84,7 +84,7 @@ export async function signUp(email: string, password: string): Promise<{ user: U
     args: [userId, email, passwordHash, now, autoVerifyEmail ? 1 : 0, verificationToken, tokenExpiresAt, 'user'],
   });
 
-  const user = { id: userId, email, role: 'user' as const, createdAt: now, emailVerified: autoVerifyEmail };
+  const user = { id: userId, email, role: 'user' as UserRole, createdAt: now, emailVerified: autoVerifyEmail };
 
   // Send verification email (if not auto-verified)
   if (!autoVerifyEmail) {

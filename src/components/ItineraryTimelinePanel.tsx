@@ -56,9 +56,9 @@ export function ItineraryTimelinePanel({
               Day {Math.max(1, tripStartDay)} of {totalNights + 1}
             </span>
           </div>
-          <div className="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-1 bg-line rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-teal-500 to-blue-500"
+              className="h-full bg-gradient-to-r from-accent to-series-2"
               style={{ width: `${Math.min(100, (tripStartDay / (totalNights + 1)) * 100)}%` }}
             />
           </div>
@@ -66,7 +66,7 @@ export function ItineraryTimelinePanel({
       )}
 
       {/* Timeline */}
-      <div className="px-4 py-6 space-y-6 border-l-4 border-teal-500 ml-4">
+      <div className="px-4 py-6 space-y-6 border-l-4 border-accent ml-4">
         {stops.map((stop, idx) => {
           const destination = getDestination(stop.destinationId);
           const isLast = idx === stops.length - 1;
@@ -85,10 +85,10 @@ export function ItineraryTimelinePanel({
               }`}
             >
               {/* Timeline Dot */}
-              <div className="absolute -left-6 top-1 w-4 h-4 bg-teal-500 rounded-full border-4 border-white dark:border-gray-900 shadow-md" />
+              <div className="absolute -left-6 top-1 w-4 h-4 bg-accent rounded-full border-4 border-surface-2 shadow-md" />
 
               {/* Stop Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-line hover:shadow-md transition-shadow">
+              <div className="bg-surface-2 rounded-lg p-4 shadow-sm border border-line hover:shadow-md transition-shadow">
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1 min-w-0">
@@ -117,7 +117,7 @@ export function ItineraryTimelinePanel({
 
                 {/* Flight Leg (if not last) */}
                 {!isLast && (
-                  <div className="flex items-center gap-2 my-3 py-2 px-3 bg-blue-50 dark:bg-blue-900/20 rounded">
+                  <div className="flex items-center gap-2 my-3 py-2 px-3 bg-accent-soft rounded">
                     <span className="text-sm">✈️</span>
                     <div className="flex-1 min-w-0">
                       <div className="text-xs text-ink-3">

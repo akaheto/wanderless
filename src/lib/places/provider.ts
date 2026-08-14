@@ -240,7 +240,7 @@ export class NominatimPlacesProvider implements PlacesProvider {
       neighborhood: this.extractNeighborhood(result),
       lat,
       lon,
-      url: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=18`,
+      url: `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`,
       providerPlaceId: `osm_${result.osm_type}_${result.osm_id}`,
       description: result.type,
     };

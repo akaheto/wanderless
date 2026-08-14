@@ -18,16 +18,35 @@ import tokyo from "./climate/tokyo.json";
 import kyoto from "./climate/kyoto.json";
 import singapore from "./climate/singapore.json";
 import stockholm from "./climate/stockholm.json";
+import paris from "./climate/paris.json";
+import london from "./climate/london.json";
+import barcelona from "./climate/barcelona.json";
+import amsterdam from "./climate/amsterdam.json";
+import madrid from "./climate/madrid.json";
+import istanbul from "./climate/istanbul.json";
+import prague from "./climate/prague.json";
+import vienna from "./climate/vienna.json";
+import berlin from "./climate/berlin.json";
+import florence from "./climate/florence.json";
+import venice from "./climate/venice.json";
+import athens from "./climate/athens.json";
+import budapest from "./climate/budapest.json";
 import lisbon from "./climate/lisbon.json";
-import seville from "./climate/seville.json";
 import rome from "./climate/rome.json";
-import riviera_maya from "./climate/riviera-maya.json";
-import san_juan from "./climate/san-juan.json";
-import dubai from "./climate/dubai.json";
-import marrakech from "./climate/marrakech.json";
-import cape_town from "./climate/cape-town.json";
-import maldives from "./climate/maldives.json";
-import mexico_city from "./climate/mexico-city.json";
+import copenhagen from "./climate/copenhagen.json";
+import milan from "./climate/milan.json";
+import dublin from "./climate/dublin.json";
+import edinburgh from "./climate/edinburgh.json";
+import munich from "./climate/munich.json";
+import brussels from "./climate/brussels.json";
+import seville from "./climate/seville.json";
+import porto from "./climate/porto.json";
+import krakow from "./climate/krakow.json";
+import dubrovnik from "./climate/dubrovnik.json";
+import nice from "./climate/nice.json";
+import naples from "./climate/naples.json";
+import salzburg from "./climate/salzburg.json";
+import reykjavik from "./climate/reykjavik.json";
 import nyc_reference from "./climate/nyc-reference.json";
 
 export const CLIMATE_RECORDS: Record<string, ClimateRecord> = {
@@ -48,16 +67,35 @@ export const CLIMATE_RECORDS: Record<string, ClimateRecord> = {
   "kyoto": kyoto as unknown as ClimateRecord,
   "singapore": singapore as unknown as ClimateRecord,
   "stockholm": stockholm as unknown as ClimateRecord,
+  "paris": paris as unknown as ClimateRecord,
+  "london": london as unknown as ClimateRecord,
+  "barcelona": barcelona as unknown as ClimateRecord,
+  "amsterdam": amsterdam as unknown as ClimateRecord,
+  "madrid": madrid as unknown as ClimateRecord,
+  "istanbul": istanbul as unknown as ClimateRecord,
+  "prague": prague as unknown as ClimateRecord,
+  "vienna": vienna as unknown as ClimateRecord,
+  "berlin": berlin as unknown as ClimateRecord,
+  "florence": florence as unknown as ClimateRecord,
+  "venice": venice as unknown as ClimateRecord,
+  "athens": athens as unknown as ClimateRecord,
+  "budapest": budapest as unknown as ClimateRecord,
   "lisbon": lisbon as unknown as ClimateRecord,
-  "seville": seville as unknown as ClimateRecord,
   "rome": rome as unknown as ClimateRecord,
-  "riviera-maya": riviera_maya as unknown as ClimateRecord,
-  "san-juan": san_juan as unknown as ClimateRecord,
-  "dubai": dubai as unknown as ClimateRecord,
-  "marrakech": marrakech as unknown as ClimateRecord,
-  "cape-town": cape_town as unknown as ClimateRecord,
-  "maldives": maldives as unknown as ClimateRecord,
-  "mexico-city": mexico_city as unknown as ClimateRecord,
+  "copenhagen": copenhagen as unknown as ClimateRecord,
+  "milan": milan as unknown as ClimateRecord,
+  "dublin": dublin as unknown as ClimateRecord,
+  "edinburgh": edinburgh as unknown as ClimateRecord,
+  "munich": munich as unknown as ClimateRecord,
+  "brussels": brussels as unknown as ClimateRecord,
+  "seville": seville as unknown as ClimateRecord,
+  "porto": porto as unknown as ClimateRecord,
+  "krakow": krakow as unknown as ClimateRecord,
+  "dubrovnik": dubrovnik as unknown as ClimateRecord,
+  "nice": nice as unknown as ClimateRecord,
+  "naples": naples as unknown as ClimateRecord,
+  "salzburg": salzburg as unknown as ClimateRecord,
+  "reykjavik": reykjavik as unknown as ClimateRecord,
   "nyc-reference": nyc_reference as unknown as ClimateRecord,
 };
 
