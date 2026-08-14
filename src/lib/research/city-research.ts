@@ -83,12 +83,17 @@ export async function researchCity(
     // Perform web searches for the city
     console.log(`[City Research] Starting research for ${city}, ${country}`);
 
+    // Check if destination is USA (no visa needed for US citizens)
+    const isUSDestination = country.toLowerCase() === 'united states' || country.toLowerCase() === 'usa';
+
     const [hotelSearch, flightSearch, visaSearch, climateSearch] =
       await Promise.all([
-        webSearch(`${city} ${country} hotel prices 4-star 5-star 2026`),
-        webSearch(`flights New York JFK to ${city} ${country} nonstop time`),
-        webSearch(`US citizens visa requirements ${city} ${country}`),
-        webSearch(`${city} ${country} climate weather temperature best time visit`),
+        webSearch(`${city} ${country} hotel prices 4-star 5-star average cost per night`),
+        webSearch(`flights JFK New York to ${city} ${country} nonstop flight time duration hours`),
+        isUSDestination
+          ? Promise.resolve("US citizens do not require a visa to travel to the United States.")
+          : webSearch(`US passport holders visa requirements entry ${city} ${country} 2026`),
+        webSearch(`${city} ${country} weather climate temperature best time to visit season`),
       ]);
 
     const searchContext = `
