@@ -151,10 +151,13 @@ Return ONLY a JSON object (no other text) with these exact fields. IMPORTANT: Ex
       }
     }
 
+    console.log(`[City Research] Claude response (first 500 chars): ${researchText.substring(0, 500)}`);
+
     const jsonMatch = researchText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error(
-        "[City Research] Failed to extract JSON from Claude response"
+        "[City Research] Failed to extract JSON from Claude response. Full text:",
+        researchText
       );
       return null;
     }
@@ -162,12 +165,13 @@ Return ONLY a JSON object (no other text) with these exact fields. IMPORTANT: Ex
     let research: CityResearchResult;
     try {
       research = JSON.parse(jsonMatch[0]) as CityResearchResult;
+      console.log(`[City Research] Parsed JSON:`, JSON.stringify(research, null, 2));
     } catch (parseError) {
       console.error(
         "[City Research] Failed to parse JSON:",
         parseError,
         "Raw:",
-        jsonMatch[0].substring(0, 200)
+        jsonMatch[0].substring(0, 500)
       );
       return null;
     }
