@@ -8,8 +8,12 @@ import {
 } from "@/lib/climate";
 import { holidaysDuring, HOLIDAY_SOURCE, holidayDataAvailable } from "@/lib/holidays";
 import { listPlacesForDestination, listSources } from "@/lib/db/places";
+import { getEventsByCity } from "@/lib/integrations/ticketmaster";
+import { getRestaurantCategories } from "@/lib/integrations/yelp";
 import { HOME } from "@/data/home";
 import { DestinationPlaces } from "@/components/DestinationPlaces";
+import { EventsGrid } from "@/components/EventCard";
+import { RestaurantCategories } from "@/components/RestaurantCard";
 import { DailyComfortChart, HomeDeltaChart, MonthlyClimateChart, SuitabilityStrip } from "@/components/charts";
 import {
   Badge,
@@ -57,6 +61,10 @@ export default async function DestinationPage({
   const placeSources = await listSources(
     places.map((p) => p.sourceId).filter((id): id is number => id !== null),
   );
+
+  // Fetch events and restaurants (cached server-side via ISR)
+  const events = await getEventsByCity(d.name, 6).catch(() => []);
+  const restaurants = await getRestaurantCategories(d.name).catch(() => ({}));
 
   return (
     <>
@@ -330,6 +338,14 @@ export default async function DestinationPage({
             </div>
           </Card>
         </div>
+      </div>
+
+      {/* Events & Restaurants Section */}
+      <div className="mt-12 space-y-12">
+        {events.length > 0 && <EventsGrid events={events} />}
+        {Object.values(restaurants).some((r) => Array.isArray(r) && r.length > 0) && (
+          <RestaurantCategories categories={restaurants} />
+        )}
       </div>
     </>
   );
