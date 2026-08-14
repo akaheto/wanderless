@@ -4,6 +4,7 @@ import {
   hasCitySuggestion,
 } from "@/lib/db/city-suggestions";
 import { checkSubmissionLimit } from "@/lib/rate-limit";
+import { getCurrentUser } from "@/lib/auth";
 
 /**
  * POST /api/cities/suggest
@@ -78,8 +79,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get current user for email notification
+    const user = await getCurrentUser();
+    const userEmail = user?.email;
+
     // Store suggestion in database
-    const suggestion = await submitCitySuggestion(trimmedCity, trimmedCountry);
+    const suggestion = await submitCitySuggestion(trimmedCity, trimmedCountry, userEmail);
 
     if (!suggestion) {
       return NextResponse.json(

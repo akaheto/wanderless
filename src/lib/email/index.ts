@@ -139,3 +139,103 @@ export async function sendAdminNewAccountAlert(email: string, createdAt: string)
     html,
   });
 }
+
+/**
+ * Send user notification when their suggested city is researched and approved
+ */
+export async function sendCityApprovedNotification(
+  userEmail: string,
+  city: string,
+  country: string,
+): Promise<boolean> {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .success { background: #f0fdf4; padding: 15px; border-left: 4px solid #22c55e; border-radius: 4px; margin-bottom: 20px; }
+          .city-info { background: #f9fafb; padding: 15px; border-radius: 4px; margin: 15px 0; }
+          .cta { display: inline-block; background: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="success">
+            <strong>✓ Your city suggestion was approved!</strong>
+          </div>
+          <p>Great news! Your suggestion for <strong>${city}, ${country}</strong> has been researched and is now available in the Wanderless destination catalog.</p>
+          <div class="city-info">
+            <p><strong>What's included:</strong></p>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              <li>Hotel pricing data from verified sources</li>
+              <li>Flight availability and travel times</li>
+              <li>Visa requirements and travel documents</li>
+              <li>Climate data and best times to visit</li>
+            </ul>
+          </div>
+          <p>You can now compare <strong>${city}</strong> with other destinations and use it in your trip planning.</p>
+          <a href="${APP_URL}/destinations" class="cta">View Destination Catalog</a>
+          <p style="margin-top: 30px; font-size: 12px; color: #666; border-top: 1px solid #e5e7eb; padding-top: 15px;">
+            Thank you for helping expand the Wanderless catalog! Have another city in mind? You can submit up to 10 suggestions per day.
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: userEmail,
+    subject: `${city}, ${country} is now in Wanderless!`,
+    html,
+  });
+}
+
+/**
+ * Send user notification when their suggested city is rejected
+ */
+export async function sendCityRejectedNotification(
+  userEmail: string,
+  city: string,
+  country: string,
+  reason: string,
+): Promise<boolean> {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .notice { background: #fef3c7; padding: 15px; border-left: 4px solid #f59e0b; border-radius: 4px; margin-bottom: 20px; }
+          .reason { background: #f9fafb; padding: 15px; border-radius: 4px; margin: 15px 0; font-style: italic; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="notice">
+            <strong>City suggestion status update</strong>
+          </div>
+          <p>Thank you for suggesting <strong>${city}, ${country}</strong> for Wanderless!</p>
+          <p>After review, we've decided not to add it to our catalog at this time.</p>
+          <div class="reason">
+            <strong>Reason:</strong> ${reason}
+          </div>
+          <p>We appreciate your input and encourage you to suggest other destinations you'd like to explore. You can submit up to 10 suggestions per day.</p>
+          <p style="margin-top: 30px; font-size: 12px; color: #666; border-top: 1px solid #e5e7eb; padding-top: 15px;">
+            If you believe this was rejected in error, please reply to this email or contact support@wanderless.app.
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: userEmail,
+    subject: `Update on your ${city} suggestion`,
+    html,
+  });
+}

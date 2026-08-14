@@ -1,20 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-interface CitySuggestion {
-  id?: number;
-  city: string;
-  country: string;
-  status: "pending" | "researching" | "reviewed" | "approved" | "rejected";
-  research_notes?: string;
-  submitted_at: string;
-}
+import { CityCard } from "@/components/CityCard";
+import type { CitySuggestion } from "@/lib/db/city-suggestions";
 
 export default function SuggestionsAdminPage() {
   const [suggestions, setSuggestions] = useState<CitySuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSuggestions();
@@ -50,10 +44,12 @@ export default function SuggestionsAdminPage() {
     }
   };
 
-  const handleReject = async (id: number) => {
+  const handleReject = async (id: number, reason: string) => {
     try {
       const response = await fetch(`/api/admin/suggestions/${id}/reject`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
       });
       if (!response.ok) throw new Error("Failed to reject");
       await fetchSuggestions();
@@ -62,7 +58,17 @@ export default function SuggestionsAdminPage() {
     }
   };
 
-  const pendingSuggestions = suggestions.filter((s) => s.status === "pending");
+  const filteredSuggestions = statusFilter
+    ? suggestions.filter((s) => s.status === statusFilter)
+    : suggestions;
+
+  const statusCounts = {
+    pending: suggestions.filter((s) => s.status === "pending").length,
+    researching: suggestions.filter((s) => s.status === "researching").length,
+    reviewed: suggestions.filter((s) => s.status === "reviewed").length,
+    approved: suggestions.filter((s) => s.status === "approved").length,
+    rejected: suggestions.filter((s) => s.status === "rejected").length,
+  };
 
   return (
     <div className="space-y-8 py-12">
@@ -72,91 +78,82 @@ export default function SuggestionsAdminPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-800">
+        <div className="rounded-lg border border-critical bg-red-50 px-4 py-3 text-critical">
           {error}
         </div>
       )}
 
-      <div className="space-y-4">
-        <div className="rounded-lg border border-line bg-surface-1 p-4">
-          <p className="text-sm font-medium">
-            Pending Review: <span className="text-lg font-bold">{pendingSuggestions.length}</span>
-          </p>
-        </div>
-
-        {isLoading && (
-          <div className="rounded-lg border border-line bg-surface-1 px-6 py-8 text-center text-ink-3">
-            Loading suggestions...
-          </div>
-        )}
-
-        {!isLoading && suggestions.length === 0 && (
-          <div className="rounded-lg border border-line bg-surface-1 px-6 py-8 text-center text-ink-3">
-            No suggestions yet
-          </div>
-        )}
-
-        {!isLoading && suggestions.length > 0 && (
-          <div className="space-y-2">
-            {suggestions.map((suggestion) => (
-              <div
-                key={suggestion.id}
-                className="rounded-lg border border-line bg-surface-1 p-4"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-semibold">
-                      {suggestion.city}, {suggestion.country}
-                    </h3>
-                    <p className="mt-1 text-xs text-ink-4">
-                      Submitted {new Date(suggestion.submitted_at).toLocaleDateString()}
-                    </p>
-                    <div className="mt-2 flex gap-1">
-                      <span
-                        className={`inline-block rounded px-2 py-1 text-xs font-medium ${
-                          suggestion.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {suggestion.status}
-                      </span>
-                    </div>
-                    {suggestion.research_notes && (
-                      <p className="mt-2 text-xs text-ink-3">{suggestion.research_notes}</p>
-                    )}
-                  </div>
-
-                  {suggestion.status === "pending" && (
-                    <div className="ml-4 flex gap-2">
-                      <button
-                        onClick={() => handleApprove(suggestion.id!)}
-                        className="rounded bg-green-100 px-3 py-1 text-xs font-medium text-green-800 hover:bg-green-200"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleReject(suggestion.id!)}
-                        className="rounded bg-red-100 px-3 py-1 text-xs font-medium text-red-800 hover:bg-red-200"
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      {/* Status Filter */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setStatusFilter(null)}
+          className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            statusFilter === null
+              ? 'bg-accent text-white'
+              : 'border border-line bg-surface-1 text-ink hover:bg-surface-2'
+          }`}
+        >
+          All ({suggestions.length})
+        </button>
+        {(['pending', 'researching', 'reviewed', 'approved', 'rejected'] as const).map((status) => (
+          <button
+            key={status}
+            onClick={() => setStatusFilter(status)}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              statusFilter === status
+                ? 'bg-accent text-white'
+                : 'border border-line bg-surface-1 text-ink hover:bg-surface-2'
+            }`}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1)} ({statusCounts[status]})
+          </button>
+        ))}
       </div>
 
+      {/* Suggestions Grid */}
+      {isLoading && (
+        <div className="rounded-lg border border-line bg-surface-1 px-6 py-12 text-center text-ink-3">
+          Loading suggestions...
+        </div>
+      )}
+
+      {!isLoading && suggestions.length === 0 && (
+        <div className="rounded-lg border border-line bg-surface-1 px-6 py-12 text-center text-ink-3">
+          No suggestions yet. Users can suggest cities from the destination catalog.
+        </div>
+      )}
+
+      {!isLoading && filteredSuggestions.length === 0 && statusFilter && (
+        <div className="rounded-lg border border-line bg-surface-1 px-6 py-12 text-center text-ink-3">
+          No {statusFilter} suggestions
+        </div>
+      )}
+
+      {!isLoading && filteredSuggestions.length > 0 && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {filteredSuggestions
+            .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
+            .map((suggestion) => (
+              <CityCard
+                key={suggestion.id}
+                suggestion={suggestion}
+                onApprove={handleApprove}
+                onReject={handleReject}
+              />
+            ))}
+        </div>
+      )}
+
+      {/* Info */}
       <div className="rounded-lg border border-line bg-surface-1 px-4 py-3 text-sm">
-        <p className="font-medium">Next Steps</p>
+        <p className="font-medium">Workflow</p>
         <ul className="mt-2 space-y-1 text-ink-3">
-          <li>• Approved cities will be queued for Claude API research</li>
-          <li>• Research includes real pricing, flights, visa requirements</li>
-          <li>• Researched data will be added to the destination catalog</li>
-          <li>• Users will be notified when their suggestion is approved</li>
+          <li>✓ Users submit cities from the destination catalog (limited to 10/day)</li>
+          <li>✓ Admin approves or rejects with optional reason</li>
+          <li>✓ Approved cities trigger Claude API research</li>
+          <li>✓ Research fetches hotel, flight, visa, and climate data</li>
+          <li>✓ User receives email notification when research completes</li>
+          <li>✓ Researched city is added to the destination catalog</li>
         </ul>
       </div>
     </div>

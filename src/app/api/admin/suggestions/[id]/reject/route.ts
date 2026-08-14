@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateCitySuggestion, getCitySuggestion } from "@/lib/db/city-suggestions";
+import { sendCityRejectedNotification } from "@/lib/email";
 import { requireAdmin } from "@/lib/auth/roles";
 
 /**
@@ -34,7 +35,7 @@ export async function POST(
     }
 
     // Try to get rejection reason from request body
-    const { body } = await request.json().catch(() => ({ body: {} }));
+    const body = await request.json().catch(() => ({}));
     const reason = (body?.reason || "Not a suitable leisure destination") as string;
 
     // Update status to 'rejected'
@@ -52,6 +53,17 @@ export async function POST(
     }
 
     console.log(`[City Suggestion Rejected] ${suggestion.city}, ${suggestion.country}: ${reason}`);
+
+    // Send notification email to the user who suggested the city
+    if (suggestion.user_email) {
+      await sendCityRejectedNotification(
+        suggestion.user_email,
+        suggestion.city,
+        suggestion.country,
+        reason
+      );
+      console.log(`[City Rejected Email] Sent to ${suggestion.user_email}`);
+    }
 
     return NextResponse.json({
       message: "Suggestion rejected",

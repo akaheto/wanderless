@@ -13,6 +13,7 @@ export interface CitySuggestion {
   reviewed_at?: string;
   reviewed_by?: string;
   decision?: string;
+  user_email?: string;
   submitted_at: string;
   created_at: string;
 }
@@ -22,7 +23,8 @@ export interface CitySuggestion {
  */
 export async function submitCitySuggestion(
   city: string,
-  country: string
+  country: string,
+  userEmail?: string
 ): Promise<CitySuggestion | null> {
   const now = new Date().toISOString();
   // Normalize to title case for consistency
@@ -34,16 +36,17 @@ export async function submitCitySuggestion(
     await client.execute({
       sql: `
         INSERT INTO city_suggestions
-        (city, country, status, submitted_at, created_at)
-        VALUES (?, ?, ?, ?, ?)
+        (city, country, status, user_email, submitted_at, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
       `,
-      args: [normalizedCity, normalizedCountry, "pending", now, now],
+      args: [normalizedCity, normalizedCountry, "pending", userEmail || null, now, now],
     });
 
     return {
       city: normalizedCity,
       country: normalizedCountry,
       status: "pending",
+      user_email: userEmail,
       submitted_at: now,
       created_at: now,
     };

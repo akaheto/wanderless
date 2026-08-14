@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateCitySuggestion, getCitySuggestion } from "@/lib/db/city-suggestions";
 import { researchCity } from "@/lib/research/city-research";
+import { sendCityApprovedNotification } from "@/lib/email";
 import { requireAdmin } from "@/lib/auth/roles";
 
 /**
@@ -79,6 +80,16 @@ export async function POST(
     }
 
     console.log(`[City Research Complete] ${suggestion.city}, ${suggestion.country}`);
+
+    // Send notification email to the user who suggested the city
+    if (suggestion.user_email) {
+      await sendCityApprovedNotification(
+        suggestion.user_email,
+        suggestion.city,
+        suggestion.country
+      );
+      console.log(`[City Approved Email] Sent to ${suggestion.user_email}`);
+    }
 
     return NextResponse.json({
       message: "City researched successfully",

@@ -531,4 +531,12 @@ export const MIGRATIONS: { name: string; statements: string[] }[] = [
       `CREATE INDEX IF NOT EXISTS idx_suggestions_submitted ON city_suggestions (submitted_at)`,
     ],
   },
+  {
+    name: "0007_city_suggestions_user_email",
+    statements: [
+      // Add user_email to city_suggestions for notifications
+      `ALTER TABLE city_suggestions ADD COLUMN user_email TEXT`,
+      `CREATE INDEX IF NOT EXISTS idx_suggestions_email ON city_suggestions (user_email)`,
+    ],
+  },
 ];
