@@ -19,7 +19,52 @@ export interface CityResearchResult {
 }
 
 /**
- * Research a city using Claude API with WebSearch.
+ * Perform a web search using Tavily API
+ */
+async function webSearch(query: string): Promise<string> {
+  const tavilyApiKey = process.env.TAVILY_API_KEY;
+  if (!tavilyApiKey) {
+    console.warn("[Web Search] TAVILY_API_KEY not configured");
+    return "";
+  }
+
+  try {
+    const response = await fetch("https://api.tavily.com/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        api_key: tavilyApiKey,
+        query,
+        max_results: 5,
+        include_answer: true,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`[Web Search] API error: ${response.status}`);
+      return "";
+    }
+
+    const data = (await response.json()) as {
+      answer?: string;
+      results?: Array<{ content?: string }>;
+    };
+
+    // Combine answer and top results
+    let searchResults = data.answer || "";
+    if (data.results) {
+      searchResults += "\n" + data.results.map((r) => r.content).join("\n");
+    }
+
+    return searchResults;
+  } catch (error) {
+    console.error("[Web Search] Error:", error);
+    return "";
+  }
+}
+
+/**
+ * Research a city using Claude API + Tavily web search.
  * Extracts real hotel pricing, flight routes, visa requirements, and climate data.
  *
  * @param city - City name (e.g., "Barcelona")
@@ -35,72 +80,56 @@ export async function researchCity(
   });
 
   try {
-    const prompt = `Research the city of ${city}, ${country} as a leisure travel destination. Focus on REAL, VERIFIED data only - no estimates or made-up information.
+    // Perform web searches for the city
+    console.log(`[City Research] Starting research for ${city}, ${country}`);
 
-Search for and extract:
+    const [hotelSearch, flightSearch, visaSearch, climateSearch] =
+      await Promise.all([
+        webSearch(`${city} ${country} hotel prices 4-star 5-star 2026`),
+        webSearch(`flights New York JFK to ${city} ${country} nonstop time`),
+        webSearch(`US citizens visa requirements ${city} ${country}`),
+        webSearch(`${city} ${country} climate weather temperature best time visit`),
+      ]);
 
-1. HOTEL PRICING (shoulder season, May 15-18, 2026):
-   - Find current rates for a well-located 4-star hotel (USD per night)
-   - Find current rates for a luxury 5-star hotel (USD per night)
-   - Use Booking.com, Trip.com, or Expedia search results
-   - Report the SOURCE website
+    const searchContext = `
+HOTEL SEARCH RESULTS:
+${hotelSearch}
 
-2. FLIGHT DATA from New York (JFK):
-   - Is there a nonstop flight? (Yes/No)
-   - What's the typical total flight time including connections?
-   - Which airlines operate this route?
-   - Report the SOURCE (airline website or flight database)
+FLIGHT SEARCH RESULTS:
+${flightSearch}
 
-3. VISA REQUIREMENTS:
-   - What do US citizens need to enter? (Visa-free, e-visa, visa on arrival, visa required)
-   - Duration of stay allowed
-   - Source: US State Department travel.state.gov
+VISA SEARCH RESULTS:
+${visaSearch}
 
-4. CLIMATE:
-   - What is the warmest month? (temperature range)
-   - What is the coolest month? (temperature range)
-   - Rainy season or dry season pattern
-   - Best months to visit (2-3 month range)
-   - Source: Climate database or weather service
+CLIMATE SEARCH RESULTS:
+${climateSearch}
+`;
 
-Return your research as a JSON object with these exact fields:
+    const prompt = `Based on the web search results below, extract structured data about ${city}, ${country} as a travel destination.
+
+${searchContext}
+
+Return ONLY a JSON object (no other text) with these exact fields. Use the search results above as your source. If a field cannot be found, set it to null:
+
 {
   "hotelData": {
-    "fourStarUSD": <number>,
-    "fiveStarUSD": <number>,
-    "source": "<website>"
+    "fourStarUSD": <number or null>,
+    "fiveStarUSD": <number or null>,
+    "source": "<website or null>"
   },
   "flightData": {
-    "nonstop": <boolean>,
-    "typicalHours": <number>,
-    "source": "<airline or database>"
+    "nonstop": <boolean or null>,
+    "typicalHours": <number or null>,
+    "source": "<source or null>"
   },
-  "visaInfo": "<US citizens: visa-free/e-visa/visa required + duration>",
-  "climateData": "<warmest month (°F), coolest month (°F), rain pattern, best months>",
-  "summary": "<1-line description of ${city} as a leisure destination>"
-}
-
-CRITICAL: Only include data from verifiable sources. Do not guess or estimate. If you cannot find reliable data for any field, mark it as null.`;
+  "visaInfo": "<visa requirement summary or null>",
+  "climateData": "<climate summary or null>",
+  "summary": "<1-line description of ${city}>"
+}`;
 
     const message = await client.messages.create({
       model: "claude-opus-4-1-20250805",
       max_tokens: 1024,
-      tools: [
-        {
-          name: "web_search",
-          description: "Search the web for real-time information",
-          input_schema: {
-            type: "object" as const,
-            properties: {
-              query: {
-                type: "string",
-                description: "Search query",
-              },
-            },
-            required: ["query"],
-          },
-        },
-      ],
       messages: [
         {
           role: "user",
@@ -109,7 +138,7 @@ CRITICAL: Only include data from verifiable sources. Do not guess or estimate. I
       ],
     });
 
-    // Extract the research result from Claude's response
+    // Extract JSON from response
     let researchText = "";
     for (const block of message.content) {
       if (block.type === "text") {
@@ -117,7 +146,6 @@ CRITICAL: Only include data from verifiable sources. Do not guess or estimate. I
       }
     }
 
-    // Parse JSON from the response
     const jsonMatch = researchText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error(
