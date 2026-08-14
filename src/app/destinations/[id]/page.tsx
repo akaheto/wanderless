@@ -11,11 +11,13 @@ import { listPlacesForDestination, listSources } from "@/lib/db/places";
 import { getEventsByCity } from "@/lib/integrations/ticketmaster";
 import { getRestaurantCategories } from "@/lib/integrations/yelp";
 import { getDemographics } from "@/lib/integrations/demographics";
+import { getTravelAdvisory } from "@/lib/integrations/travel-warnings";
 import { HOME } from "@/data/home";
 import { DestinationPlaces } from "@/components/DestinationPlaces";
 import { EventsGrid } from "@/components/EventCard";
 import { RestaurantCategories } from "@/components/RestaurantCard";
 import { DemographicsPanel } from "@/components/DemographicsPanel";
+import { TravelAdvisoryCard } from "@/components/TravelAdvisoryCard";
 import { DailyComfortChart, HomeDeltaChart, MonthlyClimateChart, SuitabilityStrip } from "@/components/charts";
 import {
   Badge,
@@ -64,10 +66,11 @@ export default async function DestinationPage({
     places.map((p) => p.sourceId).filter((id): id is number => id !== null),
   );
 
-  // Fetch events, restaurants, and demographics (cached server-side via ISR)
+  // Fetch events, restaurants, demographics, and travel advisory (cached server-side via ISR)
   const events = await getEventsByCity(d.name, 6).catch(() => []);
   const restaurants = await getRestaurantCategories(d.name).catch(() => ({}));
   const demographics = getDemographics(d.name);
+  const travelAdvisory = getTravelAdvisory(d.name);
 
   return (
     <>
@@ -118,6 +121,8 @@ export default async function DestinationPage({
           the wide tables inside push the column past the page. */}
       <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr] lg:items-start">
         <div className="min-w-0 space-y-6">
+          {travelAdvisory && <TravelAdvisoryCard advisory={travelAdvisory} />}
+
           <Card>
             <CardHeader
               title="Climate through the year"
