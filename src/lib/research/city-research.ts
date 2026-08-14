@@ -110,36 +110,35 @@ CLIMATE SEARCH RESULTS:
 ${climateSearch}
 `;
 
-    const prompt = `You are extracting travel data from web search results. Your job is to find and extract ACTUAL NUMBERS and facts, not estimate or guess.
+    const prompt = `TASK: Extract travel data from search results for ${city}, ${country}. Be aggressive - extract ANY numbers and facts you find.
 
-WEB SEARCH DATA FOR ${city.toUpperCase()}, ${country.toUpperCase()}:
+WEB SEARCH DATA:
 ${searchContext}
 
-EXTRACTION RULES:
-1. Hotel prices: Find and extract actual USD dollar amounts (look for "$" symbols and numbers)
-   - If you see "$237" and "$491", extract 237 and 491
-   - Do NOT estimate - only use numbers from the search results
-2. Flight duration: Find flight time in hours (look for "hours", "minutes", "4 hours 36 minutes")
-   - Convert to decimal hours if needed (4h 36m = 4.6 hours, round to 5)
-3. Nonstop flights: Look for "nonstop" or "direct" in flight results
-4. Visa info: Find visa requirement summary for US citizens traveling to this country
-5. Climate: Find temperature ranges and best seasons to visit
+INSTRUCTIONS (FOLLOW EXACTLY):
+1. For hotel prices: Find ANY dollar amounts mentioned. Examples: "4-star $237/night", "5-star rooms average $491" → extract 237 and 491
+2. For flights: Find ANY time duration mentioned. Examples: "4 hours 36 minutes", "nonstop flights available" → extract as number and boolean
+3. For visa: Quote the visa requirement text you find
+4. For climate: Quote the weather/season text you find
+5. For summary: Write one sentence using facts from the results
 
-RETURN ONLY THIS JSON (no markdown, no explanation):
+CRITICAL: Do NOT return null unless data is truly absent. Return whatever numbers/text you can find, even if partial or uncertain.
+
+OUTPUT (JSON ONLY, no markdown):
 {
   "hotelData": {
-    "fourStarUSD": <number from search results or null>,
-    "fiveStarUSD": <number from search results or null>,
-    "source": "<website or null>"
+    "fourStarUSD": 0,
+    "fiveStarUSD": 0,
+    "source": ""
   },
   "flightData": {
-    "nonstop": <true/false/null based on search results>,
-    "typicalHours": <number from search results or null>,
-    "source": "<airline or null>"
+    "nonstop": false,
+    "typicalHours": 0,
+    "source": ""
   },
-  "visaInfo": "<exact visa requirement summary or null>",
-  "climateData": "<exact climate/temperature summary or null>",
-  "summary": "<1-sentence description>"
+  "visaInfo": "",
+  "climateData": "",
+  "summary": ""
 }`;
 
     const message = await client.messages.create({
@@ -187,8 +186,13 @@ RETURN ONLY THIS JSON (no markdown, no explanation):
     }
 
     // Validate that we have at least some real data (at least hotel OR flight info)
-    const hasHotelData = research.hotelData?.fourStarUSD || research.hotelData?.fiveStarUSD;
-    const hasFlightData = research.flightData?.typicalHours || research.flightData?.nonstop;
+    // Check if we have numeric values (not null/undefined), even if they're 0
+    const hasHotelData =
+      (typeof research.hotelData?.fourStarUSD === 'number' && research.hotelData.fourStarUSD > 0) ||
+      (typeof research.hotelData?.fiveStarUSD === 'number' && research.hotelData.fiveStarUSD > 0);
+    const hasFlightData =
+      (typeof research.flightData?.typicalHours === 'number' && research.flightData.typicalHours > 0) ||
+      research.flightData?.nonstop === true;
     const hasSummary = research.summary && research.summary.length > 0;
 
     if (!hasSummary || (!hasHotelData && !hasFlightData)) {
