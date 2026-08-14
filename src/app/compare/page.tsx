@@ -5,7 +5,7 @@ import { ComparisonView } from "@/components/ComparisonView";
 import { PreferenceForm } from "@/components/PreferenceForm";
 import { Card, CardHeader, PageHeader } from "@/components/ui";
 
-export const metadata = { title: "Compare destinations · Travel Intelligence Hub" };
+export const metadata = { title: "Compare destinations · Wanderless" };
 
 export default async function ComparePage({
   searchParams,

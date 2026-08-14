@@ -1,5 +1,57 @@
 # Changelog
 
+## 0.11.0 — 2026-08-13
+
+**Rebrand: Travel Intelligence Hub → Wanderless**
+
+Complete visual identity redesign with new brand name, color palette, typography, and logo system.
+
+### Added
+
+**Phase 1 — Global Naming**
+- Renamed "Travel Intelligence Hub" to "Wanderless" across app, docs, emails, internal identifiers
+- Updated localStorage key: `wanderless-theme`
+- Updated session cookie: `wanderless-session`
+- Updated service worker cache: `wanderless-shell-v1`
+- Updated package.json: `name: "wanderless"`
+
+**Phase 2 — Design System (Color & Typography)**
+- New Wanderless color palette (Tailwind v4 CSS custom properties):
+  - Surfaces: warm paper tones (light: `#faf8f5`, dark: `#1a1815`)
+  - Primary accent: Wanderless Blue `#1e40af` (light), `#60a5fa` (dark)
+  - Secondary accent: clay `#a86b4a` (light), `#d9876f` (dark)
+  - Status colors: refined for new palette
+  - Chart colors: regenerated categorical & sequential palettes
+- Added Fraunces display font via `next/font/google` for distinctive headings
+- Converted 14+ components from hardcoded Tailwind colors to theme tokens (fixes dark-mode toggle)
+- Updated both `:root` light values and dark-mode blocks (`@media` + `[data-theme="dark"]`)
+
+**Phase 3 — Logo & Favicon**
+- Logo component (`src/components/Logo.tsx`): SVG wordmark with size variants (sm/md/lg)
+- LogoMark component: stylized "W" monogram for favicon/small contexts
+- SVG favicon (`src/app/icon.svg`): Next.js auto-discovers and serves as favicon
+- Updated RootLayoutClient to use Logo component instead of hardcoded text
+
+**Phase 4 — Hero Patterns**
+- RoutePattern component: curved path lines with waypoint markers (5% opacity)
+- MapGridPattern component: subtle grid with intersection dots (4% opacity)
+- Applied RoutePattern to login page as background watermark
+- Pattern components use theme tokens so they adapt to light/dark mode automatically
+
+### Changed
+
+- All page metadata titles: appended " · Wanderless" instead of " · Travel Intelligence Hub"
+- Dashboard title: "Wanderless" (homepage)
+- Login/signup pages: theme colors + pattern backgrounds
+- All error/warning components: mapped to semantic status colors
+
+### Technical
+
+- No database migrations required
+- All changes backward-compatible (session cookie rename invalidates one login, expected)
+- Build output: 15 routes, static favicon, full production build succeeds
+- Type checking: 100% pass on all changes
+
 ## 0.10.0 — 2026-08-12
 
 Release 10: Offline travel companion. Complete four-phase offline-first implementation with Service Worker app shell, IndexedDB trip/destination caching, destination downloads, and sync queue for offline changes.

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUpAction } from "@/app/actions";
 import { Button } from "@/components/ui";
+import { MapGridPattern } from "@/components/patterns/MapGridPattern";
 
 export default function SignupPage() {
   const router = useRouter();

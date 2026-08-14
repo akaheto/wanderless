@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   return (
     <>
       <PageHeader
-        title="Travel Intelligence Hub"
+        title="Wanderless"
         lede="One place to decide where to go, compare destinations against real dates, and keep everything a trip needs in one structured record."
         actions={
           <>

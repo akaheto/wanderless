@@ -200,7 +200,7 @@ export function SharingPanel({ shares, tripId, tripName, owner, currentUser, col
                   </select>
                 </label>
                 {inviteError && (
-                  <div className="rounded bg-red-50 px-3 py-2 text-[12px] text-red-900">
+                  <div className="rounded bg-critical/10 px-3 py-2 text-[12px] text-red-900">
                     {inviteError}
                   </div>
                 )}

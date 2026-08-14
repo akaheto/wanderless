@@ -118,7 +118,7 @@ export function PlaceSearchForm({
         </form>
 
         {error && (
-          <div className="bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="bg-critical/10 px-4 py-3 text-sm text-red-700">
             Error: {error}
           </div>
         )}

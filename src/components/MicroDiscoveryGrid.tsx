@@ -93,7 +93,7 @@ export function MicroDiscoveryGrid({
             <div className="text-xs text-ink-3">
               Booked: {budgetTotals.currency} {budgetTotals.booked.amount / 100}
             </div>
-            <div className="text-xs text-green-600 pt-1">
+            <div className="text-xs text-good pt-1">
               Save up to {budgetTotals.currency} {budgetTotals.recoverable.amount / 100}
             </div>
           </div>
@@ -108,7 +108,7 @@ export function MicroDiscoveryGrid({
           <div className="space-y-1">
             {events.slice(0, 3).map((event) => (
               <div key={event.id} className="text-xs">
-                <span className={event.kind === "constraint" ? "text-red-600" : "text-green-600"}>
+                <span className={event.kind === "constraint" ? "text-critical" : "text-good"}>
                   {event.kind === "constraint" ? "🚫" : "✨"}
                 </span>
                 <span className="ml-1">{event.label}</span>

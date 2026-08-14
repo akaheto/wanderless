@@ -2,7 +2,7 @@
 
 - **Status**: planned
 - **Release**: TBD (post-Priority 2)
-- **Goal**: Transform from sterile "Travel Intelligence Hub" to a memorable, visually engaging brand with personality and thematic depth
+- **Goal**: Transform from sterile "Wanderless" to a memorable, visually engaging brand with personality and thematic depth
 - **Why now**: Current name and appearance don't reflect the product's power or delight users. Rebranding increases memorability, engagement, and positions app as premium travel planning tool.
 
 ## Scope

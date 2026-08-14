@@ -6,7 +6,7 @@
 - **Scope**: design | strategy
 
 ## User story
-As a founder, I want to rebrand from "Travel Intelligence Hub" to something memorable and distinctive that reflects the product's power and appeal to travelers.
+As a founder, I want to rebrand from "Wanderless" to something memorable and distinctive that reflects the product's power and appeal to travelers.
 
 ## Acceptance criteria
 

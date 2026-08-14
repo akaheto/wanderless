@@ -12,7 +12,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Check for session cookie
-  const sessionToken = request.cookies.get('tih-session')?.value;
+  const sessionToken = request.cookies.get('wanderless-session')?.value;
 
   if (!sessionToken) {
     // Redirect to login with return URL

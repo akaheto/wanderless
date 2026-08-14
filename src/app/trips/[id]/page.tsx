@@ -5,9 +5,8 @@ import { listStops } from "@/lib/db/stops";
 import { listPlacesForTrip, listSources } from "@/lib/db/places";
 import { getCurrentUser } from "@/lib/auth";
 import { getUserById } from "@/lib/db/users";
-import { listFlightSearches, listHotelSearches } from "@/lib/db/searches";
 import { listEvents } from "@/lib/db/events";
-import { listFlightBookings, listHotelBookings } from "@/lib/db/bookings";
+import { listFlightSearches, listHotelSearches } from "@/lib/db/searches";
 import { listBudgetItems } from "@/lib/db/budget";
 import { listSharesForTrip, listCollaborators, listInvitesForTrip } from "@/lib/db/users";
 import { DESTINATIONS, getDestination, destinationsByRegion } from "@/data/destinations";
@@ -48,10 +47,9 @@ import { ForecastPanel } from "@/components/ForecastPanel";
 import { FlightSearchesPanel } from "@/components/FlightSearchesPanel";
 import { FlightSearchForm } from "@/components/FlightSearchForm";
 import { HotelSearchForm } from "@/components/HotelSearchForm";
-import { FlightBookingsPanel } from "@/components/FlightBookingsPanel";
-import { HotelBookingsPanel } from "@/components/HotelBookingsPanel";
 import { HotelSearchesPanel } from "@/components/HotelSearchesPanel";
-import { SearchComparisonPanel } from "@/components/SearchComparisonPanel";
+import { ManualFlightBookingForm } from "@/components/ManualFlightBookingForm";
+import { ManualHotelBookingForm } from "@/components/ManualHotelBookingForm";
 import { TripBudgetPanel } from "@/components/TripBudgetPanel";
 import { EventsPanel } from "@/components/EventsPanel";
 import { SharingPanel } from "@/components/SharingPanel";
@@ -68,7 +66,7 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
   const trip = Number.isFinite(id) ? await getTrip(id) : null;
   if (!trip) notFound();
 
-  const [candidates, links, preferences, stops, flightSearches, hotelSearches, events, flightBookings, hotelBookings, budgetItems, shares, owner, collaborators, invites, exchangeRates] =
+  const [candidates, links, preferences, stops, flightSearches, hotelSearches, events, budgetItems, shares, owner, collaborators, invites, exchangeRates] =
     await Promise.all([
       listCandidates(trip.id),
       listLinks(trip.id),
@@ -77,8 +75,6 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
       listFlightSearches(trip.id),
       listHotelSearches(trip.id),
       listEvents(trip.id),
-      listFlightBookings(trip.id),
-      listHotelBookings(trip.id),
       listBudgetItems(trip.id),
       listSharesForTrip(trip.id),
       getUserById(trip.ownerId),
@@ -254,65 +250,19 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
             />
           )}
 
+          <ManualFlightBookingForm tripId={trip.id} />
+          <ManualHotelBookingForm tripId={trip.id} selectedDestinationId={selected?.destinationId} />
+
           {flightSearches.length > 0 && <FlightSearchesPanel searches={flightSearches} tripId={trip.id} />}
           {hotelSearches.length > 0 && <HotelSearchesPanel searches={hotelSearches} tripId={trip.id} />}
 
           <EventsPanel events={events} tripId={trip.id} trip={trip} />
 
-          {(() => {
-            // Convert bookings and budget items to the money/budget format
-            const budgetForCalc = [
-              // Flights as line items
-              ...flightBookings.map((flight) => ({
-                id: flight.id,
-                tripId: trip.id,
-                category: "flights" as const,
-                label: `${flight.airline} ${flight.flightNumber}`,
-                estimated: null,
-                booked: flight.cost,
-                refundable: flight.status !== "confirmed",
-                refundableUntil: null,
-                dueOn: null,
-                paid: false,
-              })),
-              // Hotels as line items
-              ...hotelBookings.map((hotel) => ({
-                id: hotel.id,
-                tripId: trip.id,
-                category: "lodging" as const,
-                label: hotel.name || "Hotel",
-                estimated: null,
-                booked: hotel.nightly
-                  ? {
-                      amount: (hotel.nightly.amount + (hotel.taxes?.amount || 0) + (hotel.resortFee?.amount || 0)) *
-                        (hotel.checkIn && hotel.checkOut
-                          ? Math.ceil((new Date(hotel.checkOut).getTime() - new Date(hotel.checkIn).getTime()) / (1000 * 60 * 60 * 24))
-                          : 0),
-                      currency: hotel.nightly.currency,
-                    }
-                  : null,
-                refundable: hotel.refundable,
-                refundableUntil: hotel.cancelBy,
-                dueOn: null,
-                paid: false,
-              })),
-              // Budget items - cast to the money/budget type (structurally compatible)
-              ...(budgetItems as BudgetItemType[]),
-            ];
-
-            return (
-              <TripBudgetPanel
-                totals={summariseBudget(budgetForCalc, trip.currency, exchangeRates)}
-                byCategory={byCategory(budgetForCalc, trip.currency, exchangeRates)}
-                upcomingPayments={upcomingPayments(budgetForCalc)}
-              />
-            );
-          })()}
-
-
-          <FlightBookingsPanel tripId={trip.id} bookings={flightBookings} />
-
-          <HotelBookingsPanel tripId={trip.id} bookings={hotelBookings} />
+          <TripBudgetPanel
+            totals={summariseBudget(budgetItems as BudgetItemType[], trip.currency, exchangeRates)}
+            byCategory={byCategory(budgetItems as BudgetItemType[], trip.currency, exchangeRates)}
+            upcomingPayments={upcomingPayments(budgetItems as BudgetItemType[])}
+          />
           {selected && hasDates && getDestination(selected.destinationId) && (
             <FlightSearchForm
               tripId={trip.id}
@@ -336,15 +286,6 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
 
           <SharingPanel shares={shares} tripId={trip.id} tripName={trip.name} owner={owner} currentUser={currentUser} collaborators={collaborators} invites={invites} />
 
-          {flightSearches.length > 0 &&
-            flightSearches[0].result.itineraries.length > 0 &&
-            selected &&
-            selectedScore && (
-              <SearchComparisonPanel
-                itinerary={flightSearches[0].result.itineraries[0]}
-                estimate={selectedScore.route.route}
-              />
-            )}
 
           <PlacesPanel
             tripId={trip.id}

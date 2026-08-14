@@ -74,7 +74,7 @@ export async function sendVerificationEmail(email: string, verificationToken: st
           <div class="header">
             <h1>Verify your email</h1>
           </div>
-          <p>Welcome to Travel Intelligence Hub! Click the link below to verify your email address and complete your registration.</p>
+          <p>Welcome to Wanderless! Click the link below to verify your email address and complete your registration.</p>
           <p>
             <a href="${verificationUrl}" class="button">Verify Email</a>
           </p>
@@ -90,7 +90,7 @@ export async function sendVerificationEmail(email: string, verificationToken: st
 
   return sendEmail({
     to: email,
-    subject: 'Verify your Travel Intelligence Hub account',
+    subject: 'Verify your Wanderless account',
     html,
   });
 }

@@ -34,14 +34,14 @@ export function SeasonalGateBanner({
   const gatePercent = Math.round(gate * 100);
 
   return (
-    <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-4">
+    <div className="rounded-lg bg-critical/10 dark:bg-critical/10 border-l-4 border-red-500 p-4 mb-4">
       <div className="flex gap-3">
         <div className="text-2xl">⚠️</div>
         <div className="flex-1">
           <div className="font-semibold text-red-900 dark:text-red-200">
             Poor suitability in {monthName}
           </div>
-          <div className="text-sm text-red-800 dark:text-red-300 mt-1">
+          <div className="text-sm text-critical mt-1">
             {destinationName} rates only {currentRating.toFixed(1)}/5 in {monthName}. The seasonal
             gate reduces your score by {100 - gatePercent}%. Consider different dates.
           </div>

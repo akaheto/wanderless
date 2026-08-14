@@ -5,7 +5,7 @@ import { Badge, Card, CardHeader, PageHeader, TierMark } from "@/components/ui";
 import manifest from "@/data/generated/manifest.json";
 import holidays from "@/data/generated/holidays.json";
 
-export const metadata = { title: "Data & sources · Travel Intelligence Hub" };
+export const metadata = { title: "Data & sources · Wanderless" };
 
 /**
  * Provenance page.

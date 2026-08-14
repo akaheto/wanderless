@@ -1,5 +1,5 @@
 /**
- * Core domain types for the Travel Intelligence Hub.
+ * Core domain types for the Wanderless.
  *
  * Three tiers of information are kept deliberately separate (Phase 0 principle):
  *

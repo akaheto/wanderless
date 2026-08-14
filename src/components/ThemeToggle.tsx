@@ -27,7 +27,7 @@ function subscribe(listener: () => void): () => void {
 }
 
 function getSnapshot(): Theme {
-  const stored = localStorage.getItem("tih-theme");
+  const stored = localStorage.getItem("wanderless-theme");
   return stored === "light" || stored === "dark" ? stored : "system";
 }
 
@@ -38,10 +38,10 @@ export function ThemeToggle() {
 
   function apply(next: Theme) {
     if (next === "system") {
-      localStorage.removeItem("tih-theme");
+      localStorage.removeItem("wanderless-theme");
       document.documentElement.removeAttribute("data-theme");
     } else {
-      localStorage.setItem("tih-theme", next);
+      localStorage.setItem("wanderless-theme", next);
       document.documentElement.setAttribute("data-theme", next);
     }
     notify();

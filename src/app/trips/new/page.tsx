@@ -2,7 +2,7 @@ import { createTripAction } from "@/app/actions";
 import { TripForm } from "@/components/TripForm";
 import { PageHeader } from "@/components/ui";
 
-export const metadata = { title: "New trip · Travel Intelligence Hub" };
+export const metadata = { title: "New trip · Wanderless" };
 
 export default function NewTripPage() {
   return (

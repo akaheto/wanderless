@@ -1201,7 +1201,7 @@ ${inviteUrl}
 This link expires in 7 days.
 
 Best,
-Travel Intelligence Hub`
+Wanderless`
     );
 
     revalidatePath(`/trips/${tripId}`);

@@ -20,17 +20,17 @@ const CATEGORY_EMOJI: Record<string, string> = {
 };
 
 const getScoreColor = (score: number): string => {
-  if (score >= 75) return "text-green-600";
+  if (score >= 75) return "text-good";
   if (score >= 50) return "text-amber-600";
   if (score >= 25) return "text-orange-600";
-  return "text-red-600";
+  return "text-critical";
 };
 
 const getScoreBgColor = (score: number): string => {
   if (score >= 75) return "bg-green-50 dark:bg-green-900/20";
   if (score >= 50) return "bg-amber-50 dark:bg-amber-900/20";
   if (score >= 25) return "bg-orange-50 dark:bg-orange-900/20";
-  return "bg-red-50 dark:bg-red-900/20";
+  return "bg-critical/10 dark:bg-critical/10";
 };
 
 export function FactorCard({

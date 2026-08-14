@@ -306,7 +306,7 @@ as `STORY-<slug>.md`.
 
 - **Status**: planned
 - **Release**: TBD (post-Compliance)
-- **Goal**: Transform from sterile "Travel Intelligence Hub" to a memorable, visually engaging brand with travel-themed aesthetic and distinctive personality
+- **Goal**: Transform from sterile "Wanderless" to a memorable, visually engaging brand with travel-themed aesthetic and distinctive personality
 - **Why now**: Current branding doesn't reflect the product's power or appeal. A cohesive visual identity increases memorability, user engagement, and positions app as premium travel planning tool
 - **Scope**:
   - **Phase 1**: Brand naming strategy (20+ candidates → 1 winner)

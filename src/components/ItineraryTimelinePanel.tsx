@@ -144,7 +144,7 @@ export function ItineraryTimelinePanel({
                     type="button"
                     variant="ghost"
                     onClick={() => onDelete?.(stop.id)}
-                    className="text-xs px-2 py-1 text-red-600 hover:text-red-700"
+                    className="text-xs px-2 py-1 text-critical hover:text-red-700"
                   >
                     🗑️ Delete
                   </Button>

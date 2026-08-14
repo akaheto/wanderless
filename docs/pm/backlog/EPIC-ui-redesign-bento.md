@@ -18,7 +18,7 @@
 
 ## Problem
 
-The current Travel Intelligence Hub UI is functional and information-dense, but visually sterile.
+The current Wanderless UI is functional and information-dense, but visually sterile.
 It prioritizes data presentation over experience. Users researching destinations and building
 itineraries should feel the joy and adventure of travel, not the anxiety of a tax form.
 

@@ -25,7 +25,7 @@ export function PageHeader({
       )}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-[26px] leading-tight font-semibold tracking-tight text-balance">
+          <h1 className="font-display text-[26px] leading-tight font-semibold tracking-tight text-balance">
             {title}
           </h1>
           {lede && <p className="mt-1.5 max-w-[62ch] text-[14px] text-ink-2">{lede}</p>}

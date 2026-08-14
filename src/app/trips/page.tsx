@@ -4,7 +4,7 @@ import { TripCard } from "@/components/TripCard";
 import { ButtonLink, Empty, PageHeader } from "@/components/ui";
 import { daysUntil } from "@/lib/dates";
 
-export const metadata = { title: "Trips · Travel Intelligence Hub" };
+export const metadata = { title: "Trips · Wanderless" };
 
 export default async function TripsPage({
   searchParams,

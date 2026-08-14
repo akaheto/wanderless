@@ -17,7 +17,7 @@ export function OfflineBanner() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-yellow-600 rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-yellow-900">
+            <span className="text-sm font-medium text-warning">
               {isSyncing ? 'Syncing changes...' : 'You are offline'}
               {queuedItems.length > 0 && ` (${queuedItems.length} pending)`}
             </span>
@@ -25,7 +25,7 @@ export function OfflineBanner() {
           {!isSyncing && queuedItems.length > 0 && (
             <button
               onClick={syncNow}
-              className="text-sm font-medium text-yellow-900 hover:text-yellow-800 underline"
+              className="text-sm font-medium text-warning hover:text-yellow-800 underline"
             >
               Sync Now
             </button>

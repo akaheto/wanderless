@@ -4,7 +4,7 @@
 
 ## What is Offline Mode?
 
-Travel Intelligence Hub can now work without internet! When you're traveling and connectivity is unreliable or expensive, you can use cached trip data, browse destination guides, and even make edits offline. Everything syncs automatically when you reconnect.
+Wanderless can now work without internet! When you're traveling and connectivity is unreliable or expensive, you can use cached trip data, browse destination guides, and even make edits offline. Everything syncs automatically when you reconnect.
 
 ## Getting Started
 

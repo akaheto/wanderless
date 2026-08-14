@@ -80,7 +80,7 @@ export function HotelSearchForm({
 
       <form onSubmit={handleSubmit} className="space-y-4 px-4 py-4">
         {error && (
-          <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-300">
+          <div className="rounded-md bg-critical/10 p-3 text-sm text-red-800 dark:bg-critical/10 dark:text-critical">
             {error}
           </div>
         )}

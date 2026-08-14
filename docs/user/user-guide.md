@@ -1,6 +1,6 @@
 # User guide
 
-How to use the Travel Intelligence Hub.
+How to use the Wanderless.
 
 ## The short version
 

@@ -9,7 +9,7 @@ import { sendVerificationEmail, sendAdminNewAccountAlert } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
 import type { Row } from "@libsql/client";
 
-const SESSION_COOKIE_NAME = "tih-session";
+const SESSION_COOKIE_NAME = "wanderless-session";
 const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
 
 interface Session {

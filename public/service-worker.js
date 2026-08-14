@@ -1,5 +1,5 @@
 const CACHE_VERSION = 'v1';
-const CACHE_NAME = `tih-shell-${CACHE_VERSION}`;
+const CACHE_NAME = `wanderless-shell-${CACHE_VERSION}`;
 
 self.addEventListener('install', () => {
   self.skipWaiting();

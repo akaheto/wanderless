@@ -1,4 +1,4 @@
-# Travel Intelligence Hub
+# Wanderless
 
 A private, single-user trip-planning workspace. It answers the first two questions of the
 product vision:

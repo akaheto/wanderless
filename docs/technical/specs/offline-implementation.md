@@ -6,7 +6,7 @@
 
 ## Overview
 
-Release 10 implements a complete offline-first architecture for the Travel Intelligence Hub, enabling users to access trip data, browse destinations, and make offline edits while traveling without reliable internet connectivity.
+Release 10 implements a complete offline-first architecture for the Wanderless, enabling users to access trip data, browse destinations, and make offline edits while traveling without reliable internet connectivity.
 
 ## Architecture
 

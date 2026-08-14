@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signInAction, resendVerificationAction } from "@/app/actions";
 import { Button } from "@/components/ui";
+import { RoutePattern } from "@/components/patterns/RoutePattern";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -69,7 +70,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="mx-auto max-w-sm space-y-6 py-12">
+    <div className="relative">
+      <RoutePattern />
+      <div className="relative mx-auto max-w-sm space-y-6 py-12">
       <div>
         <h1 className="text-2xl font-bold">Sign in</h1>
         <p className="mt-2 text-sm text-ink-3">
@@ -81,21 +84,21 @@ export default function LoginPage() {
       </div>
 
       {redirectTo !== "/trips" && (
-        <div className="rounded bg-blue-50 px-4 py-3 text-sm text-blue-800">
+        <div className="rounded bg-accent-soft px-4 py-3 text-sm text-accent">
           Sign in to access that page.
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="rounded bg-red-50 px-4 py-3 text-sm text-red-800">
+          <div className="rounded bg-critical/10 px-4 py-3 text-sm text-critical">
             <p>{error}</p>
             {requiresVerification && (
               <button
                 type="button"
                 onClick={handleResendVerification}
                 disabled={isResending}
-                className="mt-2 text-sm font-medium text-red-700 hover:underline disabled:opacity-50"
+                className="mt-2 text-sm font-medium text-critical hover:underline disabled:opacity-50"
               >
                 {isResending ? "Sending..." : "Resend verification email"}
               </button>
@@ -142,6 +145,7 @@ export default function LoginPage() {
       <div className="rounded bg-sunken px-4 py-3 text-sm text-ink-3">
         <p className="font-medium text-ink-2">Demo credentials</p>
         <p className="mt-1">Use any email and password (8+ characters) to create an account.</p>
+      </div>
       </div>
     </div>
   );

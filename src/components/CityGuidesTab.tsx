@@ -83,8 +83,8 @@ export function CityGuidesTab({ destinationId, destinationName }: CityGuidesTabP
             onClick={() => handleShowSection(s.id)}
             className={`whitespace-nowrap px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
               section === s.id
-                ? 'bg-blue-600 dark:bg-blue-700 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ? 'bg-accent dark:bg-blue-700 text-white'
+                : 'bg-surface-0 dark:bg-surface-0 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
             }`}
           >
             {s.icon} {s.label}
@@ -162,7 +162,7 @@ function AttractionsGuide({
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-semibold text-gray-900 dark:text-white">{place.name}</h3>
               {place.rating && (
-                <span className="text-sm font-medium bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded">
+                <span className="text-sm font-medium bg-warning/10 dark:bg-warning/10 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded">
                   ★ {place.rating}
                 </span>
               )}
@@ -274,7 +274,7 @@ function TransitGuide({
           </div>
           <div className="flex gap-2 mb-3">
             {route.modes?.map((mode: string, i: number) => (
-              <span key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-medium">
+              <span key={i} className="px-2 py-1 bg-surface-0 dark:bg-surface-0 rounded text-xs font-medium">
                 {mode}
               </span>
             ))}
