@@ -12,12 +12,16 @@ import { getEventsByCity } from "@/lib/integrations/ticketmaster";
 import { getRestaurantCategories } from "@/lib/integrations/yelp";
 import { getDemographics } from "@/lib/integrations/demographics";
 import { getTravelAdvisory } from "@/lib/integrations/travel-warnings";
+import { searchFlights } from "@/lib/integrations/kiwi-flights";
+import { getWeatherAlerts } from "@/lib/integrations/weather-alerts";
 import { HOME } from "@/data/home";
 import { DestinationPlaces } from "@/components/DestinationPlaces";
 import { EventsGrid } from "@/components/EventCard";
 import { RestaurantCategories } from "@/components/RestaurantCard";
 import { DemographicsPanel } from "@/components/DemographicsPanel";
 import { TravelAdvisoryCard } from "@/components/TravelAdvisoryCard";
+import { FlightCard } from "@/components/FlightCard";
+import { WeatherAlerts } from "@/components/WeatherAlerts";
 import { DailyComfortChart, HomeDeltaChart, MonthlyClimateChart, SuitabilityStrip } from "@/components/charts";
 import {
   Badge,
@@ -66,11 +70,17 @@ export default async function DestinationPage({
     places.map((p) => p.sourceId).filter((id): id is number => id !== null),
   );
 
-  // Fetch events, restaurants, demographics, and travel advisory (cached server-side via ISR)
+  // Fetch events, restaurants, demographics, travel advisory, flights, and weather
   const events = await getEventsByCity(d.name, 6).catch(() => []);
   const restaurants = await getRestaurantCategories(d.name).catch(() => ({}));
   const demographics = getDemographics(d.name);
   const travelAdvisory = getTravelAdvisory(d.name);
+
+  // Fetch flights for the trip dates
+  const flights = await searchFlights(d.id, startDate, endDate).catch(() => null);
+
+  // Fetch weather for the trip dates
+  const weather = await getWeatherAlerts(d.name, d.lat, d.lon).catch(() => null);
 
   return (
     <>
@@ -122,6 +132,10 @@ export default async function DestinationPage({
       <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr] lg:items-start">
         <div className="min-w-0 space-y-6">
           {travelAdvisory && <TravelAdvisoryCard advisory={travelAdvisory} />}
+
+          {flights && <FlightCard result={flights} destination={d.id} />}
+
+          {weather && <WeatherAlerts weather={weather} />}
 
           <Card>
             <CardHeader
