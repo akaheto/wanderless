@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
+import { HelpButton } from '@/components/HelpButton';
 import { OfflineProvider } from '@/lib/offline/context';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { ServiceWorkerRegistry } from '@/components/ServiceWorkerRegistry';
@@ -30,7 +31,8 @@ export function RootLayoutClient({ children, navLinks, themeToggle }: RootLayout
 
           {navLinks}
 
-          <div className="hidden px-4 py-4 lg:block">
+          <div className="hidden px-4 py-4 lg:flex lg:items-center lg:gap-2">
+            <HelpButton />
             {themeToggle}
           </div>
         </aside>
