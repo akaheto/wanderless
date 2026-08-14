@@ -1,23 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-
-interface CitySuggestion {
-  city: string;
-  country: string;
-  submittedAt: string;
-  status: "pending" | "researching" | "approved" | "rejected";
-  notes?: string;
-}
+import {
+  submitCitySuggestion,
+  hasCitySuggestion,
+} from "@/lib/db/city-suggestions";
 
 /**
  * POST /api/cities/suggest
  * Submit a new city suggestion for research and possible inclusion in catalog.
  *
- * Future: This endpoint will:
- * - Store the suggestion in a database
- * - Trigger a Claude API research task via background worker
- * - Validate the city is a real leisure destination
- * - Research real hotel pricing, flights, visa requirements
- * - Return the researched data for manual review before adding to catalog
+ * Workflow:
+ * 1. Validate input (city and country required)
+ * 2. Check if already suggested (prevent duplicates)
+ * 3. Store in city_suggestions table with status='pending'
+ * 4. Queue async Claude API research job (future: Vercel Queues)
+ * 5. Return confirmation to user
+ *
+ * Future research via Claude:
+ * - Real hotel pricing from Booking.com, Trip.com, Expedia
+ * - Flight availability and nonstop routes
+ * - Visa requirements per US State Dept
+ * - Climate normals and seasonal patterns
+ * - Return for manual review before adding to catalog
  */
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate input
+    // Validate input types
     if (typeof city !== "string" || typeof country !== "string") {
       return NextResponse.json(
         { error: "City and country must be strings" },
@@ -41,6 +44,7 @@ export async function POST(request: NextRequest) {
     const trimmedCity = city.trim();
     const trimmedCountry = country.trim();
 
+    // Validate lengths
     if (trimmedCity.length < 2 || trimmedCity.length > 100) {
       return NextResponse.json(
         { error: "City name must be 2-100 characters" },
@@ -55,22 +59,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create suggestion object
-    const suggestion: CitySuggestion = {
-      city: trimmedCity,
-      country: trimmedCountry,
-      submittedAt: new Date().toISOString(),
-      status: "pending",
-      notes: `Submitted via UI for research`,
-    };
+    // Check if already suggested
+    if (await hasCitySuggestion(trimmedCity, trimmedCountry)) {
+      return NextResponse.json(
+        {
+          error: `${trimmedCity}, ${trimmedCountry} has already been suggested`,
+        },
+        { status: 409 }
+      );
+    }
 
-    // TODO: Store in database (e.g., Turso, PostgreSQL)
-    // For now, log it and return success
-    console.log("[City Suggestion]", JSON.stringify(suggestion));
+    // Store suggestion in database
+    const suggestion = await submitCitySuggestion(trimmedCity, trimmedCountry);
+
+    if (!suggestion) {
+      return NextResponse.json(
+        { error: "Failed to store suggestion" },
+        { status: 500 }
+      );
+    }
+
+    console.log("[City Suggestion Stored]", {
+      city: suggestion.city,
+      country: suggestion.country,
+      status: suggestion.status,
+    });
+
+    // TODO: Queue Claude API research task
+    // await queueCityResearch(suggestion.id);
 
     return NextResponse.json(
       {
-        message: "Suggestion received",
+        message: "Suggestion received and queued for research",
         suggestion: {
           city: suggestion.city,
           country: suggestion.country,

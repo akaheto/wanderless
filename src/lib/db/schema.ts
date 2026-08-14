@@ -506,4 +506,29 @@ export const MIGRATIONS: { name: string; statements: string[] }[] = [
       `CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON audit_logs (resource_type, resource_id)`,
     ],
   },
+  {
+    name: "0006_city_suggestions",
+    statements: [
+      // User-submitted city suggestions for research and possible inclusion in catalog
+      `CREATE TABLE IF NOT EXISTS city_suggestions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        city TEXT NOT NULL,
+        country TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        research_notes TEXT NOT NULL DEFAULT '',
+        hotel_data TEXT,
+        flight_data TEXT,
+        visa_info TEXT,
+        climate_data TEXT,
+        reviewed_at TEXT,
+        reviewed_by TEXT,
+        decision TEXT,
+        submitted_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE(city, country)
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_suggestions_status ON city_suggestions (status)`,
+      `CREATE INDEX IF NOT EXISTS idx_suggestions_submitted ON city_suggestions (submitted_at)`,
+    ],
+  },
 ];
