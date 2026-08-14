@@ -25,6 +25,9 @@ export async function submitCitySuggestion(
   country: string
 ): Promise<CitySuggestion | null> {
   const now = new Date().toISOString();
+  // Normalize to title case for consistency
+  const normalizedCity = city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
+  const normalizedCountry = country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
 
   try {
     const client = await db();
@@ -34,12 +37,12 @@ export async function submitCitySuggestion(
         (city, country, status, submitted_at, created_at)
         VALUES (?, ?, ?, ?, ?)
       `,
-      args: [city, country, "pending", now, now],
+      args: [normalizedCity, normalizedCountry, "pending", now, now],
     });
 
     return {
-      city,
-      country,
+      city: normalizedCity,
+      country: normalizedCountry,
       status: "pending",
       submitted_at: now,
       created_at: now,

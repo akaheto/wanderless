@@ -126,7 +126,18 @@ CRITICAL: Only include data from verifiable sources. Do not guess or estimate. I
       return null;
     }
 
-    const research = JSON.parse(jsonMatch[0]) as CityResearchResult;
+    let research: CityResearchResult;
+    try {
+      research = JSON.parse(jsonMatch[0]) as CityResearchResult;
+    } catch (parseError) {
+      console.error(
+        "[City Research] Failed to parse JSON:",
+        parseError,
+        "Raw:",
+        jsonMatch[0].substring(0, 200)
+      );
+      return null;
+    }
 
     // Validate that we have real data
     if (
