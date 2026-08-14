@@ -46,24 +46,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes (with security headers)
-  if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
-    const response = NextResponse.next();
-    return addSecurityHeaders(response);
-  }
-
-  // Check for session cookie
-  const sessionToken = request.cookies.get('wanderless-session')?.value;
-
-  if (!sessionToken) {
-    // Redirect to login with return URL
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirectTo', pathname);
-    const response = NextResponse.redirect(loginUrl);
-    return addSecurityHeaders(response);
-  }
-
-  // Session exists, allow request (with security headers)
+  // TEMP: Allow all routes for testing (no login required)
   const response = NextResponse.next();
   return addSecurityHeaders(response);
 }
