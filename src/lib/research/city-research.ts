@@ -110,36 +110,21 @@ CLIMATE SEARCH RESULTS:
 ${climateSearch}
 `;
 
-    const prompt = `TASK: Extract travel data from search results for ${city}, ${country}. Be aggressive - extract ANY numbers and facts you find.
+    const prompt = `Extract and return travel data. Do not reason, explain, or hesitate - just extract what you see.
 
-WEB SEARCH DATA:
+SEARCH RESULTS:
 ${searchContext}
 
-INSTRUCTIONS (FOLLOW EXACTLY):
-1. For hotel prices: Find ANY dollar amounts mentioned. Examples: "4-star $237/night", "5-star rooms average $491" → extract 237 and 491
-2. For flights: Find ANY time duration mentioned. Examples: "4 hours 36 minutes", "nonstop flights available" → extract as number and boolean
-3. For visa: Quote the visa requirement text you find
-4. For climate: Quote the weather/season text you find
-5. For summary: Write one sentence using facts from the results
+Look for these specific values in the search results:
+1. Hotel prices in USD: 4-star price, 5-star price (numbers only, e.g., 237, 491)
+2. Flight time: total hours as decimal (e.g., 4.6, 5)
+3. Nonstop available: true if mentioned, false if not explicitly confirmed
+4. Visa requirements: copy/paste the visa text
+5. Climate: copy/paste the climate/temperature text
+6. Summary: create a 1-sentence summary
 
-CRITICAL: Do NOT return null unless data is truly absent. Return whatever numbers/text you can find, even if partial or uncertain.
-
-OUTPUT (JSON ONLY, no markdown):
-{
-  "hotelData": {
-    "fourStarUSD": 0,
-    "fiveStarUSD": 0,
-    "source": ""
-  },
-  "flightData": {
-    "nonstop": false,
-    "typicalHours": 0,
-    "source": ""
-  },
-  "visaInfo": "",
-  "climateData": "",
-  "summary": ""
-}`;
+REQUIRED OUTPUT (pure JSON, one line):
+{"hotelData":{"fourStarUSD":100,"fiveStarUSD":200,"source":""},"flightData":{"nonstop":false,"typicalHours":4,"source":""},"visaInfo":"","climateData":"","summary":""}`;
 
     const message = await client.messages.create({
       model: "claude-opus-4-1-20250805",
