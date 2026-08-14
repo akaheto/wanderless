@@ -12,7 +12,7 @@ import { getEventsByCity } from "@/lib/integrations/ticketmaster";
 import { getRestaurantCategories } from "@/lib/integrations/yelp";
 import { getDemographics } from "@/lib/integrations/demographics";
 import { getTravelAdvisory } from "@/lib/integrations/travel-warnings";
-import { searchFlights } from "@/lib/integrations/kiwi-flights";
+import { getFlightEstimate } from "@/lib/integrations/flight-links";
 import { getWeatherAlerts } from "@/lib/integrations/weather-alerts";
 import { HOME } from "@/data/home";
 import { DestinationPlaces } from "@/components/DestinationPlaces";
@@ -76,8 +76,8 @@ export default async function DestinationPage({
   const demographics = getDemographics(d.name);
   const travelAdvisory = getTravelAdvisory(d.name);
 
-  // Fetch flights for the trip dates
-  const flights = await searchFlights(d.id, startDate, endDate).catch(() => null);
+  // Get flight estimates (no API needed, just links + estimates)
+  const flightEstimate = getFlightEstimate(d.id);
 
   // Fetch weather for the trip dates
   const weather = await getWeatherAlerts(d.name, d.lat, d.lon).catch(() => null);
@@ -133,7 +133,15 @@ export default async function DestinationPage({
         <div className="min-w-0 space-y-6">
           {travelAdvisory && <TravelAdvisoryCard advisory={travelAdvisory} />}
 
-          {flights && <FlightCard result={flights} destination={d.id} />}
+          {flightEstimate && (
+            <FlightCard
+              estimate={flightEstimate}
+              destination={d.name}
+              iataCode={d.id}
+              departDate={startDate}
+              returnDate={endDate}
+            />
+          )}
 
           {weather && <WeatherAlerts weather={weather} />}
 
