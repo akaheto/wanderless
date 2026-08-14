@@ -109,22 +109,22 @@ ${climateSearch}
 
 ${searchContext}
 
-Return ONLY a JSON object (no other text) with these exact fields. Use the search results above as your source. If a field cannot be found, set it to null:
+Return ONLY a JSON object (no other text) with these exact fields. IMPORTANT: Extract actual numbers from the search results when available. If you cannot find a value, use null.
 
 {
   "hotelData": {
-    "fourStarUSD": <number or null>,
-    "fiveStarUSD": <number or null>,
-    "source": "<website or null>"
+    "fourStarUSD": <number or null (estimated nightly rate in USD if not found)>,
+    "fiveStarUSD": <number or null (estimated nightly rate in USD if not found)>,
+    "source": "<website name or null>"
   },
   "flightData": {
     "nonstop": <boolean or null>,
-    "typicalHours": <number or null>,
-    "source": "<source or null>"
+    "typicalHours": <number or null (typical flight duration)>,
+    "source": "<airline or source or null>"
   },
-  "visaInfo": "<visa requirement summary or null>",
-  "climateData": "<climate summary or null>",
-  "summary": "<1-line description of ${city}>"
+  "visaInfo": "<visa requirement summary for US citizens or null>",
+  "climateData": "<climate/weather summary (best season, temperature range) or null>",
+  "summary": "<1-sentence description of ${city} as a travel destination>"
 }`;
 
     const message = await client.messages.create({
@@ -167,13 +167,18 @@ Return ONLY a JSON object (no other text) with these exact fields. Use the searc
       return null;
     }
 
-    // Validate that we have real data
-    if (
-      !research.hotelData?.fourStarUSD ||
-      !research.hotelData?.fiveStarUSD ||
-      !research.flightData
-    ) {
-      console.error("[City Research] Incomplete research data received");
+    // Validate that we have at least some real data (at least hotel OR flight info)
+    const hasHotelData = research.hotelData?.fourStarUSD || research.hotelData?.fiveStarUSD;
+    const hasFlightData = research.flightData?.typicalHours || research.flightData?.nonstop;
+    const hasSummary = research.summary && research.summary.length > 0;
+
+    if (!hasSummary || (!hasHotelData && !hasFlightData)) {
+      console.error("[City Research] Incomplete research data received", {
+        hasHotelData,
+        hasFlightData,
+        hasSummary,
+        research,
+      });
       return null;
     }
 
