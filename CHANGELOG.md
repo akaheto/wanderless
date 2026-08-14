@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.12.0 — 2026-08-14
+
+**City Submission System, Security Hardening, and Documentation**
+
+### Added
+
+**City Suggestion API**
+- User-facing form at `/destinations/suggest` to propose new cities
+- Admin dashboard at `/admin/suggestions` for review and approval
+- Claude API integration with WebSearch to research and populate city data
+- Database schema for city_suggestions with status tracking (pending/researching/reviewed/approved/rejected)
+- Rate limiting: 10 submissions per day per user, unlimited for admins
+- Real data research: hotel pricing, flight info, visa requirements, climate data
+
+**Security Hardening**
+- Comprehensive HTTP security headers via middleware:
+  - Content-Security-Policy: blocks inline scripts, prevents XSS
+  - X-Frame-Options: DENY (prevents clickjacking)
+  - X-Content-Type-Options: nosniff (prevents MIME sniffing)
+  - Referrer-Policy: strict-origin-when-cross-origin
+  - Permissions-Policy: disables geolocation, microphone, camera, payment, USB
+  - Strict-Transport-Security: HTTPS enforcement (production only)
+- CORS policy: restricted to same-origin (single-user authenticated app)
+- Static asset caching: aggressive Cache-Control headers (31536000s, immutable)
+- Rate limiting on API endpoints prevents abuse and DoS attacks
+
+**Documentation & User Support**
+- Public `/help` page with comprehensive user guide
+- HelpButton (?) component in sidebar footer
+- Guide covers: trips, comparisons, itineraries, destination suggestions
+- Contact email: support@wanderless.app
+- Rate limiting explained in user guide
+
+### Changed
+
+- Email templates: updated to use wanderless.app domain
+- Database names: wanderless-offline (from tih-offline)
+- Signup confirmation email: "Wanderless" branding (from "Travel Intelligence Hub")
+
+### Fixed
+
+- Case-sensitivity mismatch in city suggestion duplicate detection
+- JSON parsing errors in Claude API research (now wrapped in try-catch)
+- Missing authentication guards on admin endpoints (now protected by requireAdmin)
+- Next.js 16.3 dynamic route params (now properly awaited)
+
+### Technical
+
+- Async database operations with explicit error handling
+- SQL injection prevention via parameterized queries
+- Rate limiting with daily submission counter and fail-open on errors
+- Security headers applied at middleware and next.config level
+- TypeScript strict mode throughout
+
 ## 0.11.0 — 2026-08-13
 
 **Rebrand: Travel Intelligence Hub → Wanderless**
