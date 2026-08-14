@@ -1,134 +1,177 @@
-'use client';
+"use client";
 
+import { useState, useMemo } from "react";
+import { DESTINATIONS } from "@/data/destinations";
+import type { Destination } from "@/lib/domain/types";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { destinationsByRegion } from "@/data/destinations";
-import { SuitabilityStrip } from "@/components/charts";
-import { Badge, Card, PageHeader } from "@/components/ui";
-import { monthClimate } from "@/lib/climate";
-import { MONTH_ABBR, isValidDate } from "@/lib/dates";
-import { defaultDates } from "@/lib/scoring/params";
-import { DateRangePicker } from "@/components/DateRangePicker";
+
+const REGIONS = [
+  "Southeast Asia",
+  "East Asia",
+  "South America",
+  "Australia & Oceania",
+  "Caribbean & Mexico",
+  "Middle East",
+  "North Africa",
+  "Southern Africa",
+  "Indian Ocean",
+  "Western Europe",
+  "Eastern Europe",
+  "Northern Europe",
+  "Southern Europe",
+];
+
+type SortBy = "name" | "cost-low" | "cost-high" | "temp-warm" | "travel-easy";
 
 export default function DestinationsPage() {
-  const searchParams = useSearchParams();
-  const queryStart = searchParams.get("start");
-  const queryEnd = searchParams.get("end");
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<SortBy>("name");
 
-  const defaults = defaultDates();
-  const [startDate, setStartDate] = useState(
-    queryStart && isValidDate(queryStart) ? queryStart : defaults.startDate
-  );
-  const [endDate, setEndDate] = useState(
-    queryEnd && isValidDate(queryEnd) ? queryEnd : defaults.endDate
-  );
+  const filtered = useMemo(() => {
+    let results = DESTINATIONS;
 
-  const handleDateChange = (start: string, end: string) => {
-    setStartDate(start);
-    setEndDate(end);
-  };
+    if (selectedRegion) {
+      results = results.filter((d) => d.region === selectedRegion);
+    }
 
-  const regions = destinationsByRegion();
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      results = results.filter(
+        (d) =>
+          d.name.toLowerCase().includes(term) ||
+          d.country.toLowerCase().includes(term) ||
+          d.area.toLowerCase().includes(term)
+      );
+    }
+
+    return results.sort((a, b) => {
+      switch (sortBy) {
+        case "cost-low":
+          return a.lodging.fourStarUSD - b.lodging.fourStarUSD;
+        case "cost-high":
+          return b.lodging.fiveStarUSD - a.lodging.fiveStarUSD;
+        case "travel-easy":
+          return b.travel.arrivalEase - a.travel.arrivalEase;
+        case "name":
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
+  }, [selectedRegion, searchTerm, sortBy]);
 
   return (
-    <>
-      <PageHeader
-        title="Destination catalog"
-        lede="The set of places the comparison engine will ever recommend. Keeping it curated is what stops a ranking from surfacing somewhere technically warm but not worth the flight."
-      />
-
-      <div className="mb-8 rounded-lg border border-line bg-surface-1 p-6">
-        <h2 className="mb-4 text-sm font-semibold text-ink-2">Filter by travel dates</h2>
-        <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onRangeChange={handleDateChange}
-        />
+    <div className="space-y-8 py-12">
+      <div>
+        <h1 className="text-3xl font-bold">Destination Catalog</h1>
+        <p className="mt-2 text-ink-3">{filtered.length} destinations in real-time</p>
       </div>
 
-      {/* Destination count display */}
-      <div className="mb-6 text-sm text-ink-2">
-        Showing <span className="font-semibold">{regions.reduce((sum, r) => sum + r.items.length, 0)}</span> destinations for <span className="font-semibold">{startDate}</span> to <span className="font-semibold">{endDate}</span>
+      {/* Search & Filters */}
+      <div className="space-y-4 rounded-lg border border-line bg-surface-1 p-6">
+        <div>
+          <label className="block text-sm font-medium">Search</label>
+          <input
+            type="text"
+            placeholder="City, country, or region..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="mt-1 w-full rounded border border-line bg-surface-0 px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium">Region</label>
+            <select
+              value={selectedRegion || ""}
+              onChange={(e) => setSelectedRegion(e.target.value || null)}
+              className="mt-1 w-full rounded border border-line bg-surface-0 px-3 py-2 text-sm"
+            >
+              <option value="">All regions</option>
+              {REGIONS.map((region) => (
+                <option key={region} value={region}>
+                  {region}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium">Sort by</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortBy)}
+              className="mt-1 w-full rounded border border-line bg-surface-0 px-3 py-2 text-sm"
+            >
+              <option value="name">Name (A–Z)</option>
+              <option value="cost-low">Budget 4-star</option>
+              <option value="cost-high">Luxury 5-star</option>
+              <option value="travel-easy">Easiest arrival</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-8">
-        {regions.map((group) => (
-          <section key={group.region}>
-            <h2 className="mb-3 text-[13px] tracking-wide text-ink-3 uppercase">{group.region}</h2>
-            <div className="grid gap-3 md:grid-cols-2">
-              {group.items.map((d) => {
-                const best = d.suitability.reduce(
-                  (acc, v, i) => (v > acc.value ? { value: v, month: i + 1 } : acc),
-                  { value: -1, month: 1 },
-                );
-                const jan = monthClimate(d.id, 1);
-                const jul = monthClimate(d.id, 7);
-
-                // Determine season emoji based on best month
-                const getSeasonEmoji = (month: number) => {
-                  if ([12, 1, 2].includes(month)) return '❄️'; // Winter
-                  if ([3, 4, 5].includes(month)) return '🌸'; // Spring
-                  if ([6, 7, 8].includes(month)) return '☀️'; // Summer
-                  return '🍂'; // Fall
-                };
-
-                return (
-                  <Card key={d.id} className="p-4">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className="text-[15px] font-semibold tracking-tight">
-                          <Link
-                            href={`/destinations/${d.id}?start=${startDate}&end=${endDate}`}
-                            className="hover:text-accent"
-                          >
-                            {d.name}
-                          </Link>
-                        </h3>
-                        <p className="text-[12.5px] text-ink-3">
-                          {d.area} · {d.country}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 gap-1.5">
-                        <Badge>{d.archetype}</Badge>
-                        <span title={`Best in ${MONTH_ABBR[best.month - 1]}`}>
-                          <Badge>{getSeasonEmoji(best.month)}</Badge>
-                        </span>
-                        {d.travel.nonstop && <Badge tone="accent">nonstop</Badge>}
-                      </div>
-                    </div>
-
-                    <p className="mt-2 text-[13px] text-ink-2">{d.summary}</p>
-
-                    <dl className="tnum mt-3 grid grid-cols-3 gap-2 text-[12px]">
-                      <div>
-                        <dt className="text-ink-3">Best month</dt>
-                        <dd className="font-medium">
-                          {MONTH_ABBR[best.month - 1]} · {best.value}/5
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="text-ink-3">Jan / Jul high</dt>
-                        <dd className="font-medium">
-                          {Math.round(jan.highF)}° / {Math.round(jul.highF)}°F
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="text-ink-3">From JFK</dt>
-                        <dd className="font-medium">~{d.travel.typicalTotalHours}h</dd>
-                      </div>
-                    </dl>
-
-                    <div className="mt-3">
-                      <SuitabilityStrip destination={d} compact />
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
+      {/* Destinations Grid */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((dest) => (
+          <DestinationCard key={dest.id} destination={dest} />
         ))}
       </div>
-    </>
+
+      {filtered.length === 0 && (
+        <div className="rounded-lg border border-line bg-surface-1 px-6 py-8 text-center">
+          <p className="text-ink-3">No destinations match your filters.</p>
+        </div>
+      )}
+
+      {/* Submit New City CTA */}
+      <div className="mt-12 rounded-lg border border-accent bg-accent/5 px-6 py-8">
+        <h3 className="font-semibold">Can't find what you're looking for?</h3>
+        <p className="mt-1 text-sm text-ink-3">Request a new city — we'll research it with real data.</p>
+        <Link
+          href="/destinations/suggest"
+          className="mt-4 inline-block rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+        >
+          Suggest a city
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function DestinationCard({ destination }: { destination: Destination }) {
+  const avgCost = Math.round((destination.lodging.fourStarUSD + destination.lodging.fiveStarUSD) / 2);
+
+  return (
+    <Link href={`/destinations/${destination.id}`}>
+      <div className="group rounded-lg border border-line bg-surface-1 p-4 transition hover:border-accent hover:shadow-md">
+        <div className="space-y-2">
+          <div>
+            <h3 className="font-semibold group-hover:text-accent">{destination.name}</h3>
+            <p className="text-xs text-ink-4">
+              {destination.area}, {destination.country}
+            </p>
+          </div>
+
+          <p className="text-xs leading-relaxed text-ink-3">{destination.summary}</p>
+
+          <div className="flex flex-wrap gap-1 pt-2">
+            {destination.travel.nonstop && (
+              <span className="inline-block rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                Nonstop
+              </span>
+            )}
+            <span className="inline-block rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+              ${avgCost}/night
+            </span>
+            <span className="inline-block rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
+              {destination.archetype}
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }
