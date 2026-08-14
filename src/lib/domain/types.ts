@@ -107,6 +107,8 @@ export interface LodgingProfile {
   peakMultiplier: number;
   /** Multiplier applied in low months. */
   lowMultiplier: number;
+  /** Live Booking.com search URL for current prices. */
+  bookingSearchUrl?: string;
 }
 
 export interface Destination {
