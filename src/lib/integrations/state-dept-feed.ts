@@ -12,22 +12,15 @@
  */
 
 import { parse as parseDate, isValid as isValidDate, formatISO } from "date-fns";
+import type { Fetched } from "@/lib/providers/contract";
 
 export type AdvisoryLevel = 1 | 2 | 3 | 4;
 
 /**
- * Result of a source read. A provider either produced a value with provenance, or it
- * failed for a stated reason — it never invents a fallback.
- *
- * Safety data makes the reason for this rule concrete: defaulting a failed advisory
- * lookup to "Level 1 — Exercise Normal Precautions" would render an unknown risk as an
- * all-clear. Absence must read as absence.
- *
- * Phase 1b generalises this into the shared provider layer; it is scoped here for now.
+ * Re-exported so existing importers keep working. The contract itself now lives in
+ * `@/lib/providers/contract`, shared by every client rather than owned by this one.
  */
-export type Fetched<T> =
-  | { ok: true; value: T; sourceDate: string }
-  | { ok: false; reason: string };
+export type { Fetched };
 
 export interface ParsedAdvisory {
   /** Country exactly as the feed names it, e.g. "Czechia". */
