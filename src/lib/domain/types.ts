@@ -61,15 +61,6 @@ export interface RiskWindow {
   severity: "low" | "moderate" | "high";
 }
 
-export interface InfluencerSpot {
-  /** Real name of the location. */
-  name: string;
-  /** Category: bar, restaurant, cafe, museum, lookout, beach, market, shop, other. */
-  type: string;
-  /** Brief description of what makes it notable. */
-  description: string;
-}
-
 /** 0-5 sub-scores. 0 = essentially absent, 5 = world-class. */
 export interface ExperienceProfile {
   food: number;
@@ -146,8 +137,6 @@ export interface Destination {
   /** Sparse notes keyed by month number (1-12). */
   monthNotes: Partial<Record<number, string>>;
   risks: RiskWindow[];
-  /** Instagram-worthy and popular social media spots: bars, restaurants, cafes, museums, lookout points, etc. 20-50 spots recommended. */
-  influencerSpots?: InfluencerSpot[];
   /** ISO date the curated fields above were last reviewed. */
   curatedOn: string;
 }
