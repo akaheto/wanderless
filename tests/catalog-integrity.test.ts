@@ -146,17 +146,21 @@ describe("route coverage", () => {
 /**
  * Destinations still awaiting a confirmed arrival airport.
  *
- * Same ratchet as MISSING_ROUTES: may only shrink, and self-cleans. Auto-derivation was
- * tried and rejected — nearest-airport scored 14/20 against known-correct values across
- * three heuristics, and six of these 26 would be wrong on distance alone (Paris resolves
- * to Le Bourget, Reykjavík to the domestic terminal, London to City). The gateway a
- * traveller actually uses is a judgement, so these are confirmed by hand.
+ * Same ratchet as MISSING_ROUTES: may only shrink, and self-cleans.
+ *
+ * Auto-derivation was tried and rejected. Nearest-airport scored 14/20 against the
+ * known-correct values across three heuristics, and six of the original 26 would have
+ * been wrong on distance alone — Paris resolving to Le Bourget, a private-aviation
+ * field; London to City; Reykjavík to the domestic terminal. The other 45 were instead
+ * confirmed against the JFK and Newark destination tables on 2026-08-15: an airport New
+ * York actually flies to is the gateway, and that is evidence rather than inference.
  */
 const MISSING_AIRPORT = new Set([
-  "paris", "london", "barcelona", "amsterdam", "madrid", "istanbul", "prague",
-  "vienna", "berlin", "florence", "venice", "athens", "budapest", "copenhagen",
-  "milan", "dublin", "edinburgh", "munich", "brussels", "porto", "krakow",
-  "dubrovnik", "nice", "naples", "salzburg", "reykjavik",
+  // Florence alone. Neither Florence nor Pisa receives a nonstop from JFK or Newark, so
+  // "whichever the US flies to" cannot decide it — the choice is between the city's own
+  // small airport and the larger regional one an hour away, which is a traveller
+  // judgement rather than a fact about route networks.
+  "florence",
 ]);
 
 describe("arrival airports", () => {
@@ -190,7 +194,7 @@ describe("arrival airports", () => {
 
   it("does not let the quarantine grow", () => {
     // Ratchet. Lower as airports are confirmed; never raise.
-    expect(MISSING_AIRPORT.size).toBeLessThanOrEqual(26);
+    expect(MISSING_AIRPORT.size).toBeLessThanOrEqual(1);
   });
 });
 
