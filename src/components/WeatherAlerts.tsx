@@ -65,7 +65,7 @@ export function WeatherAlerts({ weather }: WeatherAlertsProps) {
             <p className="text-xs font-medium uppercase text-ink-2 mb-1">Current Conditions</p>
             <div className="flex items-baseline gap-2">
               <span className="text-4xl">{getConditionEmoji(weather.condition)}</span>
-              <span className="text-3xl font-bold text-ink">{Math.round(weather.temperature)}°C</span>
+              <span className="text-3xl font-bold text-ink">{Math.round(weather.temperature)}°F</span>
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@ export function WeatherAlerts({ weather }: WeatherAlertsProps) {
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <p className="text-xs text-ink-3">Feels like</p>
-            <p className="font-semibold text-ink">{Math.round(weather.feelsLike)}°C</p>
+            <p className="font-semibold text-ink">{Math.round(weather.feelsLike)}°F</p>
           </div>
           <div>
             <p className="text-xs text-ink-3">Humidity</p>

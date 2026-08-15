@@ -19,7 +19,8 @@ export interface WeatherAlert {
 }
 
 export interface WeatherCondition {
-  temperature: number; // Celsius
+  /** Fahrenheit, like every other temperature in the app. */
+  temperature: number;
   feelsLike: number;
   humidity: number;
   windSpeed: number; // km/h
@@ -66,7 +67,7 @@ async function getOpenWeatherMapAlerts(lat: number, lon: number): Promise<Weathe
     const params = new URLSearchParams({
       lat: lat.toString(),
       lon: lon.toString(),
-      units: 'metric',
+      units: 'imperial',
       appid: OWM_API_KEY,
     });
 
@@ -123,6 +124,10 @@ async function getOpenMeteoWeather(lat: number, lon: number): Promise<WeatherCon
       longitude: lon.toString(),
       current: 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,apparent_temperature,uv_index',
       timezone: 'auto',
+      // Open-Meteo returns Celsius unless asked otherwise. Omitting this put °C on a
+      // page whose every other temperature is °F.
+      temperature_unit: 'fahrenheit',
+      wind_speed_unit: 'mph',
     });
 
     const response = await fetch(
@@ -154,12 +159,12 @@ async function getOpenMeteoWeather(lat: number, lon: number): Promise<WeatherCon
       });
     }
 
-    if (current.temperature_2m > 35) {
+    if (current.temperature_2m > 95) {
       // Heat alerts
       alerts.push({
         id: 'ome-heat',
         title: 'Extreme Heat Warning',
-        description: `High temperature of ${current.temperature_2m}°C`,
+        description: `High temperature of ${Math.round(current.temperature_2m)}°F`,
         severity: 'critical',
         category: 'heat',
         effectiveDate: new Date().toISOString().split('T')[0],
