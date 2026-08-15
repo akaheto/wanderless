@@ -2,11 +2,12 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 
-export interface InfluencerSpot {
-  name: string;
-  type: string;
-  description: string;
-}
+/**
+ * Imported from the domain, which now requires citations. This file's own definition was
+ * one of three copies; another sat inlined in the admin page.
+ */
+import type { InfluencerSpot } from "@/lib/domain/types";
+export type { InfluencerSpot };
 
 export interface CityResearchResult {
   hotelData: {

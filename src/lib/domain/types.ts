@@ -116,6 +116,76 @@ export function travelBandOf(hours: number): TravelBand {
   return hours < 8 ? "0-8" : hours < 16 ? "8-16" : "16+";
 }
 
+// ---------------------------------------------------------------------------
+// Influencer spots
+// ---------------------------------------------------------------------------
+
+/**
+ * Where a spot was seen being featured.
+ *
+ * `editorial` covers the published city guides — Time Out, Eater, Atlas Obscura — which
+ * are frequently what the social posts are themselves working from.
+ */
+export type SpotPlatform =
+  | "tiktok"
+  | "instagram"
+  | "youtube"
+  | "reddit"
+  | "wikivoyage"
+  | "tripadvisor"
+  | "editorial";
+
+/**
+ * One piece of evidence that a place was actually featured somewhere.
+ *
+ * The URL is the point. "This is an influencer spot" is an unfalsifiable claim without a
+ * link — a name and a description alone are indistinguishable from something invented,
+ * which is exactly how a fabricated destination entry passed review once already. A
+ * citation can be opened and checked by anyone; a description cannot.
+ */
+export interface SpotCitation {
+  platform: SpotPlatform;
+  /** The post, video, thread or article featuring the place. */
+  url: string;
+  creator?: string;
+  /** ISO date this citation was captured. */
+  seenOn: string;
+}
+
+export type SpotCategory =
+  | "bar"
+  | "restaurant"
+  | "cafe"
+  | "museum"
+  | "lookout"
+  | "beach"
+  | "market"
+  | "shop"
+  | "park"
+  | "landmark"
+  | "other";
+
+/**
+ * A place worth going, with evidence that somebody said so.
+ *
+ * Previously `{ name, type, description }` — three strings a model can produce without
+ * leaving the room. Requiring citations changes what the type can express: a spot now
+ * carries where it was seen, so a reader can check it and a generator cannot invent it.
+ *
+ * `citations` is also the ranking signal. Paid place APIs sell a popularity score; the
+ * same thing can be built from free sources by counting independent agreement. A place
+ * named in a travel video, a Reddit thread and a city guide has three citations; one
+ * named once has one. Unlike a purchased rating, every point of that score is a link.
+ */
+export interface InfluencerSpot {
+  name: string;
+  type: SpotCategory;
+  /** Written from what the citations say, never originated. */
+  description: string;
+  /** At least one. A spot without evidence cannot be stored — see `validateSpot`. */
+  citations: SpotCitation[];
+}
+
 export interface TravelProfile {
   /** Whether a nonstop exists from the reference departure airport. */
   nonstop: boolean;
