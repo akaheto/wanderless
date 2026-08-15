@@ -136,10 +136,11 @@ export interface Destination {
    * the domestic terminal rather than Keflavík, Paris to Le Bourget. The right answer is
    * the gateway a traveller actually uses, which is a judgement no dataset encodes.
    *
-   * Optional only while the remaining destinations are confirmed; the catalog-integrity
-   * quarantine ratchets that down to zero.
+   * Required: all 46 destinations carry a confirmed code, so the compiler now enforces
+   * what the catalog-integrity quarantine previously tracked. A destination cannot be
+   * added without declaring the airport its visitors arrive at.
    */
-  arrivalAirport?: string;
+  arrivalAirport: string;
   archetype: Archetype;
   tourismTier: TourismTier;
   /** One line on what this place actually is. */

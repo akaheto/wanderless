@@ -37,6 +37,13 @@ interface ManualCityData {
   lon: number;
   timezone: string;
   coastal: boolean;
+  /**
+   * IATA code of the airport visitors actually arrive at — the gateway, not the nearest
+   * strip. Required, and not derivable: nearest-airport scored 14/20 against known-good
+   * values, resolving Rome to Ciampino and Paris to Le Bourget. Confirm it against the
+   * departure airport's published destinations before adding a city.
+   */
+  arrivalAirport: string;
   archetype: "city" | "beach" | "resort" | "mixed" | "nature";
   tourismTier: 1 | 2 | 3;
   summary: string;
@@ -312,6 +319,7 @@ export async function buildDestination(
     lat: cityData.lat,
     lon: cityData.lon,
     timezone: cityData.timezone,
+    arrivalAirport: cityData.arrivalAirport,
     coastal: cityData.coastal,
     archetype: cityData.archetype,
     tourismTier: cityData.tourismTier,

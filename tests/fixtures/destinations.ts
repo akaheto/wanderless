@@ -73,6 +73,8 @@ export function routeTestDestination(id: string): Destination {
     lon: 0,
     timezone: "UTC",
     coastal: false,
+    // Route-table stand-ins are keyed by id, so any well-formed code will do.
+    arrivalAirport: "XXX",
     archetype: "city",
     tourismTier: 1,
     summary: `Route-table stand-in for ${id}.`,

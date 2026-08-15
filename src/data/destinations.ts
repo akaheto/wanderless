@@ -1073,6 +1073,7 @@ export const DESTINATIONS: Destination[] = [
     lon: 11.2558,
     timezone: "Europe/Rome",
     coastal: false,
+    arrivalAirport: "PSA",
     archetype: "city",
     tourismTier: 1,
     summary: "Renaissance alive — unprecedented art density in walkable medieval city.",

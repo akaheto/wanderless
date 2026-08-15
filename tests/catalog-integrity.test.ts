@@ -155,12 +155,11 @@ describe("route coverage", () => {
  * confirmed against the JFK and Newark destination tables on 2026-08-15: an airport New
  * York actually flies to is the gateway, and that is evidence rather than inference.
  */
-const MISSING_AIRPORT = new Set([
-  // Florence alone. Neither Florence nor Pisa receives a nonstop from JFK or Newark, so
-  // "whichever the US flies to" cannot decide it — the choice is between the city's own
-  // small airport and the larger regional one an hour away, which is a traveller
-  // judgement rather than a fact about route networks.
-  "florence",
+const MISSING_AIRPORT = new Set<string>([
+  // Empty, and it stays that way: `arrivalAirport` is now required on Destination, so a
+  // destination without one no longer compiles. Kept as the ratchet's floor rather than
+  // deleted, so the assertions below still guard the invariant if the field is ever
+  // loosened again.
 ]);
 
 describe("arrival airports", () => {
@@ -194,7 +193,7 @@ describe("arrival airports", () => {
 
   it("does not let the quarantine grow", () => {
     // Ratchet. Lower as airports are confirmed; never raise.
-    expect(MISSING_AIRPORT.size).toBeLessThanOrEqual(1);
+    expect(MISSING_AIRPORT.size).toBe(0);
   });
 });
 
