@@ -1847,6 +1847,50 @@ export const DESTINATIONS: Destination[] = [
     ],
     curatedOn: CURATED_ON,
   },
+  {
+    id: "nice",
+    name: "Nice",
+    area: "French Riviera",
+    country: "France",
+    region: "Western Europe",
+    lat: 43.7102,
+    lon: 7.2620,
+    timezone: "Europe/Paris",
+    coastal: true,
+    archetype: "beach",
+    tourismTier: 1,
+    summary: "Sophisticated beach city on the Mediterranean with Belle Époque charm, mountains, and easy access to Provence.",
+    travel: {
+      nonstop: false,
+      typicalTotalHours: 11,
+      typicalConnections: 1,
+      arrivalEase: 4,
+      notes: "One stop via European hub. Airport 10 km from city center.",
+    },
+    lodging: {
+      fourStarUSD: 280,
+      fiveStarUSD: 650,
+      peakMultiplier: 1.4,
+      lowMultiplier: 0.75,
+      bookingSearchUrl: "https://www.booking.com/searchresults.en.html?ss=Nice&checkin=2026-05-15&checkout=2026-05-18"
+    },
+    experience: { food: 5, culture: 4.5, beaches: 4.5, nightlife: 4, dayTrips: 4.5, nature: 4, shopping: 4.5 },
+    practicality: { localTransport: 4.5, languageEase: 3.5, safetyEase: 4, entryEase: 5, tripSimplicity: 4.5 },
+    seasons: seasons("LSSPPPPPPSSL"),
+    suitability: [3, 3.5, 4.5, 5, 5, 5, 4.5, 4.5, 4, 4.5, 4, 3.5],
+    monthNotes: {
+      5: "Late spring — sea reaches ideal temperature, wildflowers in the hills.",
+      6: "Peak summer begins; perfect for beaches and outdoor dining.",
+      7: "Hottest, most crowded month; iconic Riviera experience.",
+      8: "Still hot, slightly less crowded than July as some locals leave.",
+      9: "Summer lingers with warm water and clearer skies; harvest season begins.",
+    },
+    risks: [
+      { months: [7, 8], label: "Extreme summer crowds and tourist prices", severity: "moderate" },
+      { months: [11, 12], label: "Occasional rain and mistral wind, but rarely snow", severity: "low" },
+    ],
+    curatedOn: CURATED_ON,
+  },
 ];
 
 export const DESTINATIONS_BY_ID = new Map(DESTINATIONS.map((d) => [d.id, d]));
