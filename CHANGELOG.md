@@ -1,5 +1,52 @@
 # Changelog
 
+## 0.13.0 — 2026-08-15
+
+**Influencer Spots & Comprehensive Documentation**
+
+### Added
+
+**Influencer/Social Media Spots for Destinations**
+- New web search in city research: queries Instagram-worthy locations (bars, restaurants, cafes, museums, lookout points)
+- InfluencerSpot interface: `{name, type, description}` for each location
+- Claude AI extraction: 20–50 curated Instagram-worthy destinations per city with real names and descriptions
+- Database schema extended: `influencer_spots` column in city_suggestions table
+- UI display: destination cards show influencer spots in organized grid with type badges
+- Validation: research fails if fewer than 20 spots extracted (data quality gate)
+
+**Comprehensive User Documentation**
+- Complete rewrite of user guide (`docs/user/user-guide.md`): task-oriented, beginner-friendly
+- New `/help` page: quick start, FAQ, troubleshooting, navigation
+- New `/docs/user-guide` page: full documentation with table of contents and detailed walkthroughs
+- "Help & guides" link in main navigation sidebar
+- Help button (?) in header footer links to help center
+- Covers: creating trips, comparing destinations, building itineraries, recording places, budget tracking, data sources
+
+**Destination Catalog Expansion**
+- Added Nice, France to destination catalog with full data:
+  - Mediterranean beach city, French Riviera region
+  - Hotel estimates: 4-star $280, 5-star $650 (shoulder season)
+  - Travel: 11 hours with 1 connection via European hub
+  - Climate: Mediterranean, best May–September
+  - Experience ratings for food, culture, beaches, nightlife, day trips, nature, shopping
+  - Month-by-month suitability and seasonal notes
+
+### Changed
+
+- City research pipeline now extracts and stores influencer spots for every researched city
+- Approve endpoint stores influencer_spots JSON alongside hotel/flight/visa/climate data
+- User guide reframed from technical reference to task-oriented walkthrough
+
+### Fixed
+
+- Ensured influencer spots validation prevents incomplete research from persisting
+
+### Technical
+
+- Parallel web searches for multiple data types (hotel, flight, visa, climate, influencer spots)
+- JSON extraction from Claude with 20–50 spot validation gate
+- Responsive UI grid for influencer spot display with type badges and descriptions
+
 ## 0.12.0 — 2026-08-14
 
 **City Submission System, Security Hardening, and Documentation**
