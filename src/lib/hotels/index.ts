@@ -68,7 +68,13 @@ export class NullHotelSearch implements HotelSearch {
  */
 export class EnhancedMockHotelSearch implements HotelSearch {
   readonly name = "Enhanced Mock Hotels";
-  readonly configured = true;
+  /**
+   * Reports itself unconfigured, because it is: the inventory it returns is invented,
+   * not searched. This keeps `searchUnavailableReason` truthful, so any surface that
+   * asks whether prices are real gets the right answer even while the mock is running
+   * under ALLOW_MOCK_HOTELS.
+   */
+  readonly configured = false;
 
   async search(query: HotelSearchQuery): Promise<HotelSearchResult | null> {
     try {
@@ -384,14 +390,25 @@ interface RapidAPIHotelResult {
 }
 
 /**
- * Resolve the configured provider.
+ * Resolve the hotel provider.
  *
- * Uses real API when configured, otherwise falls back to enhanced mock.
- * Mock provider is the default (free, no credentials required).
- * Can be overridden with environment variables for alternative providers.
+ * Order: a real provider when credentials exist; the mock only when explicitly opted
+ * into for local development; otherwise nothing.
+ *
+ * This previously defaulted to `EnhancedMockHotelSearch`, which reports
+ * `configured = true`. With no RAPIDAPI credentials in any environment, production
+ * served six invented hotels per search — names built from the destination slug, rates
+ * derived arithmetically from a hash of it, invented amenities and cancellation
+ * policies — and stored them. Because the mock claimed to be configured,
+ * `searchUnavailableReason` returned null and nothing ever warned.
+ *
+ * The mock is now opt-in via ALLOW_MOCK_HOTELS=1 and reports itself unconfigured, so
+ * the unavailable path is reachable even when it is running.
+ *
+ * `NullHotelSearch` — already present, and by its own doc comment the intended default
+ * before the mock displaced it — is what an unconfigured install falls back to.
  */
 export function hotelSearch(): HotelSearch {
-  // Check if a real provider is configured via environment
   if (process.env.RAPIDAPI_KEY && process.env.RAPIDAPI_HOST) {
     try {
       return new RapidAPIHotelSearch(
@@ -399,12 +416,18 @@ export function hotelSearch(): HotelSearch {
         process.env.RAPIDAPI_HOST,
       );
     } catch (error) {
-      console.warn("Failed to initialize RapidAPI hotel provider, falling back to mock:", error);
+      // Deliberately not falling back to the mock: a misconfigured real provider is a
+      // problem to surface, not to paper over with invented inventory.
+      console.error("Failed to initialize RapidAPI hotel provider:", error);
+      return new NullHotelSearch();
     }
   }
 
-  // Default to enhanced mock
-  return new EnhancedMockHotelSearch();
+  if (process.env.ALLOW_MOCK_HOTELS === "1") {
+    return new EnhancedMockHotelSearch();
+  }
+
+  return new NullHotelSearch();
 }
 
 export function searchUnavailableReason(search: HotelSearch): string | null {
