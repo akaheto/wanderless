@@ -10,6 +10,7 @@ export interface CitySuggestion {
   flight_data?: string;
   visa_info?: string;
   climate_data?: string;
+  influencer_spots?: string;
   reviewed_at?: string;
   reviewed_by?: string;
   decision?: string;
@@ -97,6 +98,11 @@ export async function updateCitySuggestion(
   if (updates.climate_data) {
     fields.push("climate_data = ?");
     values.push(updates.climate_data);
+  }
+
+  if (updates.influencer_spots) {
+    fields.push("influencer_spots = ?");
+    values.push(updates.influencer_spots);
   }
 
   if (updates.decision) {

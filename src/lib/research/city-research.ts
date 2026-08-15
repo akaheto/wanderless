@@ -2,6 +2,12 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 
+export interface InfluencerSpot {
+  name: string;
+  type: string;
+  description: string;
+}
+
 export interface CityResearchResult {
   hotelData: {
     fourStarUSD: number;
@@ -16,6 +22,7 @@ export interface CityResearchResult {
   visaInfo: string;
   climateData: string;
   summary: string;
+  influencerSpots: InfluencerSpot[];
 }
 
 /**
@@ -86,7 +93,7 @@ export async function researchCity(
     // Check if destination is USA (no visa needed for US citizens)
     const isUSDestination = country.toLowerCase() === 'united states' || country.toLowerCase() === 'usa';
 
-    const [hotelSearch, flightSearch, visaSearch, climateSearch] =
+    const [hotelSearch, flightSearch, visaSearch, climateSearch, influencerSearch] =
       await Promise.all([
         webSearch(`${city} ${country} hotel prices 4-star 5-star average cost per night`),
         webSearch(`flights JFK New York to ${city} ${country} nonstop flight time duration hours`),
@@ -94,6 +101,7 @@ export async function researchCity(
           ? Promise.resolve("US citizens do not require a visa to travel to the United States.")
           : webSearch(`US passport holders visa requirements entry ${city} ${country} 2026`),
         webSearch(`${city} ${country} weather climate temperature best time to visit season`),
+        webSearch(`best Instagram-worthy Instagram spots cafes bars restaurants museums lookout points ${city} ${country}`),
       ]);
 
     const searchContext = `
@@ -108,6 +116,9 @@ ${visaSearch}
 
 CLIMATE SEARCH RESULTS:
 ${climateSearch}
+
+INFLUENCER/SOCIAL MEDIA SPOTS:
+${influencerSearch}
 `;
 
     const prompt = `Extract and return travel data. Do not reason, explain, or hesitate - just extract what you see.
@@ -122,9 +133,10 @@ Look for these specific values in the search results:
 4. Visa requirements: copy/paste the visa text
 5. Climate: copy/paste the climate/temperature text
 6. Summary: create a 1-sentence summary
+7. Influencer spots: extract 20-50 Instagram-worthy locations including bars, restaurants, cafes, museums, lookout points, etc. Each spot must have: real name, type (bar/restaurant/cafe/museum/lookout/other), and brief description
 
 REQUIRED OUTPUT (pure JSON, one line):
-{"hotelData":{"fourStarUSD":100,"fiveStarUSD":200,"source":""},"flightData":{"nonstop":false,"typicalHours":4,"source":""},"visaInfo":"","climateData":"","summary":""}`;
+{"hotelData":{"fourStarUSD":100,"fiveStarUSD":200,"source":""},"flightData":{"nonstop":false,"typicalHours":4,"source":""},"visaInfo":"","climateData":"","summary":"","influencerSpots":[{"name":"Spot Name","type":"category","description":"Brief description"}]}`;
 
     const message = await client.messages.create({
       model: "claude-sonnet-5",
@@ -179,12 +191,15 @@ REQUIRED OUTPUT (pure JSON, one line):
       (typeof research.flightData?.typicalHours === 'number' && research.flightData.typicalHours > 0) ||
       research.flightData?.nonstop === true;
     const hasSummary = research.summary && research.summary.length > 0;
+    const hasInfluencerSpots = Array.isArray(research.influencerSpots) && research.influencerSpots.length >= 20;
 
-    if (!hasSummary || (!hasHotelData && !hasFlightData)) {
+    if (!hasSummary || (!hasHotelData && !hasFlightData) || !hasInfluencerSpots) {
       console.error("[City Research] Incomplete research data received", {
         hasHotelData,
         hasFlightData,
         hasSummary,
+        hasInfluencerSpots,
+        spotsCount: research.influencerSpots?.length || 0,
         research,
       });
       return null;

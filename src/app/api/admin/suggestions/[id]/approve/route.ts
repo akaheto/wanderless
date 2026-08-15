@@ -69,6 +69,7 @@ export async function POST(
       flight_data: JSON.stringify(research.flightData),
       visa_info: research.visaInfo,
       climate_data: research.climateData,
+      influencer_spots: JSON.stringify(research.influencerSpots),
       research_notes: `Research complete: ${research.summary}`,
     });
 
