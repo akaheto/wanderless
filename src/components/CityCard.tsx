@@ -90,6 +90,7 @@ export function CityCard({
 
   const hotelData = suggestion.hotel_data ? JSON.parse(suggestion.hotel_data) : null;
   const flightData = suggestion.flight_data ? JSON.parse(suggestion.flight_data) : null;
+  const influencerSpots = suggestion.influencer_spots ? JSON.parse(suggestion.influencer_spots) : null;
 
   return (
     <div className={`rounded-lg border p-6 ${statusColors[suggestion.status as keyof typeof statusColors]}`}>
@@ -147,6 +148,27 @@ export function CityCard({
           <div>
             <p className="text-xs font-medium text-ink-2 uppercase">Climate</p>
             <p className="text-sm text-ink">{suggestion.climate_data}</p>
+          </div>
+        )}
+
+        {influencerSpots && influencerSpots.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-ink-2 uppercase mb-2">Influencer Spots ({influencerSpots.length})</p>
+            <div className="grid grid-cols-1 gap-2 text-sm">
+              {influencerSpots.map((spot: any, idx: number) => (
+                <div key={idx} className="rounded border border-line/50 bg-surface-1 p-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <p className="font-medium text-ink">{spot.name}</p>
+                      <p className="text-xs text-ink-2 mt-0.5">{spot.description}</p>
+                    </div>
+                    <span className="inline-block px-2 py-1 bg-accent/10 text-accent text-xs rounded font-medium whitespace-nowrap">
+                      {spot.type}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
