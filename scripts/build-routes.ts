@@ -287,7 +287,6 @@ async function main() {
 
     for (const [o, originAirport] of origins) {
       const { nonstop, seasonal } = serviceFrom(sections[o], arrival.name, ambiguous);
-      const connections = nonstop ? 0 : 1;
 
       // Airlines are not extracted: attributing a destination to a carrier needs the
       // table's row structure, which the interleaved citations make fragile. Existing
