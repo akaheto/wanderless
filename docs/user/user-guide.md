@@ -1,212 +1,335 @@
-# User guide
+# Wanderless User Guide
 
-How to use the Wanderless.
+**Find your next trip with confidence.** Wanderless replaces scattered browser tabs, spreadsheets, and half-remembered advice with one structured record that survives being put down for a month and picked back up.
 
-## The short version
+## Quick Start (5 minutes)
 
-1. **Create a trip** with a name and rough dates. Nothing else is required.
-2. **Compare destinations** for those dates, adjusting what matters to you.
-3. **Shortlist, reject or choose** straight from the results.
+### 1. Create a trip
+- Click **New Trip** in the sidebar
+- Give it a name (e.g., "Summer 2026 Europe")
+- Pick rough dates (they can change later)
+- Everything else is optional
 
-Everything is reversible, and rejections are kept on purpose.
+### 2. Compare destinations
+- Click **Compare** to rank the catalog for your dates
+- Adjust the sliders to match what you care about:
+  - **Temperature** — what feels good to you
+  - **Travel time** — how long you'll tolerate getting there
+  - **Budget** — what you're willing to spend per night
+  - **Other factors** — toggle what matters (food, beaches, culture, etc.)
+- The ranking updates live as you slide
 
-## Creating a trip
+### 3. Make a decision
+- Choose a destination directly, or shortlist several to decide between
+- Your trip planning status advances automatically
+- Rejected destinations stay visible so you remember what didn't work
 
-**Trips → New trip.** Only a name is required; everything else can come later.
+---
 
-Worth filling in early:
+## Understanding the Ranking
 
-- **Dates** drive the whole comparison. If they are not fixed, put your best guess and set
-  *How fixed are the dates?* — the flexibility setting is recorded and shown, so a future
-  you knows how much room there was.
-- **Departure airport** defaults to JFK. Journey times are quoted from here.
-- **Purpose** is free text and is never touched by anything automated. It is the thing that
-  makes a trip make sense again in two months.
+### Why is destination X ranked here?
 
-## Comparing destinations
+Every ranking shows:
+- **The winner** — top of the page, with explanation and the gap to #2
+- **A table** — scan left to right to compare destinations on each factor
+- **Full working** — click any destination to see what's in its favor, what's against it, and how the score breaks down
 
-Two ways in:
+### Reading the scores
 
-- **Compare destinations** in the sidebar — free-form, for exploring.
-- **Compare destinations** from inside a trip — dates and departure airport are locked to
-  that trip, so results always reflect the real plan.
+**"What looks wrong here?"** Three things are working as intended:
 
-Leave the destination checkboxes empty to rank the whole catalog, or tick a few to compare
-just those.
+1. **A destination scores lower after shortlisting it** — if the catalog rates it a bad time to visit during your dates, the score is automatically scaled down to prevent recommending somewhere because it's cheap and quiet in its worst season. This is labeled as a **seasonal gate** and it's intentional.
 
-### Reading the result
+2. **A destination jumps below everything else** — if it exceeds your maximum travel time, it's demoted below all destinations that fit, regardless of score. It's marked **over travel limit**. Raise your travel-time slider to bring it back.
 
-**Top of the ranking** is the headline answer with a paragraph explaining itself, plus the
-gap to the runner-up.
+3. **The score uses decimal places** — 76.43 is more precise than 76, and that precision matters when destinations are close. The app shows it because tie-breaking is worth seeing.
 
-**Side by side** is the table. Each row is a destination; each column a category. Scan a
-column to see who wins on that dimension.
+---
 
-**The working** is one card per destination: what is in its favour, what is against it, the
-full factor breakdown under *How the score is built*, and what the score rests on.
+## Planning a Trip Step by Step
 
-### Two things that will look wrong at first
+### Setting up your trip
 
-**A destination can rank below one with a lower score.** If it exceeds your maximum travel
-time, it sits below everything that fits, whatever it scores. It is marked *over travel
-limit*, and a note under the table says how many were demoted. Raise the travel-time slider
-to bring them back into contention.
+**Dates matter most.** They drive the comparison:
+- If your dates are fixed, set them exactly
+- If they're flexible, set your best guess and note the flexibility
+- The app remembers your flexibility, so future-you knows how much room there was
 
-**A score can be reduced after the fact.** If the catalog rates a destination a poor time
-to visit in your months, the total is scaled down and shown as `×0.76 seasonal gate (was
-76)`. This is deliberate — it stops somewhere being recommended because it is cheap and
-quiet in its worst season.
+**Departure airport** defaults to JFK (New York). If you're leaving from somewhere else, change it — journey times are calculated from here. You can set multiple departure cities for a round-trip.
 
-### Adjusting the brief
+**Purpose** is free text and never touched by automation. Examples: "Anniversary trip," "Recovering from a conference," "Winter escape." This is what makes the record make sense again in two months.
 
-Every slider re-runs the comparison. The two with the most effect:
+**Who's going** and **How fixed are the dates** are recorded but optional. They help you remember context.
 
-- **Ideal daytime high** — the temperature the weather score is measured against, not a
-  minimum.
-- **Maximum travel time** — a hard boundary, not a preference. See above.
+### Comparing destinations within your trip
 
-*How much each category counts* at the bottom re-weights the seven categories. Setting one
-to zero keeps it visible but stops it affecting the total.
+Click **Compare destinations** from your trip page. Your dates and departure airport are locked to this trip, so results always reflect your real plan.
 
-**The URL holds everything.** Bookmark a comparison and it comes back exactly as it was.
-Copy the link and it carries every slider position with it.
+**To compare just a few destinations**, tick the checkboxes. Leave them all empty to rank the entire catalog.
 
-## Making a decision
+**Adjusting your preferences** — every slider re-runs the ranking:
+- **Ideal daytime high** — the temperature the weather score is measured against (not a minimum or maximum, just ideal)
+- **Maximum travel time** — a hard boundary, not a preference
+- **Budget per night** — for hotels
+- **How much each category counts** — re-weight the seven scoring factors (food, culture, beaches, nightlife, day trips, nature, shopping)
 
-From a trip's comparison, each destination card has **Shortlist**, **Choose this** and
-**Reject**.
+**Bookmark the URL.** Every comparison is stored in the link, so you can share it or come back to it exactly as you left it.
 
-- **Shortlist** — still in play.
-- **Choose this** — the decision. Only one destination can hold it; choosing a second moves
-  it. The trip's planning status advances automatically.
-- **Reject** — out, but kept and visible. Knowing what you ruled out is half of why the
-  record is worth having.
+### Making a decision
 
-## Laying out the itinerary
+From your trip's comparison results, each destination card has three buttons:
 
-Once a trip has dates, the **Itinerary** panel on the trip page turns it into a sequence of
-stops. If you have already chosen a destination, one button starts you off with it for the
-whole trip.
+- **Shortlist** — still considering
+- **Choose this** — the decision. Only one destination can be chosen; choosing a second moves it from the previous one
+- **Reject** — out, but kept. Knowing what you ruled out is part of why the record matters
 
-**You allocate nights; the dates follow.** Stop one starts on your departure date, and each
-stop begins where the last one ended. This is why there is no date picker per stop — it is
-not possible to leave a gap or double-book a night. Move the trip's start date and the whole
-itinerary moves with it.
+Once you've chosen a destination, your trip automatically advances to the next stage: building an itinerary.
 
-The panel tells you three things at the top: how many stops, how the nights add up against
-the trip, and how many hours you spend moving between stops.
+---
 
-### When the nights don't add up
+## Building an Itinerary
 
-If your stops account for fewer nights than the trip has, you will see **"3 nights
-unallocated"**. More, and you get **"6 nights over — the itinerary runs past the return
-date"**. Neither is corrected for you; the stops keep the nights you gave them and the
-problem is stated. Change a night count, or add or remove a stop.
+Click **Itinerary** on your trip page. This is where you map out which cities you'll visit and how long you'll spend in each.
 
-### Transfer burden
+### You allocate nights, dates follow
 
-Between each pair of stops is the journey: mode, hours door to door, distance, and a
-judgement — *easy*, *half a day*, *a full day*, or *punishing*.
+- **Stop 1** starts on your trip's departure date
+- **Stop 2** starts where Stop 1 ends
+- And so on — no gaps, no double-bookings
 
-The hours are deliberately unflattering about flying. A 630 km domestic hop is modelled at
-about four and a half hours, because the flight is the short part — the airport is the rest.
-This is the number a night count hides, and the reason a "three-night stop" can turn out to
-be one full day.
+This is why there's no date picker per stop. Move your trip's start date and the whole itinerary moves with it.
 
-Two flags worth acting on:
+### What the panel shows
 
-- **"Transfer costs more than the stop is worth"** — the journey eats more than a third of
-  the waking hours the stop buys you. Stay longer or cut it.
-- **"A lot of this trip is transit"** — across the whole trip you are spending more time
-  moving than the itinerary can carry. Usually means one stop too many.
+At the top:
+- **Number of stops** — how many cities in your trip
+- **Night count** — total nights allocated vs. trip length (they should match)
+- **Travel time** — total hours spent moving between stops (this is often more than people expect)
 
-**Reordering changes the total.** Sequencing stops geographically rather than by preference
-often saves hours — the ↑ and ↓ arrows are worth experimenting with.
+### When nights don't add up
+
+- **"3 nights unallocated"** — you've allocated fewer nights than your trip has. Add more stops or increase night counts.
+- **"6 nights over"** — your itinerary runs past your return date. Remove a stop or reduce nights.
+
+Neither is corrected automatically; the record keeps the nights you gave it and tells you the problem clearly.
+
+### Understanding transfer time
+
+Between stops, you'll see the journey: mode, hours door-to-door, distance, and a difficulty judgment.
+
+**The hours are deliberately conservative.** A 2-hour flight looks like 4.5 hours because the flight is the short part — the airport is the rest. These are the hours a night count hides, and why a "3-night stop" can turn out to be just one full day in the city.
+
+**Two red flags to watch for:**
+- **"Transfer costs more than the stop is worth"** — the hours spent getting there eat more than a third of the waking hours you'll have there. Consider staying longer or cutting the stop.
+- **"A lot of this trip is transit"** — you're spending more time moving than actually in cities. Usually means one stop too many.
+
+### Reordering saves hours
+
+Use the ↑ and ↓ arrows to try different sequences. Sequencing stops geographically rather than by preference often saves surprising amounts of travel time.
 
 ### Climate per stop
 
-Each stop shows the temperature and expected wet days for **its own** dates, not the trip's
-average. On a long trip this matters more than it sounds: a fortnight in Vietnam can span
-Hanoi at 77°F and Ho Chi Minh City at 95°F.
+Each stop shows temperature and rain for **its own dates**, not your trip's average. On a long trip this matters: you might be enjoying 77°F in Hanoi while your next stop is 95°F.
 
-Transfer times are estimates from distance and typical airport overhead — not searched
-routes. The panel says so. Real flight timings arrive with Release 5; a few legs the model
-gets wrong are corrected by hand already, such as Krabi to Koh Samui, which crosses the
-peninsula and is a bus and a ferry rather than a drive.
+---
 
-## Looking at one destination
+## Exploring a Destination
 
-**Destination catalog** → any destination. The date picker at *Day by day, for these dates*
-changes the window everything is calculated for.
+Click **Destination Catalog** in the sidebar, then any destination.
 
-- **Climate through the year** — the annual shape, with your months highlighted.
-- **Day by day** — normals for your exact calendar days. Not a forecast.
-- **What that actually means** — plain-language readings for sightseeing, beach, outdoor
-  dining and daylight. This is interpretation, and is labelled as such.
-- **Compared with New York** — the same dates at home, for context.
-- **Season by season** — the curated month ratings and the notes behind them.
+Use the date picker at the top — it changes what you see **for those specific dates**. Default shows the whole year.
 
-## Where the numbers come from
+### Climate through the year
 
-**Data & sources** explains every source, when it was fetched, and — importantly — what is
-missing. Worth reading once.
+A graph of the annual shape, with your chosen dates highlighted. Tells you the pattern without reading numbers.
 
-Three kinds of number, marked wherever they appear:
+### Day-by-day normals
 
-- **Measured** — from a named source with a date. Climate, holidays.
-- **Curated** — editorial judgement with a review date. Seasonal ratings, cost bands,
-  journey times.
-- **Personal** — yours. Never overwritten by anything.
+Temperature and rain for each calendar day (not a forecast, but a historical average).
 
-Two gaps worth knowing about now:
+### What it actually means
 
-- **Holiday data is thin in places.** There is none for Thailand, the UAE or the Maldives,
-  and Vietnam's list omits Tết. An empty holiday list is not proof of a quiet week — the
-  app says so where it applies.
-- **Hotel costs are planning estimates**, not quotes, and flight times are typical journeys
-  rather than searched availability.
+Plain-language reading for:
+- **Sightseeing** — can you see what you came for
+- **Beach** — is the water swimmable
+- **Outdoor dining** — is it pleasant
+- **Daylight** — when sunrise/sunset are
 
-## Not built yet
+This is interpretation and is labeled as such. The underlying numbers are separate.
 
-Flights and hotels, and budget, appear as labelled placeholders on the trip page with the
-release they are coming in. They are shown rather than hidden so it is clear what the record
-will eventually hold.
+### Compared with New York
 
-## Saving places
+The same dates at home, for context. Useful for realizing "ah, it's like July in New York but dryer."
 
-The **Places** panel on a trip holds everything you have been told about — restaurants,
-beaches, markets, day trips. What makes it worth keeping, rather than a notes app, is that
-each entry records **who recommended it** and **when it was last checked**.
+### Season-by-season ratings
 
-Places are grouped under the stop they belong to, so you see what is near you when. A place
-whose destination is not on the itinerary appears under *Not on the itinerary* rather than
-being hidden.
+The curated month ratings (1–5 scale) and the editorial notes behind them. These come from a combination of climate data, tourism calendars, and local knowledge.
 
-### Verified, and how stale
+---
 
-Adding a place does not claim you checked it. Tick *I have just checked these details* only
-if you actually did — otherwise it saves as **never verified**, which is honest and is
-flagged.
+## Recording Places
 
-Staleness depends on what kind of place it is:
+The **Places** panel on your trip holds everything worth remembering: restaurants, beaches, markets, day trips, viewpoints.
 
-- **Restaurants, bars, cafés** go stale after about eighteen months.
-- **Shops and markets** after two years.
-- **Museums and sights** after three.
-- **Beaches, viewpoints, neighbourhoods** after five — a beach does not close.
+What makes it worth keeping instead of a notes app:
+- Each entry records **who recommended it** (friend, guidebook, etc.) and **when it was last checked**
+- Places are grouped under the stop they belong to, so you see what's near you when
 
-Anything stale or unverified gets a **Re-check this** link. Filling it in marks the place
-verified today. **It cannot touch your notes or your priority** — only the factual fields.
-That separation is deliberate: a refresh should never overwrite something you wrote.
+### Verify places as you research
 
-As departure gets closer the warnings sharpen. A stale place six months out is a note; three
-weeks out it is a problem worth acting on.
+When adding a place, you can tick **I have just checked these details** only if you actually did. Otherwise, it saves as **never verified**, which is honest and gets flagged.
+
+**Staleness depends on what it is:**
+- Restaurants, bars, cafés — go stale after 18 months
+- Shops and markets — after 2 years
+- Museums and sights — after 3 years
+- Beaches, viewpoints, neighborhoods — after 5 years
+
+Stale or unverified places get a **Re-check this** link. Filling it in marks the place verified today. **It can't touch your notes** — only the factual fields (hours, address, etc.). This separation is deliberate: a refresh should never overwrite something you wrote.
 
 ### Standing notes
 
-Leave a place unattached to any trip and it becomes a standing note on the destination. Next
-time you go there it is offered again, and **Add to this trip** copies it across while
-leaving the original in place. This is how the record gets better each time you use it.
+Leave a place unattached to any trip and it becomes a standing note on the destination. Next time you visit that destination, the place is offered to you. Click **Add to this trip** to copy it while keeping the original. This is how the record gets better each time you use it.
 
-You do not need an API key for any of this. Details are typed in by hand, which is the
-normal path — the best recommendations usually come from people rather than a database.
+You don't need an API key. Details are typed by hand, which is the normal path — the best recommendations usually come from people rather than a database.
+
+---
+
+## Budget & Bookings
+
+### Budget tracking
+
+The **Budget** panel on your trip tracks what you plan to spend and what's booked:
+- **Flights** (when searched or booked)
+- **Hotels** (per stop)
+- **Activities & dining**
+- **Other** (insurance, transit cards, etc.)
+
+Record estimated costs as you plan and actual costs as you book. This is where "why did that trip cost so much" gets answered.
+
+### Flights & hotels
+
+Flights and hotels can be recorded from searches or bookings. Include:
+- **Price** (converted to your trip's currency)
+- **Dates and times**
+- **Confirmation number** (when booked)
+- **Notes** (any gotchas: early check-in fee, luggage allowance, etc.)
+
+---
+
+## Data & Sources
+
+Click **Data & Sources** in the sidebar to see where every number comes from.
+
+### Three kinds of data
+
+1. **Measured** — from a named source with a date
+   - Climate (from weather normals, updated quarterly)
+   - Holidays (from official calendars)
+
+2. **Curated** — editorial judgement with a review date
+   - Seasonal ratings (1–5 scale, reviewed annually)
+   - Cost bands (updated quarterly)
+   - Journey times (updated when routes change)
+
+3. **Personal** — yours
+   - Notes, decisions, bookings, places
+   - Never overwritten by an update
+
+### Important gaps to know
+
+- **Holiday data is thin in places** — Thailand, UAE, Maldives have little data; Vietnam's list omits Tết (lunar new year)
+- **Hotel costs are estimates**, not quotes. They're shoulder-season averages from Booking.com, useful for comparison but not for booking
+- **Flight times are typical journeys**, not searched availability. They account for airport time and connections
+
+---
+
+## Sharing Your Trip
+
+Click the **Share** button on your trip page to generate a link.
+
+**Who can see it:**
+- The shared link shows: destination choice, itinerary, bookings, places
+- Hidden from the link: notes, priorities, budget, rejected options (you can explain those by email)
+
+**Sharing is read-only** — people with the link can't edit your trip.
+
+---
+
+## Tips & Tricks
+
+### Finding your way back
+- Bookmark comparisons (the URL holds everything)
+- Starred trips appear at the top of the sidebar
+- Search for trip name in the sidebar
+
+### Making better decisions
+- Adjust one slider at a time so you see what matters most
+- Check the seasonal gate explanation if a destination drops unexpectedly
+- Visit the destination page before choosing — see the month notes and climate details
+
+### Keeping notes useful
+- Update places as you research (date it so you know it's fresh)
+- Write context, not just names ("their fresh pasta is worth the trip" not "good pasta")
+- Standing notes are worth creating — next trip you'll have them ready to go
+
+### Handling trip changes
+- Change dates? The whole itinerary shifts with it
+- Replace a destination? Shortlist a new one, then choose it (the old choice moves)
+- Skip a stop? Set nights to 0 or delete it — the rest shuffle forward
+
+---
+
+## FAQ
+
+**Can I undo a choice?**
+Yes. Shortlist a different destination, then choose it. The old one goes back to shortlist. If you reject something by mistake, click its name to view it, then choose or shortlist it again.
+
+**What happens to my budget if I change the dates?**
+It stays put. Hotel costs are recalculated for the new dates if you re-run a comparison, but flight and explicit bookings stay as recorded.
+
+**Can I invite others to plan with me?**
+Not yet. You can share your trip (read-only), but multi-user editing is planned for a future release. For now, one person plans and shares the link.
+
+**Why is my hotel estimate way off?**
+Hotel costs are shoulder-season averages. Peak months (July–August in most places) are 20–50% higher. Extreme-low-season can be 20% cheaper. Use the trip's budget tracker to refine as you do real searches.
+
+**Can I change my departure city mid-trip?**
+Yes, but it recalculates all flight times. If you're visiting from two cities, you can record both airports when you search for flights (Phase 9).
+
+**How do I delete a trip?**
+Archive it instead (click **Archive** on the trip page). Archived trips still exist but don't clutter the sidebar. You can unarchive anytime.
+
+**Where do I find my research notes?**
+Research notes on destinations (climate, holidays, ratings) are in **Data & Sources**. Your personal notes are in the **Places** panel on each trip.
+
+---
+
+## Troubleshooting
+
+**My browser is showing an old ranking.**
+Bookmark URLs hold a snapshot. If destinations have been added to the catalog, the URL won't include them. Re-run the comparison to see the full catalog.
+
+**The climate data looks wrong for my dates.**
+Climate is **historical normal**, not forecast. It shows the average for those dates, not what will actually happen. Use a weather app 10 days before your trip for a forecast.
+
+**A destination doesn't appear in results.**
+It's either outside your maximum travel time or not in the curated catalog. Raise your travel-time slider to check if it's a travel-time issue. If it still doesn't appear, it hasn't been added to the catalog yet.
+
+**Why is the travel time estimate so high?**
+It includes airport time and connections, not just flight time. A "2-hour flight" usually takes 4–5 hours door to door.
+
+---
+
+## Getting Help
+
+Found a bug or have a feature request? Reach out to [support contact].
+
+Have a question this guide didn't answer? Check **Data & Sources** → **FAQ** or post in [community channel].
+
+---
+
+**Version:** 2.0  
+**Last updated:** August 2026  
+**Applies to:** Wanderless Release 8 and later

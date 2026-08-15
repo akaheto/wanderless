@@ -1,200 +1,164 @@
-import type { Metadata } from "next";
+'use client';
 
-export const metadata: Metadata = {
-  title: "User Guide · Wanderless",
-  description: "Learn how to use Wanderless to plan your trips and compare destinations.",
+import { PageHeader } from '@/components/ui';
+import Link from 'next/link';
+
+export const metadata = {
+  title: 'Help & Documentation · Wanderless',
+  description: 'Learn how to plan your next trip with Wanderless',
 };
 
 export default function HelpPage() {
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4">
-      <article className="prose prose-sm dark:prose-invert max-w-none">
-        <h1>User Guide</h1>
+    <div className="min-h-screen bg-surface-0">
+      <PageHeader title="Help & Documentation" subtitle="Learn how to make the most of Wanderless" />
 
-        <p>How to use Wanderless.</p>
+      <div className="mx-auto max-w-4xl px-6 py-8">
+        {/* Quick Links */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold text-ink mb-6">Get Started</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link href="#quick-start" className="block p-6 rounded-lg border border-line bg-surface-1 hover:bg-surface-2 transition">
+              <h3 className="font-semibold text-ink mb-2">🚀 Quick Start</h3>
+              <p className="text-sm text-ink-2">Get your first trip planned in 5 minutes</p>
+            </Link>
 
-        <h2>The short version</h2>
+            <Link href="#comparing" className="block p-6 rounded-lg border border-line bg-surface-1 hover:bg-surface-2 transition">
+              <h3 className="font-semibold text-ink mb-2">📊 Comparing Destinations</h3>
+              <p className="text-sm text-ink-2">Understand how the ranking works</p>
+            </Link>
 
-        <ol>
-          <li>
-            <strong>Create a trip</strong> with a name and rough dates. Nothing else is
-            required.
-          </li>
-          <li>
-            <strong>Compare destinations</strong> for those dates, adjusting what matters to
-            you.
-          </li>
-          <li>
-            <strong>Shortlist, reject or choose</strong> straight from the results.
-          </li>
-        </ol>
+            <Link href="#itinerary" className="block p-6 rounded-lg border border-line bg-surface-1 hover:bg-surface-2 transition">
+              <h3 className="font-semibold text-ink mb-2">📅 Building an Itinerary</h3>
+              <p className="text-sm text-ink-2">Plan your stops and travel time</p>
+            </Link>
+          </div>
+        </section>
 
-        <p>Everything is reversible, and rejections are kept on purpose.</p>
+        {/* Quick Start */}
+        <section id="quick-start" className="mb-12 scroll-mt-20">
+          <h2 className="text-2xl font-semibold text-ink mb-4">Quick Start (5 minutes)</h2>
+          <div className="space-y-4">
+            <div className="rounded-lg border border-line bg-surface-1 p-6">
+              <h3 className="font-semibold text-ink mb-2">1. Create a trip</h3>
+              <p className="text-sm text-ink-2">Click <strong>New Trip</strong> in the sidebar. Give it a name and pick dates. That's it!</p>
+            </div>
+            <div className="rounded-lg border border-line bg-surface-1 p-6">
+              <h3 className="font-semibold text-ink mb-2">2. Compare destinations</h3>
+              <p className="text-sm text-ink-2">Click <strong>Compare</strong> to see all destinations ranked for your dates. Adjust the sliders to match what you care about — temperature, travel time, budget, etc.</p>
+            </div>
+            <div className="rounded-lg border border-line bg-surface-1 p-6">
+              <h3 className="font-semibold text-ink mb-2">3. Make a decision</h3>
+              <p className="text-sm text-ink-2">Choose a destination and your trip advances to itinerary planning. Rejected options stay visible so you remember what didn't work.</p>
+            </div>
+          </div>
+        </section>
 
-        <h2>Creating a trip</h2>
+        {/* Understanding Rankings */}
+        <section id="comparing" className="mb-12 scroll-mt-20">
+          <h2 className="text-2xl font-semibold text-ink mb-4">Understanding the Ranking</h2>
+          <div className="space-y-4 text-sm text-ink-2">
+            <p>
+              Every ranking shows the winner at the top with an explanation, a table to compare destinations side-by-side, and full working for each destination so you can see exactly what's in its favor and what's against it.
+            </p>
+            <div className="rounded-lg bg-accent/5 border border-accent/20 p-4">
+              <p className="font-semibold text-ink mb-2">💡 Three things that look wrong but aren't:</p>
+              <ul className="space-y-2">
+                <li><strong>Score dropped</strong> — if a destination is a bad time to visit during your dates, we scale it down. This is the seasonal gate, working as intended.</li>
+                <li><strong>Jumped below everything</strong> — if it exceeds your travel-time limit, it's demoted below everything that fits. Raise your slider to reconsider.</li>
+                <li><strong>Decimal places</strong> — 76.43 vs 76 matters when destinations are close. We show it for transparency.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
 
-        <p>
-          <strong>Trips → New trip.</strong> Only a name is required; everything else can come
-          later.
-        </p>
+        {/* Itinerary */}
+        <section id="itinerary" className="mb-12 scroll-mt-20">
+          <h2 className="text-2xl font-semibold text-ink mb-4">Building an Itinerary</h2>
+          <div className="space-y-4 text-sm text-ink-2">
+            <p>
+              Once you've chosen a destination, click <strong>Itinerary</strong> to map out your stops. You allocate nights to each stop, and dates follow automatically.
+            </p>
+            <div className="rounded-lg border border-line bg-surface-1 p-4">
+              <p className="font-semibold text-ink mb-2">⏱ Travel time is conservative</p>
+              <p>A "2-hour flight" usually takes 4-5 hours door-to-door because the flight is the short part. These are the hours that hide in night counts, and why a "3-night stop" can feel like just one full day.</p>
+            </div>
+          </div>
+        </section>
 
-        <p>Worth filling in early:</p>
+        {/* Full Guide */}
+        <section className="mb-12 rounded-lg border border-accent/20 bg-accent/5 p-8">
+          <h2 className="text-2xl font-semibold text-ink mb-4">📚 Complete User Guide</h2>
+          <p className="text-ink-2 mb-6">
+            For detailed walkthroughs on every feature, data sources, troubleshooting and more, read the full user guide:
+          </p>
+          <a
+            href="/docs/user-guide"
+            className="inline-block px-6 py-3 bg-accent text-white rounded-lg font-medium hover:bg-accent-strong transition"
+          >
+            Read Full User Guide →
+          </a>
+        </section>
 
-        <ul>
-          <li>
-            <strong>Dates</strong> drive the whole comparison. If they are not fixed, put your
-            best guess and set <em>How fixed are the dates?</em> — the flexibility setting is
-            recorded and shown, so a future you knows how much room there was.
-          </li>
-          <li>
-            <strong>Departure airport</strong> defaults to JFK. Journey times are quoted from
-            here.
-          </li>
-          <li>
-            <strong>Purpose</strong> is free text and is never touched by anything automated.
-            It is the thing that makes a trip make sense again in two months.
-          </li>
-        </ul>
+        {/* FAQ */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold text-ink mb-6">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            <details className="rounded-lg border border-line bg-surface-1 p-4 cursor-pointer group">
+              <summary className="font-semibold text-ink group-open:text-accent">
+                Can I undo a choice?
+              </summary>
+              <p className="text-sm text-ink-2 mt-3">
+                Yes. Shortlist a different destination, then choose it. The old one goes back to shortlist.
+              </p>
+            </details>
 
-        <h2>Comparing destinations</h2>
+            <details className="rounded-lg border border-line bg-surface-1 p-4 cursor-pointer group">
+              <summary className="font-semibold text-ink group-open:text-accent">
+                How accurate are the hotel prices?
+              </summary>
+              <p className="text-sm text-ink-2 mt-3">
+                Hotel estimates are shoulder-season averages. Peak months are 20–50% higher. Extreme-low-season can be 20% cheaper. Use your budget tracker to refine as you search.
+              </p>
+            </details>
 
-        <p>Two ways in:</p>
+            <details className="rounded-lg border border-line bg-surface-1 p-4 cursor-pointer group">
+              <summary className="font-semibold text-ink group-open:text-accent">
+                Can multiple people edit one trip?
+              </summary>
+              <p className="text-sm text-ink-2 mt-3">
+                Not yet. You can share your trip (read-only), but multi-user editing is planned for a future release.
+              </p>
+            </details>
 
-        <ul>
-          <li>
-            <strong>Compare destinations</strong> in the sidebar — free-form, for exploring.
-          </li>
-          <li>
-            <strong>Compare destinations</strong> from inside a trip — dates and departure
-            airport are locked to that trip, so results always reflect the real plan.
-          </li>
-        </ul>
+            <details className="rounded-lg border border-line bg-surface-1 p-4 cursor-pointer group">
+              <summary className="font-semibold text-ink group-open:text-accent">
+                Why is climate data different from weather forecasts?
+              </summary>
+              <p className="text-sm text-ink-2 mt-3">
+                Climate shows historical averages for those dates, not the actual forecast. Use a weather app 10 days before your trip for predictions.
+              </p>
+            </details>
 
-        <p>
-          Leave the destination checkboxes empty to rank the whole catalog, or tick a few to
-          compare just those.
-        </p>
+            <details className="rounded-lg border border-line bg-surface-1 p-4 cursor-pointer group">
+              <summary className="font-semibold text-ink group-open:text-accent">
+                How do I delete or archive a trip?
+              </summary>
+              <p className="text-sm text-ink-2 mt-3">
+                Click <strong>Archive</strong> on the trip page to hide it from your sidebar. Archived trips still exist and can be unarchived. Permanent deletion isn't available to prevent accidents.
+              </p>
+            </details>
+          </div>
+        </section>
 
-        <h3>Reading the result</h3>
-
-        <p>
-          <strong>Top of the ranking</strong> is the headline answer with a paragraph explaining
-          itself, plus the gap to the runner-up.
-        </p>
-
-        <p>
-          <strong>Side by side</strong> is the table. Each row is a destination; each column a
-          category. Scan a column to see who wins on that dimension.
-        </p>
-
-        <p>
-          <strong>The working</strong> is one card per destination: what is in its favour, what
-          is against it, the full factor breakdown under <em>How the score is built</em>, and
-          what the score rests on.
-        </p>
-
-        <h3>Two things that will look wrong at first</h3>
-
-        <p>
-          <strong>A destination can rank below one with a lower score.</strong> If it exceeds
-          your maximum travel time, it sits below everything that fits, whatever it scores. It
-          is marked <em>over travel limit</em>, and a note under the table says how many were
-          demoted. Raise the travel-time slider to bring them back into contention.
-        </p>
-
-        <p>
-          <strong>A score can be reduced after the fact.</strong> If the catalog rates a
-          destination a poor time to visit in your months, the total is scaled down and shown as{" "}
-          <code>×0.76 seasonal gate (was 76)</code>. This is deliberate — it stops somewhere
-          being recommended because it is cheap and quiet in its worst season.
-        </p>
-
-        <h3>Adjusting the brief</h3>
-
-        <p>Every slider re-runs the comparison. The two with the most effect:</p>
-
-        <ul>
-          <li>
-            <strong>Ideal daytime high</strong> — the temperature the weather score is measured
-            against, not a minimum.
-          </li>
-          <li>
-            <strong>Maximum travel time</strong> — a hard boundary, not a preference. See above.
-          </li>
-        </ul>
-
-        <p>
-          <em>How much each category counts</em> at the bottom re-weights the seven categories.
-          Setting one to zero keeps it visible but stops it affecting the total.
-        </p>
-
-        <p>
-          <strong>The URL holds everything.</strong> Bookmark a comparison and it comes back
-          exactly as it was. Copy the link and it carries every slider position with it.
-        </p>
-
-        <h2>Making a decision</h2>
-
-        <p>
-          From a trip's comparison, each destination card has <strong>Shortlist</strong>,{" "}
-          <strong>Choose this</strong> and <strong>Reject</strong>.
-        </p>
-
-        <ul>
-          <li>
-            <strong>Shortlist</strong> — still in play.
-          </li>
-          <li>
-            <strong>Choose this</strong> — the decision. Only one destination can hold it;
-            choosing a second moves it. The trip's planning status advances automatically.
-          </li>
-          <li>
-            <strong>Reject</strong> — out, but kept and visible. Knowing what you ruled out is
-            half of why the record is worth having.
-          </li>
-        </ul>
-
-        <h2>Laying out the itinerary</h2>
-
-        <p>
-          Once a trip has dates, the <strong>Itinerary</strong> panel on the trip page turns it
-          into a sequence of stops. If you have already chosen a destination, one button starts
-          you off with it for the whole trip.
-        </p>
-
-        <p>
-          <strong>You allocate nights; the dates follow.</strong> Stop one starts on your
-          departure date, and each stop begins where the last one ended. This is why there is
-          no date picker per stop — it is not possible to leave a gap or double-book a night.
-          Move the trip's start date and the whole itinerary moves with it.
-        </p>
-
-        <p>
-          The panel tells you three things at the top: how many stops, how the nights add up
-          against the trip, and how many hours you spend moving between stops.
-        </p>
-
-        <h2>Suggesting new destinations</h2>
-
-        <p>
-          Don't see a city you want to visit? Use the <strong>Destination catalog</strong> page
-          to suggest new cities. Submit a city name and country, and it will be researched and
-          added to Wanderless for everyone to use.
-        </p>
-
-        <ul>
-          <li>Each user can suggest up to 10 cities per day</li>
-          <li>Suggestions are reviewed and researched by Wanderless</li>
-          <li>Approved cities appear in the catalog within 24-48 hours</li>
-        </ul>
-
-        <h2>Questions or feedback?</h2>
-
-        <p>
-          Contact us at <a href="mailto:support@wanderless.app">support@wanderless.app</a> with
-          any questions, suggestions, or feedback.
-        </p>
-      </article>
+        {/* Support */}
+        <section className="mb-12 rounded-lg border border-line/50 bg-surface-1 p-8">
+          <h2 className="text-2xl font-semibold text-ink mb-4">Need More Help?</h2>
+          <p className="text-ink-2 mb-6">
+            Check the <strong>Data & Sources</strong> page for where all numbers come from and additional FAQs. Found a bug or have a feature idea? We'd love to hear it.
+          </p>
+        </section>
+      </div>
     </div>
   );
 }

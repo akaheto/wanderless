@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/compare", label: "Compare destinations" },
   { href: "/destinations", label: "Destination catalog" },
   { href: "/sources", label: "Data & sources" },
+  { href: "/help", label: "Help & guides" },
 ];
 
 const ADMIN_LINKS = [
