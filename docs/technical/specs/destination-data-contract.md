@@ -650,6 +650,49 @@ not applied blind.
 
 ---
 
+## 5.2 Adding a destination must stay a one-step operation
+
+A `Destination` is not self-contained. It is the hub of several separately-generated
+reference datasets, and adding one means adding a row to every dataset that keys off it:
+
+| Dataset | Keyed by | Populated by | On miss today |
+|---|---|---|---|
+| Climate (`climate/*.json`) | `destination.id` | `npm run build:data` | **throws**, with instructions |
+| Routes (`routes.ts`) | `destination.id` | hand-maintained | silent fallback to `travel.*` |
+| Advisories (`advisories.json`) | `destination.country` | `npm run build:advisories` | "unavailable" card |
+| Holidays (`holidays.json`) | country code | `npm run build:data` | — |
+
+Nothing enforced this, which is why the catalog drifted (§3.7.4). Note the inconsistency in
+the last column: `climateFor` throws with a fix instruction, while `routesFor` returns
+`undefined` and lets `selectRoute` quietly substitute hand-written figures. **Loud is
+correct**; the silent one is how 57% of the catalog came to score off fallback data
+unnoticed.
+
+`tests/catalog-integrity.test.ts` holds every dataset to the loud standard regardless of how
+its own lookup behaves, so drift fails in CI rather than surfacing later as a stack trace in
+an unrelated module. It asserts: unique slug-shaped ids, climate present, routes present,
+country resolves to an advisory, no orphaned reference data, and no future-dated `curatedOn`.
+
+### 5.2.1 The quarantine ratchet
+
+The invariants are introduced against a catalog that already violates them — 26 destinations
+without routes, one country without an advisory. Rather than defer the guard until the
+backlog clears, the known gaps are enumerated in the test under two rules:
+
+1. **It may only shrink.** A newly added destination must never be listed. That is the point:
+   existing debt is capped, new debt is impossible.
+2. **It is self-cleaning.** An entry that no longer needs quarantine *fails the suite*, so
+   fixing a gap forces its removal instead of leaving the list to rot.
+
+Verified by injecting a synthetic destination with no reference data: the guard produced
+three failures naming the missing dataset and the command that populates it.
+
+Regenerating reference data is therefore part of adding a destination, not a follow-up —
+and Phase 5's shared pipeline should run these same assertions as its stage-5 gate, so the
+site and CLI paths inherit the guarantee rather than reimplementing it.
+
+---
+
 ## 6. Acceptance criteria
 
 1. The same city added via the site and via CLI produces byte-identical records apart from `curatedOn`.
