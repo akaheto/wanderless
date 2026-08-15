@@ -1,5 +1,3 @@
-'use client';
-
 import { PageHeader } from '@/components/ui';
 import Link from 'next/link';
 
@@ -11,7 +9,7 @@ export const metadata = {
 export default function HelpPage() {
   return (
     <div className="min-h-screen bg-surface-0">
-      <PageHeader title="Help & Documentation" subtitle="Learn how to make the most of Wanderless" />
+      <PageHeader title="Help & Documentation" lede="Learn how to make the most of Wanderless" />
 
       <div className="mx-auto max-w-4xl px-6 py-8">
         {/* Quick Links */}

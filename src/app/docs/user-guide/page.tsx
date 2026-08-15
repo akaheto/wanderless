@@ -1,5 +1,3 @@
-'use client';
-
 import { PageHeader } from '@/components/ui';
 import Link from 'next/link';
 
@@ -11,7 +9,7 @@ export const metadata = {
 export default function UserGuidePage() {
   return (
     <div className="min-h-screen bg-surface-0">
-      <PageHeader title="Wanderless User Guide" subtitle="Find your next trip with confidence" />
+      <PageHeader title="Wanderless User Guide" lede="Find your next trip with confidence" />
 
       <article className="mx-auto max-w-3xl px-6 py-8 prose prose-sm dark:prose-invert">
         <div className="mb-12">
