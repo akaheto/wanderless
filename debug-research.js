@@ -98,21 +98,11 @@ Return ONLY a JSON object (no other text) with these exact fields. IMPORTANT: Ex
   "summary": "<1-sentence description of ${city} as a travel destination>"
 }`;
 
-  console.log('\n🤖 CALLING CLAUDE (trying claude-opus)...');
+  console.log('\n🤖 CALLING CLAUDE (claude-opus-5)...');
   const message = await client.messages.create({
-    model: 'claude-opus',
+    model: 'claude-opus-5',
     max_tokens: 1024,
     messages: [{ role: 'user', content: prompt }],
-  }).catch(async (err) => {
-    if (err.status === 404) {
-      console.log('❌ Model not found. Trying claude-3-haiku...');
-      return await client.messages.create({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-      });
-    }
-    throw err;
   });
 
   let researchText = '';
@@ -161,5 +151,11 @@ Return ONLY a JSON object (no other text) with these exact fields. IMPORTANT: Ex
   return research;
 }
 
-// Run test
-researchCity('Austin', 'United states').catch(console.error);
+// Run test with both cities
+async function runTests() {
+  await researchCity('Austin', 'United states');
+  console.log('\n' + '='.repeat(80) + '\n');
+  await researchCity('Accra', 'Ghana');
+}
+
+runTests().catch(console.error);

@@ -127,7 +127,7 @@ REQUIRED OUTPUT (pure JSON, one line):
 {"hotelData":{"fourStarUSD":100,"fiveStarUSD":200,"source":""},"flightData":{"nonstop":false,"typicalHours":4,"source":""},"visaInfo":"","climateData":"","summary":""}`;
 
     const message = await client.messages.create({
-      model: "claude-opus-4-1-20250805",
+      model: "claude-opus-5",
       max_tokens: 1024,
       messages: [
         {
