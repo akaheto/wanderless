@@ -98,9 +98,9 @@ Return ONLY a JSON object (no other text) with these exact fields. IMPORTANT: Ex
   "summary": "<1-sentence description of ${city} as a travel destination>"
 }`;
 
-  console.log('\n🤖 CALLING CLAUDE (claude-opus-5)...');
+  console.log('\n🤖 CALLING CLAUDE (claude-sonnet-5)...');
   const message = await client.messages.create({
-    model: 'claude-opus-5',
+    model: 'claude-sonnet-5',
     max_tokens: 1024,
     messages: [{ role: 'user', content: prompt }],
   });
