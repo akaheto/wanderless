@@ -1,178 +1,139 @@
 /**
- * Travel Warnings & Advisories
- * US State Department and WHO health alerts
- * Data source: travel.state.gov, CDC, WHO
+ * Travel advisories, sourced live from the US State Department.
+ *
+ * This module previously shipped a hand-maintained table of 10 countries stamped
+ * `lastUpdated: '2024-08-10'`. It now reads the published feed, which covers all 214
+ * countries the State Department rates. See `state-dept-feed.ts` for the parser and
+ * `scripts/verify-advisory-coverage.ts` for the guard that keeps the catalog joined
+ * to it.
+ *
+ * Advisories are country-scoped. The old table was keyed by city, which is why only
+ * ten destinations ever resolved.
  */
 
-export type TravelWarningLevel = 'level1' | 'level2' | 'level3' | 'level4';
+import "server-only";
 
-export interface TravelWarning {
-  level: TravelWarningLevel;
-  title: string;
-  description: string;
-  category: 'safety' | 'health' | 'political' | 'crime' | 'natural-disaster';
-  effectiveDate: string;
-  source: string;
-  url?: string;
-}
+import {
+  ADVISORY_SOURCE,
+  countryKey,
+  fetchAdvisoryIndex,
+  normalizeCountry,
+  type AdvisoryLevel,
+} from "./state-dept-feed";
+
+export type TravelWarningLevel = "level1" | "level2" | "level3" | "level4";
 
 export interface CityTravelAdvisory {
+  /** Country as the State Department names it, which may differ from the catalog's. */
   country: string;
-  city: string;
   advisoryLevel: TravelWarningLevel;
+  /** The clause the State Department attaches to the level. */
   advisoryTitle: string;
-  warnings: TravelWarning[];
-  lastUpdated: string;
+  /** Opening of the advisory body, tags stripped. */
+  summary: string;
+  /**
+   * The date the State Department last revised *this* advisory — not the date we
+   * fetched it (spec §3.6.1).
+   *
+   * These legitimately run old: a country whose advisory has not been revised in two
+   * years is a stable one, and that is meaningful rather than a data failure. Showing
+   * a fetch date here would misrepresent a 2024 position as a fresh one.
+   */
+  sourceRevisedOn: string;
   sourceUrl: string;
+  sourceName: string;
 }
 
 /**
- * Travel warning levels (US State Department)
- * Level 1: Exercise Normal Precautions
- * Level 2: Exercise Increased Caution
- * Level 3: Reconsider Travel
- * Level 4: Do Not Travel
+ * Either an advisory, or a stated reason there isn't one.
+ *
+ * Deliberately not `CityTravelAdvisory | undefined`. An absent advisory section reads
+ * to a traveller as "no problems here", so the failure has to be representable and
+ * rendered, not silently dropped.
  */
+export type AdvisoryResult =
+  | { status: "ok"; advisory: CityTravelAdvisory; asOf: string }
+  | { status: "unavailable"; reason: string; asOf: string };
 
-export const TRAVEL_ADVISORIES: Record<string, CityTravelAdvisory> = {
-  paris: {
-    country: 'France',
-    city: 'Paris',
-    advisoryLevel: 'level1',
-    advisoryTitle: 'Exercise Normal Precautions',
-    warnings: [],
-    lastUpdated: '2024-08-10',
-    sourceUrl: 'https://travel.state.gov/destinations/france',
-  },
-  london: {
-    country: 'United Kingdom',
-    city: 'London',
-    advisoryLevel: 'level1',
-    advisoryTitle: 'Exercise Normal Precautions',
-    warnings: [],
-    lastUpdated: '2024-08-10',
-    sourceUrl: 'https://travel.state.gov/destinations/united-kingdom',
-  },
-  rome: {
-    country: 'Italy',
-    city: 'Rome',
-    advisoryLevel: 'level1',
-    advisoryTitle: 'Exercise Normal Precautions',
-    warnings: [],
-    lastUpdated: '2024-08-10',
-    sourceUrl: 'https://travel.state.gov/destinations/italy',
-  },
-  barcelona: {
-    country: 'Spain',
-    city: 'Barcelona',
-    advisoryLevel: 'level1',
-    advisoryTitle: 'Exercise Normal Precautions',
-    warnings: [],
-    lastUpdated: '2024-08-10',
-    sourceUrl: 'https://travel.state.gov/destinations/spain',
-  },
-  amsterdam: {
-    country: 'Netherlands',
-    city: 'Amsterdam',
-    advisoryLevel: 'level1',
-    advisoryTitle: 'Exercise Normal Precautions',
-    warnings: [],
-    lastUpdated: '2024-08-10',
-    sourceUrl: 'https://travel.state.gov/destinations/netherlands',
-  },
-  madrid: {
-    country: 'Spain',
-    city: 'Madrid',
-    advisoryLevel: 'level1',
-    advisoryTitle: 'Exercise Normal Precautions',
-    warnings: [],
-    lastUpdated: '2024-08-10',
-    sourceUrl: 'https://travel.state.gov/destinations/spain',
-  },
-  istanbul: {
-    country: 'Turkey',
-    city: 'Istanbul',
-    advisoryLevel: 'level2',
-    advisoryTitle: 'Exercise Increased Caution',
-    warnings: [
-      {
-        level: 'level2',
-        title: 'Security Concerns',
-        description: 'Terrorist organizations including ISIS and al-Qaeda have targeted tourist areas',
-        category: 'safety',
-        effectiveDate: '2024-01-01',
-        source: 'US State Department',
-        url: 'https://travel.state.gov/destinations/turkey',
-      },
-    ],
-    lastUpdated: '2024-08-10',
-    sourceUrl: 'https://travel.state.gov/destinations/turkey',
-  },
-  prague: {
-    country: 'Czech Republic',
-    city: 'Prague',
-    advisoryLevel: 'level1',
-    advisoryTitle: 'Exercise Normal Precautions',
-    warnings: [],
-    lastUpdated: '2024-08-10',
-    sourceUrl: 'https://travel.state.gov/destinations/czech-republic',
-  },
-  vienna: {
-    country: 'Austria',
-    city: 'Vienna',
-    advisoryLevel: 'level1',
-    advisoryTitle: 'Exercise Normal Precautions',
-    warnings: [],
-    lastUpdated: '2024-08-10',
-    sourceUrl: 'https://travel.state.gov/destinations/austria',
-  },
-  lisbon: {
-    country: 'Portugal',
-    city: 'Lisbon',
-    advisoryLevel: 'level1',
-    advisoryTitle: 'Exercise Normal Precautions',
-    warnings: [],
-    lastUpdated: '2024-08-10',
-    sourceUrl: 'https://travel.state.gov/destinations/portugal',
-  },
+const LEVEL_KEY: Record<AdvisoryLevel, TravelWarningLevel> = {
+  1: "level1",
+  2: "level2",
+  3: "level3",
+  4: "level4",
 };
 
 /**
- * Get travel advisory for a city
+ * Look up the advisory governing a destination's country.
+ *
+ * @param country Catalog country name; aliased onto the feed's naming internally.
  */
-export function getTravelAdvisory(city: string): CityTravelAdvisory | null {
-  const normalized = city.toLowerCase().trim();
-  return TRAVEL_ADVISORIES[normalized] || null;
+export async function getTravelAdvisory(country: string): Promise<AdvisoryResult> {
+  // Read the clock here rather than in the component: this is a plain async function,
+  // where doing so is legitimate, and it gives the UI a pinned `asOf` to measure
+  // advisory age against without calling an impure function during render.
+  const asOf = new Date().toISOString().slice(0, 10);
+
+  const index = await fetchAdvisoryIndex();
+  if (!index.ok) {
+    return { status: "unavailable", reason: index.reason, asOf };
+  }
+
+  const normalized = normalizeCountry(country);
+  const hit = index.value.get(countryKey(normalized));
+
+  if (!hit) {
+    // A name the feed does not publish. Surfaced rather than swallowed so it gets
+    // fixed in COUNTRY_ALIASES — run scripts/verify-advisory-coverage.ts.
+    return {
+      status: "unavailable",
+      reason: `No published State Department advisory matches "${country}"`,
+      asOf,
+    };
+  }
+
+  return {
+    status: "ok",
+    asOf,
+    advisory: {
+      country: hit.country,
+      advisoryLevel: LEVEL_KEY[hit.level],
+      advisoryTitle: hit.headline,
+      summary: hit.summary,
+      sourceRevisedOn: hit.publishedOn,
+      sourceUrl: hit.url,
+      sourceName: ADVISORY_SOURCE,
+    },
+  };
 }
 
 /**
- * Get advisory level color/styling
+ * Advisory level as a themed colour set.
+ *
+ * Colour never carries the level on its own — every caller pairs this with the label
+ * below.
  */
 export function getAdvisoryColor(level: TravelWarningLevel): string {
   switch (level) {
-    case 'level1':
-      return 'bg-good/20 border-good text-good'; // Green
-    case 'level2':
-      return 'bg-warning/20 border-warning text-warning'; // Orange
-    case 'level3':
-      return 'bg-serious/20 border-serious text-serious'; // Red
-    case 'level4':
-      return 'bg-critical/20 border-critical text-critical'; // Dark Red
+    case "level1":
+      return "bg-good/20 border-good text-good";
+    case "level2":
+      return "bg-warning/20 border-warning text-warning";
+    case "level3":
+      return "bg-serious/20 border-serious text-serious";
+    case "level4":
+      return "bg-critical/20 border-critical text-critical";
   }
 }
 
-/**
- * Get advisory level label
- */
 export function getAdvisoryLabel(level: TravelWarningLevel): string {
   switch (level) {
-    case 'level1':
-      return 'Normal Precautions';
-    case 'level2':
-      return 'Increased Caution';
-    case 'level3':
-      return 'Reconsider Travel';
-    case 'level4':
-      return 'Do Not Travel';
+    case "level1":
+      return "Normal Precautions";
+    case "level2":
+      return "Increased Caution";
+    case "level3":
+      return "Reconsider Travel";
+    case "level4":
+      return "Do Not Travel";
   }
 }

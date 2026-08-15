@@ -220,6 +220,77 @@ export function TierMark({ tier }: { tier: Tier }) {
   );
 }
 
+/**
+ * How old a fact is *at its source*, next to the source's name.
+ *
+ * The date shown is always the source's own — when the publisher last revised the
+ * fact — never when we fetched it. Those differ, and conflating them is how stale data
+ * comes to look fresh: a State Department advisory last revised in 2024 would otherwise
+ * render as "verified today" simply because the feed was read this morning.
+ *
+ * An old date is not automatically a problem. Climate normals are drawn from a decade
+ * of observations, and an advisory untouched for two years describes a stable country.
+ * `staleAfterDays` is therefore per-source, and only past it does the age draw attention.
+ */
+export function DataAge({
+  source,
+  sourceDate,
+  asOf,
+  staleAfterDays,
+  label = "revised",
+}: {
+  source: string;
+  /** ISO date (YYYY-MM-DD) the source last revised this fact. */
+  sourceDate: string;
+  /**
+   * The clock this age is measured against, supplied by the caller.
+   *
+   * Passed in rather than read from `Date.now()` here: reading the clock during render
+   * is impure, and it would make the component untestable for exactly the reason
+   * `checkStaleness` takes its own `asOf` — every assertion would change meaning as the
+   * calendar advanced.
+   */
+  asOf: string;
+  /** Age past which this particular source should be re-read. Omit for none. */
+  staleAfterDays?: number;
+  /** Verb describing what the date represents, e.g. "revised", "measured". */
+  label?: string;
+}) {
+  const parsed = Date.parse(sourceDate);
+  const now = Date.parse(asOf);
+
+  if (Number.isNaN(parsed) || Number.isNaN(now)) {
+    return (
+      <span className="text-[11px] text-ink-3">
+        {source} · <span className="text-warning">undated</span>
+      </span>
+    );
+  }
+
+  const days = Math.max(0, Math.floor((now - parsed) / 86_400_000));
+  const age =
+    days < 1
+      ? "today"
+      : days < 30
+        ? `${days}d ago`
+        : days < 365
+          ? `${Math.floor(days / 30)}mo ago`
+          : `${(days / 365).toFixed(days < 730 ? 1 : 0)}y ago`;
+
+  const stale = staleAfterDays !== undefined && days > staleAfterDays;
+
+  return (
+    <span className="text-[11px] text-ink-3">
+      {source} · {label} {sourceDate} ·{" "}
+      <span className={stale ? "font-medium text-warning" : ""}>
+        {/* Staleness is carried by colour, so it is also stated for screen readers. */}
+        {stale && <span className="sr-only">Stale: </span>}
+        {age}
+      </span>
+    </span>
+  );
+}
+
 const WARNING_DOT: Record<DataWarning["severity"], string> = {
   serious: "var(--serious)",
   warning: "var(--warning)",
