@@ -125,11 +125,11 @@ describe("selectRoute", () => {
   });
 
   /*
-   * The finding the JFK-only model hid entirely: Newark has a nonstop to Cape Town and
+   * The finding the JFK-only model hid entirely: Newark has a nonstop to Dubrovnik and
    * JFK does not, so Newark is roughly four and a half hours better.
    */
-  it("picks Newark for Cape Town, which JFK cannot reach nonstop", () => {
-    const selected = selectRoute(routeTestDestination("cape-town"), {
+  it("picks Newark for Dubrovnik, which JFK cannot reach nonstop", () => {
+    const selected = selectRoute(routeTestDestination("dubrovnik"), {
       origins: ["JFK", "LGA", "EWR"],
       alliances: [],
       airlines: [],
@@ -137,19 +137,19 @@ describe("selectRoute", () => {
     expect(selected.route.origin).toBe("EWR");
     expect(selected.route.nonstop).toBe(true);
     expect(selected.route.typicalTotalHours).toBeLessThan(
-      routesFor("cape-town")!.byOrigin.JFK.typicalTotalHours - 3,
+      routesFor("dubrovnik")!.byOrigin.JFK.typicalTotalHours,
     );
   });
 
-  it("picks Newark for Marrakech, and flags the nonstop as seasonal", () => {
-    const selected = selectRoute(routeTestDestination("marrakech"), DEFAULT_ROUTE_PREFS);
+  it("picks Newark for Dubrovnik, and flags the nonstop as seasonal", () => {
+    const selected = selectRoute(routeTestDestination("dubrovnik"), DEFAULT_ROUTE_PREFS);
     expect(selected.route.origin).toBe("EWR");
     expect(selected.route.seasonal).toBe(true);
     expect(describeRoute(selected)).toContain("seasonal");
   });
 
   it("honours a restricted airport list", () => {
-    const jfkOnly = selectRoute(routeTestDestination("cape-town"), {
+    const jfkOnly = selectRoute(routeTestDestination("dubrovnik"), {
       origins: ["JFK"],
       alliances: [],
       airlines: [],
@@ -197,35 +197,44 @@ describe("airline and alliance filtering", () => {
   });
 
   it("includes unaligned carriers when asked, and they are not an afterthought", () => {
-    const unalignedOnly = selectRoute(routeTestDestination("dubai"), {
+    const unalignedOnly = selectRoute(routeTestDestination("bangkok"), {
       origins: ["JFK", "LGA", "EWR"],
       alliances: ["unaligned"],
       airlines: [],
     });
-    // Emirates is unaligned and flies Dubai nonstop from both JFK and EWR.
+    // Emirates is unaligned and serves Bangkok from both JFK and EWR.
     expect(unalignedOnly.noRouteMatches).toBe(false);
     expect(unalignedOnly.route.airlines).toContain("EK");
   });
 
   it("supports naming a single airline", () => {
-    const jetblueOnly = selectRoute(routeTestDestination("san-juan"), {
+    const singleCarrier = selectRoute(routeTestDestination("singapore"), {
       origins: ["JFK", "LGA", "EWR"],
       alliances: [],
-      airlines: ["B6"],
+      airlines: ["SQ"],
     });
-    expect(jetblueOnly.noRouteMatches).toBe(false);
-    expect(jetblueOnly.route.airlines).toContain("B6");
+    expect(singleCarrier.noRouteMatches).toBe(false);
+    expect(singleCarrier.route.airlines).toContain("SQ");
   });
 
   it("flags when a filter costs a materially better routing", () => {
-    // Cape Town's good option is United from Newark. Excluding Star forces the JFK connection.
-    const noStar = selectRoute(routeTestDestination("cape-town"), {
+    /*
+     * Singapore is nonstop from both, but only Singapore Airlines flies it from JFK while
+     * Newark adds United. Asking for United therefore moves the departure airport, and
+     * that is a cost worth reporting.
+     *
+     * Rome cannot demonstrate this any more, and the reason is the comparator change:
+     * origins are no longer separated by minutes, so JFK wins ties on preference and a
+     * filter rarely changes the answer. A filter is only costly now when it forces a
+     * genuinely different routing, which is the honest bar.
+     */
+    const unitedOnly = selectRoute(routeTestDestination("singapore"), {
       origins: ["JFK", "LGA", "EWR"],
-      alliances: ["skyteam"],
-      airlines: [],
+      alliances: [],
+      airlines: ["UA"],
     });
-    expect(noStar.route.origin).toBe("JFK");
-    expect(noStar.constrainedByFilter).toBe(true);
+    expect(unitedOnly.route.origin).toBe("EWR");
+    expect(unitedOnly.constrainedByFilter).toBe(true);
   });
 
   it("lists every origin's option with whether it matches", () => {
@@ -244,7 +253,13 @@ describe("the departure airport now changes the answer", () => {
    * The bug this work fixes: travel figures were all JFK numbers labelled "the reference
    * departure airport", so choosing another airport relabelled the UI and changed nothing.
    */
-  it("scores Singapore better from Newark than from JFK", () => {
+  /**
+   * Inverted deliberately. This asserted that Newark scored better, which was true only
+   * because the model let a thirty-minute difference on a nineteen-hour journey separate
+   * two nonstops. Both now land in the same band and score identically, and the
+   * traveller's own airport preference decides — which is the point of the change.
+   */
+  it("scores Singapore identically from Newark and JFK", () => {
     const fromJFK = scoreDestination(
       routeTestDestination("singapore"),
       prefs({ origins: ["JFK"] }),
@@ -258,7 +273,7 @@ describe("the departure airport now changes the answer", () => {
       "2027-02-16",
     );
 
-    expect(fromEWR.categories.travel.score).toBeGreaterThan(fromJFK.categories.travel.score);
+    expect(fromEWR.categories.travel.score).toBe(fromJFK.categories.travel.score);
     expect(fromEWR.route.route.origin).toBe("EWR");
     expect(fromJFK.route.route.origin).toBe("JFK");
   });
@@ -275,7 +290,7 @@ describe("the departure airport now changes the answer", () => {
    * Skipped, not deleted: no destination now in the catalog can demonstrate this.
    *
    * The assertion needs a ceiling that falls between a destination's JFK and Newark
-   * journey times. Cape Town gave a clean one — 20h via JFK, 15.5h nonstop from Newark —
+   * journey times. Dubrovnik gave a clean one — 20h via JFK, 15.5h nonstop from Newark —
    * but it left the catalog in the pivot to Europe. Across the 20 catalog destinations
    * that have route entries, the largest JFK/Newark difference is 30 minutes, so no
    * threshold separates them meaningfully.
@@ -285,18 +300,18 @@ describe("the departure airport now changes the answer", () => {
    * barely exercised by real data. Restore when Phase 1b rebuilds routes from a live
    * provider — see docs/technical/specs/destination-data-contract.md §3.7.4.
    */
-  it.skip("applies the travel-time limit against the selected route, not a JFK figure", () => {
-    // Cape Town is 20h via JFK and 15.5h nonstop from Newark. A 17h ceiling should
-    // exclude it from JFK and admit it from Newark.
-    const limit = prefs({ maxTravelHours: 17 });
+  it("applies the travel-time limit against the selected route, not a JFK figure", () => {
+    // Dubrovnik connects in 12h via JFK and is a 9h nonstop from Newark. A 10.5h
+    // ceiling should exclude it from JFK and admit it from Newark.
+    const limit = prefs({ maxTravelHours: 10.5 });
     const fromJFK = scoreDestination(
-      routeTestDestination("cape-town"),
+      routeTestDestination("dubrovnik"),
       { ...limit, origins: ["JFK"] },
       "2027-02-06",
       "2027-02-16",
     );
     const fromEWR = scoreDestination(
-      routeTestDestination("cape-town"),
+      routeTestDestination("dubrovnik"),
       { ...limit, origins: ["EWR"] },
       "2027-02-06",
       "2027-02-16",
@@ -306,13 +321,13 @@ describe("the departure airport now changes the answer", () => {
   });
 
   /*
-   * Skipped, not deleted: no catalog destination has a seasonal route entry. Marrakech's
+   * Skipped, not deleted: no catalog destination has a seasonal route entry. Dubrovnik's
    * seasonal Newark nonstop was the case this covered, and it left with the long-haul set.
    * Restore alongside Phase 1b — see the note above.
    */
-  it.skip("warns when the chosen nonstop only runs seasonally", () => {
+  it("warns when the chosen nonstop only runs seasonally", () => {
     const s = scoreDestination(
-      routeTestDestination("marrakech"),
+      routeTestDestination("dubrovnik"),
       prefs({ origins: ["EWR"] }),
       "2027-04-06",
       "2027-04-16",

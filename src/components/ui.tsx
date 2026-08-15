@@ -291,6 +291,81 @@ export function DataAge({
   );
 }
 
+/**
+ * Where a section's data came from — a build-time overlay, not a permanent surface.
+ *
+ * The catalog mixes measured data with editorial judgement and renders both identically.
+ * A destination card shows climate normals drawn from ERA5 next to a nightlife score
+ * somebody typed, and nothing distinguishes them. That is how a fabricated hotel price
+ * survives review: it looks exactly like a measured one.
+ *
+ *   sourced     a named external source, with the date it published
+ *   derived     computed from sourced data by a deterministic rule
+ *   unverified  editorial judgement nobody has confirmed — marked, and meant to be
+ *   missing     the section has no data at all
+ *
+ * `sourced` renders quietly and `derived` almost as quietly, so a mark means something.
+ * A card with no amber on it is the goal state, and should be visibly reachable.
+ *
+ * Controlled by NEXT_PUBLIC_DATA_PROVENANCE_OVERLAY so it can be switched off in one
+ * place once the catalog no longer needs it.
+ */
+export type FieldStatus = "sourced" | "derived" | "unverified" | "missing";
+
+export function overlayEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_DATA_PROVENANCE_OVERLAY === "1";
+}
+
+export function Provenance({
+  status,
+  source,
+  sourceDate,
+  asOf,
+  note,
+}: {
+  status: FieldStatus;
+  /** Who published it. Required for `sourced`, meaningless for `unverified`. */
+  source?: string;
+  /** ISO date the source last revised it — never our fetch date. */
+  sourceDate?: string;
+  /** Clock to measure age against, so nothing impure is read during render. */
+  asOf?: string;
+  note?: string;
+}) {
+  if (!overlayEnabled()) return null;
+
+  if (status === "sourced" && source && sourceDate && asOf) {
+    return <DataAge source={source} sourceDate={sourceDate} asOf={asOf} label="measured" />;
+  }
+
+  if (status === "sourced" || status === "derived") {
+    return (
+      <span className="text-[11px] text-ink-3">
+        {status === "derived" ? "derived" : "measured"}
+        {source ? ` · ${source}` : ""}
+        {note ? ` · ${note}` : ""}
+      </span>
+    );
+  }
+
+  // Unverified and missing are the ones worth looking at, so they carry weight — and
+  // say so in words, never by colour alone.
+  const label = status === "missing" ? "no data" : "unverified";
+  const detail =
+    note ?? (status === "missing" ? "nothing recorded" : "editorial judgement, unconfirmed");
+
+  return (
+    <span
+      title={detail}
+      className="inline-flex items-center gap-1 rounded border border-warning/50 px-1.5 py-px text-[10.5px] font-medium tracking-wide text-warning uppercase"
+    >
+      <span aria-hidden>△</span>
+      {label}
+      <span className="sr-only"> — {detail}</span>
+    </span>
+  );
+}
+
 const WARNING_DOT: Record<DataWarning["severity"], string> = {
   serious: "var(--serious)",
   warning: "var(--warning)",

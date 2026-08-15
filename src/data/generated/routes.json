@@ -1,0 +1,1684 @@
+{
+  "generatedOn": "2026-08-15",
+  "source": "Wikipedia airport 'Airlines and destinations' tables",
+  "sourceKind": "crowdsourced",
+  "note": "Nonstop status and seasonality are read from the tables. Journey length is derived from great-circle distance and is only claimed accurate to its band. Airlines are not extracted.",
+  "origins": [
+    "JFK",
+    "EWR",
+    "LGA"
+  ],
+  "count": 46,
+  "routes": {
+    "hanoi": {
+      "destinationId": "hanoi",
+      "arrivalAirport": "HAN",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 19,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "NH",
+            "CX",
+            "QR",
+            "EK"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 19,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "QR",
+            "EK",
+            "TK"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "NH",
+            "CX",
+            "QR",
+            "EK"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "hcmc": {
+      "destinationId": "hcmc",
+      "arrivalAirport": "SGN",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "EK",
+            "QR",
+            "CX"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "QR",
+            "EK",
+            "TK"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 21.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "EK",
+            "QR",
+            "CX"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "hoi-an": {
+      "destinationId": "hoi-an",
+      "arrivalAirport": "DAD",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 19.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "SQ",
+            "CX"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 19.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "SQ",
+            "QR"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 21,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "SQ",
+            "CX"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "phu-quoc": {
+      "destinationId": "phu-quoc",
+      "arrivalAirport": "PQC",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "SQ",
+            "EK",
+            "QR"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "SQ",
+            "QR"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 22,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "SQ",
+            "EK",
+            "QR"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "bangkok": {
+      "destinationId": "bangkok",
+      "arrivalAirport": "BKK",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 20,
+          "typicalConnections": 1,
+          "airlines": [
+            "EK",
+            "QR",
+            "EY",
+            "KE",
+            "CX",
+            "NH",
+            "TK"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 20,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "EK",
+            "QR",
+            "TK",
+            "SQ"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 21.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "EK",
+            "QR",
+            "EY",
+            "KE",
+            "CX",
+            "NH",
+            "TK"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "phuket": {
+      "destinationId": "phuket",
+      "arrivalAirport": "HKT",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "EK",
+            "QR",
+            "SQ",
+            "CX"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "EK",
+            "QR",
+            "SQ"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 22,
+          "typicalConnections": 1,
+          "airlines": [
+            "EK",
+            "QR",
+            "SQ",
+            "CX"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "krabi": {
+      "destinationId": "krabi",
+      "arrivalAirport": "KBV",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "EK",
+            "QR",
+            "SQ"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "EK",
+            "QR",
+            "SQ"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 22,
+          "typicalConnections": 1,
+          "airlines": [
+            "EK",
+            "QR",
+            "SQ"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "koh-samui": {
+      "destinationId": "koh-samui",
+      "arrivalAirport": "USM",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "EK",
+            "QR",
+            "SQ",
+            "CX"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 20.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "EK",
+            "QR",
+            "SQ"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 22,
+          "typicalConnections": 1,
+          "airlines": [
+            "EK",
+            "QR",
+            "SQ",
+            "CX"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "palawan": {
+      "destinationId": "palawan",
+      "arrivalAirport": "PPS",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 20,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "EK",
+            "QR",
+            "CX"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 20,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "EK",
+            "QR"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 21.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "EK",
+            "QR",
+            "CX"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "boracay": {
+      "destinationId": "boracay",
+      "arrivalAirport": "MPH",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 20,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "EK",
+            "CX"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 20,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "EK",
+            "QR"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 21.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "EK",
+            "CX"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "siargao": {
+      "destinationId": "siargao",
+      "arrivalAirport": "IAO",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 20,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "CX",
+            "SQ"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 20,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "SQ",
+            "QR"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 21.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "KE",
+            "CI",
+            "CX",
+            "SQ"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "south-bali": {
+      "destinationId": "south-bali",
+      "arrivalAirport": "DPS",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 22.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "QR",
+            "EK",
+            "SQ",
+            "KE",
+            "CX"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 22.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "SQ",
+            "UA",
+            "QR",
+            "EK"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 24,
+          "typicalConnections": 1,
+          "airlines": [
+            "QR",
+            "EK",
+            "SQ",
+            "KE",
+            "CX"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "ubud": {
+      "destinationId": "ubud",
+      "arrivalAirport": "DPS",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 22.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "QR",
+            "EK",
+            "SQ",
+            "KE"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 22.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "SQ",
+            "UA",
+            "QR",
+            "EK"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 24,
+          "typicalConnections": 1,
+          "airlines": [
+            "QR",
+            "EK",
+            "SQ",
+            "KE"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "tokyo": {
+      "destinationId": "tokyo",
+      "arrivalAirport": "HND",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 13.5,
+          "typicalConnections": 0,
+          "airlines": [
+            "JL",
+            "NH",
+            "AA",
+            "DL"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 13.5,
+          "typicalConnections": 0,
+          "airlines": [
+            "UA",
+            "NH"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 17.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "JL",
+            "NH",
+            "AA",
+            "DL"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "kyoto": {
+      "destinationId": "kyoto",
+      "arrivalAirport": "KIX",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 16.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "JL",
+            "NH",
+            "KE",
+            "CX"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 16.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "UA",
+            "NH"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 18,
+          "typicalConnections": 1,
+          "airlines": [
+            "JL",
+            "NH",
+            "KE",
+            "CX"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "singapore": {
+      "destinationId": "singapore",
+      "arrivalAirport": "SIN",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 19,
+          "typicalConnections": 0,
+          "airlines": [
+            "SQ"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 19,
+          "typicalConnections": 0,
+          "airlines": [
+            "SQ",
+            "UA"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 23,
+          "typicalConnections": 1,
+          "airlines": [
+            "SQ"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "stockholm": {
+      "destinationId": "stockholm",
+      "arrivalAirport": "ARN",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 8,
+          "typicalConnections": 0,
+          "airlines": [
+            "SK",
+            "DL",
+            "N0"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 8,
+          "typicalConnections": 0,
+          "airlines": [
+            "SK",
+            "UA"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12,
+          "typicalConnections": 1,
+          "airlines": [
+            "SK",
+            "DL",
+            "N0"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "paris": {
+      "destinationId": "paris",
+      "arrivalAirport": "CDG",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 7.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 7.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 11.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "london": {
+      "destinationId": "london",
+      "arrivalAirport": "LHR",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 7,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 7,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 11.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "barcelona": {
+      "destinationId": "barcelona",
+      "arrivalAirport": "BCN",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 8,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 8,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "amsterdam": {
+      "destinationId": "amsterdam",
+      "arrivalAirport": "AMS",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 7.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 7.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 11.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "madrid": {
+      "destinationId": "madrid",
+      "arrivalAirport": "MAD",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 7.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 7.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 11.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "istanbul": {
+      "destinationId": "istanbul",
+      "arrivalAirport": "IST",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 10,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 10,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 14.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "prague": {
+      "destinationId": "prague",
+      "arrivalAirport": "PRG",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 8.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 11,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "vienna": {
+      "destinationId": "vienna",
+      "arrivalAirport": "VIE",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 8.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 8.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 13,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "berlin": {
+      "destinationId": "berlin",
+      "arrivalAirport": "BER",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 8,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": true
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 8,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "florence": {
+      "destinationId": "florence",
+      "arrivalAirport": "PSA",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 11,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 11,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "venice": {
+      "destinationId": "venice",
+      "arrivalAirport": "VCE",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 8.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 8.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": true
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "athens": {
+      "destinationId": "athens",
+      "arrivalAirport": "ATH",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 10,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": true
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 10,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 14,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "budapest": {
+      "destinationId": "budapest",
+      "arrivalAirport": "BUD",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 11.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 11.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 13,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "lisbon": {
+      "destinationId": "lisbon",
+      "arrivalAirport": "LIS",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 7,
+          "typicalConnections": 0,
+          "airlines": [
+            "TP",
+            "DL",
+            "UA"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 7,
+          "typicalConnections": 0,
+          "airlines": [
+            "TP",
+            "UA"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 11,
+          "typicalConnections": 1,
+          "airlines": [
+            "TP",
+            "DL",
+            "UA"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "rome": {
+      "destinationId": "rome",
+      "arrivalAirport": "FCO",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 9,
+          "typicalConnections": 0,
+          "airlines": [
+            "AZ",
+            "DL",
+            "AA",
+            "UA",
+            "N0"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 9,
+          "typicalConnections": 0,
+          "airlines": [
+            "UA",
+            "AZ"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 13,
+          "typicalConnections": 1,
+          "airlines": [
+            "AZ",
+            "DL",
+            "AA",
+            "UA",
+            "N0"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "copenhagen": {
+      "destinationId": "copenhagen",
+      "arrivalAirport": "CPH",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 8,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 8,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "milan": {
+      "destinationId": "milan",
+      "arrivalAirport": "MXP",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 8,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 8.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "dublin": {
+      "destinationId": "dublin",
+      "arrivalAirport": "DUB",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 9.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 9.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 11,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "edinburgh": {
+      "destinationId": "edinburgh",
+      "arrivalAirport": "EDI",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 7,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 7,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 11,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "munich": {
+      "destinationId": "munich",
+      "arrivalAirport": "MUC",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 8.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 8.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "brussels": {
+      "destinationId": "brussels",
+      "arrivalAirport": "BRU",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 7.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 7.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "seville": {
+      "destinationId": "seville",
+      "arrivalAirport": "SVQ",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 10,
+          "typicalConnections": 1,
+          "airlines": [
+            "IB",
+            "TP",
+            "AF",
+            "LH"
+          ],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 10,
+          "typicalConnections": 1,
+          "airlines": [
+            "IB",
+            "TP",
+            "UA",
+            "LH"
+          ],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 11.5,
+          "typicalConnections": 1,
+          "airlines": [
+            "IB",
+            "TP",
+            "AF",
+            "LH"
+          ],
+          "seasonal": false
+        }
+      }
+    },
+    "porto": {
+      "destinationId": "porto",
+      "arrivalAirport": "OPO",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 9.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 9.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 11,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "krakow": {
+      "destinationId": "krakow",
+      "arrivalAirport": "KRK",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 9,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 9,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": true
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 13,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "dubrovnik": {
+      "destinationId": "dubrovnik",
+      "arrivalAirport": "DBV",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 12,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 9,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": true
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 13.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "nice": {
+      "destinationId": "nice",
+      "arrivalAirport": "NCE",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 8,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 8.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": true
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "naples": {
+      "destinationId": "naples",
+      "arrivalAirport": "NAP",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 9,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 9,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": true
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 13,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "salzburg": {
+      "destinationId": "salzburg",
+      "arrivalAirport": "SZG",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": false,
+          "typicalTotalHours": 11,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": false,
+          "typicalTotalHours": 11,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 12.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    },
+    "reykjavik": {
+      "destinationId": "reykjavik",
+      "arrivalAirport": "KEF",
+      "byOrigin": {
+        "JFK": {
+          "origin": "JFK",
+          "nonstop": true,
+          "typicalTotalHours": 5.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "EWR": {
+          "origin": "EWR",
+          "nonstop": true,
+          "typicalTotalHours": 5.5,
+          "typicalConnections": 0,
+          "airlines": [],
+          "seasonal": false
+        },
+        "LGA": {
+          "origin": "LGA",
+          "nonstop": false,
+          "typicalTotalHours": 9.5,
+          "typicalConnections": 1,
+          "airlines": [],
+          "seasonal": false
+        }
+      }
+    }
+  }
+}
