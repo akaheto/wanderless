@@ -1,112 +1,103 @@
-'use client';
-
-import Link from 'next/link';
-import { Card, CardHeader } from '@/components/ui';
-import type { CityTravelAdvisory } from '@/lib/integrations/travel-warnings';
-import { getAdvisoryLabel } from '@/lib/integrations/travel-warnings';
-
-interface TravelAdvisoryCardProps {
-  advisory: CityTravelAdvisory;
-}
+import Link from "next/link";
+import { Card, CardHeader, DataAge } from "@/components/ui";
+import type { AdvisoryResult, TravelWarningLevel } from "@/lib/integrations/travel-warnings";
+import { getAdvisoryLabel } from "@/lib/integrations/travel-warnings";
 
 /**
- * Display US State Department travel advisory for a destination
+ * Advisories are safety data, so a failed lookup is rendered rather than dropped.
+ * A card that simply disappears reads as "nothing to worry about here", which is the
+ * one thing an unknown risk must never look like.
  */
-export function TravelAdvisoryCard({ advisory }: TravelAdvisoryCardProps) {
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case 'level1':
-        return 'bg-good/10 border-good/30 text-good';
-      case 'level2':
-        return 'bg-warning/10 border-warning/30 text-warning';
-      case 'level3':
-        return 'bg-serious/10 border-serious/30 text-serious';
-      case 'level4':
-        return 'bg-critical/10 border-critical/30 text-critical';
-      default:
-        return 'bg-surface-2 border-line text-ink';
-    }
-  };
+const STALE_AFTER_DAYS = 30;
+
+const LEVEL_STYLE: Record<TravelWarningLevel, string> = {
+  level1: "bg-good/10 border-good/40",
+  level2: "bg-warning/10 border-warning/40",
+  level3: "bg-serious/10 border-serious/40",
+  level4: "bg-critical/10 border-critical/40",
+};
+
+/** Paired with the text label — the level is never carried by colour alone. */
+const LEVEL_MARK: Record<TravelWarningLevel, string> = {
+  level1: "✓",
+  level2: "!",
+  level3: "!!",
+  level4: "✕",
+};
+
+export function TravelAdvisoryCard({ result }: { result: AdvisoryResult }) {
+  if (result.status === "unavailable") {
+    return (
+      <Card>
+        <CardHeader title="Travel advisory" />
+        <div className="px-4 py-4">
+          <div className="rounded-lg border border-warning/40 bg-warning/10 p-4">
+            <p className="text-sm font-medium text-ink">Advisory unavailable</p>
+            <p className="mt-1 text-[13px] text-ink-2">{result.reason}</p>
+            <p className="mt-2 text-[12.5px] text-ink-3">
+              This is not an all-clear — it means the current advisory could not be
+              read. Check travel.state.gov directly before relying on this page.
+            </p>
+          </div>
+          <div className="mt-4 border-t border-line pt-3">
+            <Link
+              href="https://travel.state.gov/content/travel/en/traveladvisories/traveladvisories.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-medium text-accent hover:underline"
+            >
+              Open travel.state.gov advisories →
+            </Link>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  const { advisory } = result;
 
   return (
     <Card>
       <CardHeader
-        title="Travel Advisory"
-        note={`Updated: ${new Date(advisory.lastUpdated).toLocaleDateString()}`}
+        title="Travel advisory"
+        right={
+          <DataAge
+            source={advisory.sourceName}
+            sourceDate={advisory.sourceRevisedOn}
+            asOf={result.asOf}
+            staleAfterDays={STALE_AFTER_DAYS}
+          />
+        }
       />
 
       <div className="space-y-4 px-4 py-4">
-        {/* Advisory Level */}
-        <div className={`rounded-lg border-2 p-4 ${getLevelColor(advisory.advisoryLevel)}`}>
-          <div className="font-semibold">
-            {advisory.advisoryLevel === 'level1' && '✓'}
-            {advisory.advisoryLevel === 'level2' && '⚠'}
-            {advisory.advisoryLevel === 'level3' && '⚠⚠'}
-            {advisory.advisoryLevel === 'level4' && '✗'}
-            {' '}
+        <div className={`rounded-lg border-2 p-4 ${LEVEL_STYLE[advisory.advisoryLevel]}`}>
+          <p className="font-semibold text-ink">
+            <span aria-hidden className="mr-1.5">
+              {LEVEL_MARK[advisory.advisoryLevel]}
+            </span>
+            Level {advisory.advisoryLevel.replace("level", "")} —{" "}
             {getAdvisoryLabel(advisory.advisoryLevel)}
-          </div>
-          <p className="text-sm mt-1 opacity-90">{advisory.advisoryTitle}</p>
+          </p>
+          <p className="mt-1 text-sm text-ink-2">{advisory.advisoryTitle}</p>
         </div>
 
-        {/* Specific Warnings */}
-        {advisory.warnings.length > 0 && (
-          <div className="space-y-3 border-t border-line pt-4">
-            <p className="text-xs font-medium uppercase text-ink-2">Active Warnings</p>
-            {advisory.warnings.map((warning, idx) => (
-              <div key={idx} className="rounded bg-surface-2 p-3">
-                <div className="flex items-start gap-2">
-                  <span
-                    className={`mt-0.5 text-lg ${
-                      warning.category === 'safety'
-                        ? 'text-critical'
-                        : warning.category === 'health'
-                          ? 'text-warning'
-                          : warning.category === 'political'
-                            ? 'text-serious'
-                            : warning.category === 'crime'
-                              ? 'text-serious'
-                              : 'text-warning'
-                    }`}
-                  >
-                    {warning.category === 'safety' && '🚨'}
-                    {warning.category === 'health' && '⚕️'}
-                    {warning.category === 'political' && '🏛️'}
-                    {warning.category === 'crime' && '🚔'}
-                    {warning.category === 'natural-disaster' && '🌋'}
-                  </span>
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-ink-2 uppercase">{warning.category}</p>
-                    <p className="text-sm font-semibold text-ink mt-0.5">{warning.title}</p>
-                    <p className="text-xs text-ink-3 mt-1">{warning.description}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        {advisory.summary && (
+          <p className="text-[13px] leading-relaxed text-ink-2">{advisory.summary}</p>
         )}
 
-        {/* No Active Warnings */}
-        {advisory.warnings.length === 0 && advisory.advisoryLevel === 'level1' && (
-          <div className="rounded bg-good/10 border border-good/20 p-3">
-            <p className="text-sm text-good">
-              ✓ No specific warnings. Standard travel safety precautions recommended.
-            </p>
-          </div>
-        )}
-
-        {/* Source Link */}
         <div className="border-t border-line pt-4">
           <Link
             href={advisory.sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-medium text-accent hover:underline flex items-center gap-1"
+            className="flex items-center gap-1 text-xs font-medium text-accent hover:underline"
           >
             View full advisory on travel.state.gov →
           </Link>
-          <p className="text-xs text-ink-3 mt-2">
-            Source: US State Department Travel Advisory for {advisory.country}
+          <p className="mt-2 text-xs text-ink-3">
+            {advisory.sourceName} advisory for {advisory.country}. The date above is when
+            it was last revised, not when this page loaded it.
           </p>
         </div>
       </div>

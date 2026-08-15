@@ -4,7 +4,9 @@ import type {
   Origin,
   OriginRoute,
   SelectedRoute,
+  TravelBand,
 } from "@/lib/domain/types";
+import { travelBandOf } from "@/lib/domain/types";
 import { alliancesFor, allianceOf } from "@/data/airlines";
 import { routesFor } from "@/data/routes";
 import { HOME_AIRPORTS } from "@/lib/config/home";
@@ -57,19 +59,36 @@ export function matchingAirlines(route: OriginRoute, prefs: RoutePreferences): s
 }
 
 /**
- * Rank two routes. Fewer hours wins; a nonstop breaks a near-tie; origin preference breaks
- * an exact tie.
+ * Order two routes, worst-first comparator style: negative means `a` is the better trip.
  *
- * The half-hour tolerance matters: a nonstop that is twenty minutes slower than a
- * connection is still the better trip, and treating hours as the only signal would pick
- * the connection.
+ * Ranks on what is evidenced and stops ranking on what was estimated. Nonstop status,
+ * seasonality and connection count all come from published airport route tables. Journey
+ * length only enters as a band, because that is the resolution the data supports.
+ *
+ * This deliberately no longer discriminates on small differences in hours. Singapore is
+ * 19h from JFK and 18.5h from Newark, and the old comparator let that half hour decide
+ * the origin. Both are nonstop, both land in the same band, so the routes now tie and
+ * the traveller's own airport preference settles it — which is the honest answer, since
+ * thirty minutes on a nineteen-hour journey was never a real signal.
  */
+function compareRoutes(a: OriginRoute, b: OriginRoute, originOrder: Origin[]): number {
+  // A nonstop is a better trip than a connection regardless of anything else.
+  if (a.nonstop !== b.nonstop) return a.nonstop ? -1 : 1;
+  // Year-round beats seasonal: a route you cannot count on is worth less than one you can.
+  if (a.seasonal !== b.seasonal) return a.seasonal ? 1 : -1;
+  if (a.typicalConnections !== b.typicalConnections) {
+    return a.typicalConnections - b.typicalConnections;
+  }
+  const bandA = travelBandOf(a.typicalTotalHours);
+  const bandB = travelBandOf(b.typicalTotalHours);
+  if (bandA !== bandB) return BAND_ORDER[bandA] - BAND_ORDER[bandB];
+  return originOrder.indexOf(a.origin) - originOrder.indexOf(b.origin);
+}
+
+const BAND_ORDER: Record<TravelBand, number> = { "0-8": 0, "8-16": 1, "16+": 2 };
+
 function better(a: OriginRoute, b: OriginRoute, originOrder: Origin[]): OriginRoute {
-  const gap = a.typicalTotalHours - b.typicalTotalHours;
-  if (Math.abs(gap) > 0.5) return gap < 0 ? a : b;
-  if (a.nonstop !== b.nonstop) return a.nonstop ? a : b;
-  if (a.seasonal !== b.seasonal) return a.seasonal ? b : a;
-  return originOrder.indexOf(a.origin) <= originOrder.indexOf(b.origin) ? a : b;
+  return compareRoutes(a, b, originOrder) <= 0 ? a : b;
 }
 
 /**
@@ -120,9 +139,11 @@ export function selectRoute(
     route: chosen,
     alliances: alliancesFor(chosen.airlines),
     // True when the filter cost the traveller a materially better routing.
+    // The filter cost the traveller something only if the unconstrained pick is strictly
+    // better on the evidenced signals — not merely different by a rounding of hours.
     constrainedByFilter:
       chosen.origin !== unconstrained.origin ||
-      chosen.typicalTotalHours > unconstrained.typicalTotalHours + 0.5,
+      compareRoutes(unconstrained, chosen, originOrder) < 0,
     noRouteMatches: false,
   };
 }

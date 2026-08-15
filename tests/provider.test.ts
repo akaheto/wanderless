@@ -131,7 +131,7 @@ describe("NominatimPlacesProvider", () => {
     expect(place.name).toBe("Test Restaurant");
   });
 
-  it("generates OpenStreetMap URLs", async () => {
+  it("links places to Google Maps, sourced from OpenStreetMap", async () => {
     const provider = new NominatimPlacesProvider();
 
     global.fetch = vi.fn(
@@ -159,7 +159,11 @@ describe("NominatimPlacesProvider", () => {
       query: "test",
     });
 
-    expect(result.places[0].url).toContain("openstreetmap.org");
+    // Places are sourced from Nominatim but linked to Google Maps: the lookup is OSM,
+    // the link is whatever the traveller can actually navigate with. Changed
+    // deliberately in fd61bf4 ("place search improvements"); this assertion had been
+    // left behind pointing at the old OSM link.
+    expect(result.places[0].url).toContain("google.com/maps");
     expect(result.places[0].url).toContain("21.0285");
     expect(result.places[0].url).toContain("105.8542");
   });

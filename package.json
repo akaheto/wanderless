@@ -14,7 +14,9 @@
     "test:watch": "vitest",
     "add:destination": "tsx scripts/add-destination.ts",
     "verify:destination": "tsx scripts/verify-destination.ts",
-    "publish:destination": "tsx scripts/publish-destination.ts"
+    "publish:destination": "tsx scripts/publish-destination.ts",
+    "verify:advisories": "tsx scripts/verify-advisory-coverage.ts",
+    "build:advisories": "tsx scripts/build-advisory-baseline.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

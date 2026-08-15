@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DESTINATIONS, getDestination } from "@/data/destinations";
+import { catalogDestination } from "./fixtures/destinations";
+import { DESTINATIONS } from "@/data/destinations";
 import { CATEGORY_KEYS, type ComparisonPreferences } from "@/lib/domain/types";
 import { DEFAULT_PREFERENCES, compareDestinations, scoreDestination } from "@/lib/scoring/engine";
 
@@ -12,7 +13,7 @@ const prefs = (overrides: Partial<ComparisonPreferences> = {}): ComparisonPrefer
 const ids = (result: { scores: { destination: { id: string } }[] }) =>
   result.scores.map((s) => s.destination.id);
 
-const VIETNAM = ["hanoi", "hcmc", "hoi-an", "phu-quoc"].map((id) => getDestination(id)!);
+const VIETNAM = ["hanoi", "hcmc", "hoi-an", "phu-quoc"].map((id) => catalogDestination(id));
 
 describe("score integrity", () => {
   it("keeps every score inside 0-100", () => {
@@ -80,8 +81,8 @@ describe("dates change the answer", () => {
   });
 
   it("scores Hoi An far worse in its flood season than in its dry season", () => {
-    const dry = scoreDestination(getDestination("hoi-an")!, prefs(), "2027-04-05", "2027-04-15");
-    const flood = scoreDestination(getDestination("hoi-an")!, prefs(), "2027-11-05", "2027-11-15");
+    const dry = scoreDestination(catalogDestination("hoi-an"), prefs(), "2027-04-05", "2027-04-15");
+    const flood = scoreDestination(catalogDestination("hoi-an"), prefs(), "2027-11-05", "2027-11-15");
     expect(dry.overall - flood.overall).toBeGreaterThan(15);
     expect(flood.cons.join(" ")).toMatch(/flood/i);
   });
@@ -91,7 +92,7 @@ describe("dates change the answer", () => {
     // November is the reverse. This is the single most useful thing the engine knows
     // about Thailand, and the reason a date-blind "best beaches" list is useless.
     const p = prefs({ beachImportance: 5, maxTravelHours: 30 });
-    const coasts = [getDestination("phuket")!, getDestination("koh-samui")!];
+    const coasts = [catalogDestination("phuket"), catalogDestination("koh-samui")];
 
     expect(ids(compareDestinations(coasts, p, "2027-07-05", "2027-07-15"))[0]).toBe("koh-samui");
     expect(ids(compareDestinations(coasts, p, "2027-11-05", "2027-11-15"))[0]).toBe("phuket");
@@ -122,13 +123,13 @@ describe("the seasonal viability gate", () => {
   });
 
   it("applies no gate when the catalog rates the month well", () => {
-    const s = scoreDestination(getDestination("hanoi")!, prefs(), "2027-10-06", "2027-10-16");
+    const s = scoreDestination(catalogDestination("hanoi"), prefs(), "2027-10-06", "2027-10-16");
     expect(s.seasonalGate).toBe(1);
     expect(s.overall).toBe(s.rawOverall);
   });
 
   it("applies a gate, and says so, when the month is rated poorly", () => {
-    const s = scoreDestination(getDestination("dubai")!, prefs(), "2027-07-06", "2027-07-16");
+    const s = scoreDestination(catalogDestination("hanoi"), prefs(), "2027-07-06", "2027-07-16");
     expect(s.seasonalGate).toBeLessThan(0.8);
     expect(s.overall).toBeLessThan(s.rawOverall);
     expect(s.warnings.some((w) => w.label.includes("Score reduced"))).toBe(true);
@@ -161,7 +162,7 @@ describe("travel time is a constraint, not a hint", () => {
 
 describe("preferences change the ranking", () => {
   it("moves beach destinations up when beaches matter and down when they do not", () => {
-    const pool = ["phu-quoc", "hanoi", "bangkok", "krabi"].map((id) => getDestination(id)!);
+    const pool = ["phu-quoc", "hanoi", "bangkok", "krabi"].map((id) => catalogDestination(id));
     const beachy = ids(
       compareDestinations(pool, prefs({ beachImportance: 5, cityVsResort: 2, maxTravelHours: 30 }), "2027-02-06", "2027-02-16"),
     );
@@ -201,7 +202,7 @@ describe("preferences change the ranking", () => {
 
 describe("narrative output", () => {
   it("writes a verdict that names the destination and cites its own numbers", () => {
-    const s = scoreDestination(getDestination("phu-quoc")!, prefs(), "2027-02-06", "2027-02-16");
+    const s = scoreDestination(catalogDestination("phu-quoc"), prefs(), "2027-02-06", "2027-02-16");
     expect(s.verdict).toContain("Phú Quốc");
     expect(s.verdict).toContain(String(s.overall));
     expect(s.verdict).toContain(`${s.climate.avgHighF}°F`);
@@ -232,12 +233,12 @@ describe("narrative output", () => {
 
   it("flags a public holiday falling inside the dates", () => {
     // Japanese Golden Week, 29 April to 5 May 2027.
-    const s = scoreDestination(getDestination("tokyo")!, prefs(), "2027-04-28", "2027-05-06");
+    const s = scoreDestination(catalogDestination("tokyo"), prefs(), "2027-04-28", "2027-05-06");
     expect(s.cons.join(" ")).toMatch(/falls during your dates/);
   });
 
   it("reduces confidence where holiday data does not exist", () => {
-    const thai = scoreDestination(getDestination("phuket")!, prefs(), "2027-02-06", "2027-02-16");
+    const thai = scoreDestination(catalogDestination("phuket"), prefs(), "2027-02-06", "2027-02-16");
     expect(thai.warnings.some((w) => w.label.includes("No public-holiday data"))).toBe(true);
     expect(thai.confidence).not.toBe("high");
   });

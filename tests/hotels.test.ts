@@ -26,8 +26,11 @@ describe("Hotel search providers", () => {
       provider = new EnhancedMockHotelSearch();
     });
 
-    it("is marked as configured", () => {
-      expect(provider.configured).toBe(true);
+    it("reports itself unconfigured, because its inventory is invented", () => {
+      // This previously asserted `configured === true`, which is what let the mock stand
+      // in for a real provider in production: searchUnavailableReason consults this flag,
+      // so a mock claiming to be configured silenced the only warning path there was.
+      expect(provider.configured).toBe(false);
     });
 
     it("has a descriptive name", () => {
@@ -130,9 +133,9 @@ describe("Hotel search providers", () => {
       delete process.env.RAPIDAPI_HOST;
     });
 
-    it("defaults to enhanced mock when no API credentials provided", () => {
+    it("defaults to no provider when no API credentials are present", () => {
       const provider = hotelSearch();
-      expect(provider.name).toBe("Enhanced Mock Hotels");
+      expect(provider.name).toBe("No hotel provider");
     });
 
     it("uses RapidAPI when credentials are configured", () => {
@@ -143,14 +146,14 @@ describe("Hotel search providers", () => {
       expect(provider.name).toContain("Booking.com");
     });
 
-    it("falls back to mock if RapidAPI initialization fails", () => {
+    it("does not fall back to invented inventory if RapidAPI initialization fails", () => {
       // Set invalid credentials that will fail validation
       process.env.RAPIDAPI_KEY = "";
       process.env.RAPIDAPI_HOST = "";
 
       const provider = hotelSearch();
       // Should fall back to enhanced mock
-      expect(provider.name).toBe("Enhanced Mock Hotels");
+      expect(provider.name).toBe("No hotel provider");
     });
   });
 
@@ -168,8 +171,10 @@ describe("Hotel search providers", () => {
   });
 
   describe("searchUnavailableReason", () => {
-    it("returns null when provider is configured", () => {
-      const provider = new EnhancedMockHotelSearch();
+    it("returns null when a real provider is configured", () => {
+      // Must be a genuinely configured provider. This previously used the mock, which
+      // is how "no reason to warn" came to be the answer for invented inventory.
+      const provider = new RapidAPIHotelSearch("test-key", "test-host");
       const reason = searchUnavailableReason(provider);
       expect(reason).toBeNull();
     });
@@ -272,5 +277,56 @@ describe("Hotel search providers", () => {
         expect(hotel.totalForStay).toBe(hotel.pricePerNight * result!.nights);
       });
     });
+  });
+});
+
+describe("provider selection never invents inventory", () => {
+  const env = { ...process.env };
+  afterEach(() => {
+    process.env = { ...env };
+  });
+
+  /**
+   * The regression this locks down: with no RAPIDAPI credentials — the state of every
+   * environment — `hotelSearch()` returned EnhancedMockHotelSearch, which reports
+   * `configured = true`. Production served six invented hotels per search, with names
+   * built from the destination slug and rates derived from a hash of it, stored them to
+   * the database, and never warned, because searchUnavailableReason consults `configured`
+   * and got back `true`.
+   */
+  it("returns an unconfigured provider when no credentials are present", () => {
+    delete process.env.RAPIDAPI_KEY;
+    delete process.env.RAPIDAPI_HOST;
+    delete process.env.ALLOW_MOCK_HOTELS;
+
+    const search = hotelSearch();
+    expect(search.configured).toBe(false);
+    expect(searchUnavailableReason(search)).toContain("No hotel provider is configured");
+  });
+
+  it("returns nothing rather than invented hotels when unconfigured", async () => {
+    delete process.env.RAPIDAPI_KEY;
+    delete process.env.RAPIDAPI_HOST;
+    delete process.env.ALLOW_MOCK_HOTELS;
+
+    const result = await hotelSearch().search({
+      destinationId: "paris",
+      checkIn: "2027-05-01",
+      checkOut: "2027-05-04",
+      guests: 2,
+    });
+    expect(result).toBeNull();
+  });
+
+  it("uses the mock only when explicitly opted into, and still flags it unconfigured", () => {
+    delete process.env.RAPIDAPI_KEY;
+    delete process.env.RAPIDAPI_HOST;
+    process.env.ALLOW_MOCK_HOTELS = "1";
+
+    const search = hotelSearch();
+    expect(search.name).toBe("Enhanced Mock Hotels");
+    // Opting in for local development must not make the invented prices look real.
+    expect(search.configured).toBe(false);
+    expect(searchUnavailableReason(search)).not.toBeNull();
   });
 });

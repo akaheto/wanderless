@@ -195,7 +195,7 @@ export default function ResearchReviewPage() {
         <section className="rounded-lg border border-accent/20 bg-accent/5 p-6">
           <h2 className="text-lg font-semibold text-ink mb-4">✎ Hotel Prices (Edit & Verify)</h2>
           <p className="text-sm text-ink-2 mb-4">
-            Enter actual prices you've researched. {research.suggestedHotelPrices.source}
+            Enter actual prices you&apos;ve researched. {research.suggestedHotelPrices.source}
           </p>
 
           <div className="space-y-4">

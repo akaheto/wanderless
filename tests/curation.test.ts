@@ -215,8 +215,21 @@ describe("curation against the real catalog", () => {
   });
 
   it("gives every catalog destination a parseable curatedOn", () => {
+    /*
+     * Uses today rather than the shared ASOF pin. ASOF is fixed at 2026-08-12 so the
+     * threshold assertions above can rely on exact day counts — one of them depends on a
+     * precise 180-day gap — but the catalog is edited on its own schedule, and CURATED_ON
+     * moved to 2026-08-13. Judged against the pin, every destination looked curated
+     * *tomorrow* and came back invalid-date.
+     *
+     * That all 46 share one hand-edited constant able to drift past a fixed clock is the
+     * defect itself; see docs/technical/specs/destination-data-contract.md §3.7.1. The
+     * "never dates a curation in the future" assertion in catalog-integrity.test.ts is
+     * what now guards it against the real calendar.
+     */
+    const today = new Date().toISOString().slice(0, 10);
     for (const destination of DESTINATIONS) {
-      const result = checkStaleness(destination.id, destination.name, destination.curatedOn, ASOF);
+      const result = checkStaleness(destination.id, destination.name, destination.curatedOn, today);
       expect(result.reason, `${destination.id} has an unusable curatedOn`).not.toBe("invalid-date");
     }
   });

@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { DESTINATIONS, getDestination } from "@/data/destinations";
+import { catalogDestination } from "./fixtures/destinations";
+import { DESTINATIONS } from "@/data/destinations";
 import { climateFor, dateWindowClimate, compareWithHome, interpretConditions } from "@/lib/climate";
 import { solarDay, utcOffsetHours } from "@/lib/climate/solar";
 
-const hoiAn = getDestination("hoi-an")!;
-const stockholm = getDestination("stockholm")!;
-const phuQuoc = getDestination("phu-quoc")!;
+const hoiAn = catalogDestination("hoi-an");
+const stockholm = catalogDestination("stockholm");
+const phuQuoc = catalogDestination("phu-quoc");
 
 describe("generated climate data", () => {
   it("covers every destination in the catalog", () => {
@@ -78,14 +79,14 @@ describe("dateWindowClimate", () => {
   });
 
   it("puts the northern and southern hemispheres in opposite seasons", () => {
-    const capeTown = getDestination("cape-town")!;
-    const rome = getDestination("rome")!;
-    const janCape = dateWindowClimate(capeTown, "2027-01-10", "2027-01-17").avgHighF;
-    const julCape = dateWindowClimate(capeTown, "2027-07-10", "2027-07-17").avgHighF;
+    const bali = catalogDestination("south-bali");
+    const rome = catalogDestination("rome");
+    const janBali = dateWindowClimate(bali, "2027-01-10", "2027-01-17").avgHighF;
+    const julBali = dateWindowClimate(bali, "2027-07-10", "2027-07-17").avgHighF;
     const janRome = dateWindowClimate(rome, "2027-01-10", "2027-01-17").avgHighF;
     const julRome = dateWindowClimate(rome, "2027-07-10", "2027-07-17").avgHighF;
 
-    expect(janCape).toBeGreaterThan(julCape);
+    expect(janBali).toBeGreaterThan(julBali);
     expect(julRome).toBeGreaterThan(janRome);
   });
 
@@ -105,7 +106,7 @@ describe("solar geometry", () => {
   });
 
   it("gives the equator roughly twelve hours all year", () => {
-    const singapore = getDestination("singapore")!;
+    const singapore = catalogDestination("singapore");
     for (const start of ["2027-01-05", "2027-04-05", "2027-07-05", "2027-10-05"]) {
       const w = dateWindowClimate(singapore, start, start);
       expect(Math.abs(w.avgDaylightHours - 12)).toBeLessThan(0.4);
@@ -149,7 +150,7 @@ describe("compareWithHome", () => {
 
 describe("interpretConditions", () => {
   it("says there is no beach at an inland destination rather than reporting a sea temperature", () => {
-    const hanoi = getDestination("hanoi")!;
+    const hanoi = catalogDestination("hanoi");
     const reading = interpretConditions(hanoi, dateWindowClimate(hanoi, "2027-03-06", "2027-03-16"));
     expect(reading.beach).toMatch(/no beach/i);
   });

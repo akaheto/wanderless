@@ -74,7 +74,9 @@ export default async function DestinationPage({
   const events = await getEventsByCity(d.name, 6).catch(() => []);
   const restaurants = await getRestaurantCategories(d.name).catch(() => ({}));
   const demographics = getDemographics(d.name);
-  const travelAdvisory = getTravelAdvisory(d.name);
+  // Advisories are country-scoped. Keying this by city name is why only ten
+  // destinations ever resolved one.
+  const travelAdvisory = await getTravelAdvisory(d.country);
 
   // Get flight estimates (no API needed, just links + estimates)
   const flightEstimate = getFlightEstimate(d.id);
@@ -131,7 +133,7 @@ export default async function DestinationPage({
           the wide tables inside push the column past the page. */}
       <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr] lg:items-start">
         <div className="min-w-0 space-y-6">
-          {travelAdvisory && <TravelAdvisoryCard advisory={travelAdvisory} />}
+          <TravelAdvisoryCard result={travelAdvisory} />
 
           {flightEstimate && (
             <FlightCard

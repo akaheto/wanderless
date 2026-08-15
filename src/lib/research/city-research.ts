@@ -79,11 +79,21 @@ async function webSearch(query: string): Promise<string> {
   }
 }
 
+/** Shape of Claude's JSON output before validation — every field is untrusted. */
+interface RawExtraction {
+  hotelData?: { fourStarUSD?: unknown; fiveStarUSD?: unknown; source?: unknown };
+  flightData?: { typicalHours?: unknown; nonstop?: unknown; source?: unknown };
+  visaInfo?: unknown;
+  climateData?: unknown;
+  summary?: unknown;
+  influencerSpots?: Array<{ name?: unknown; type?: unknown; description?: unknown }>;
+}
+
 /**
  * Validate extracted data according to spec.
  * Returns error if validation fails, null if all passes.
  */
-function validateResearch(data: any): ResearchError[] {
+function validateResearch(data: RawExtraction): ResearchError[] {
   const errors: ResearchError[] = [];
 
   // Hotel validation
@@ -163,8 +173,8 @@ function validateResearch(data: any): ResearchError[] {
     }
 
     // Check for duplicates
-    const names = data.influencerSpots.map((s: any) => s.name);
-    const duplicates = names.filter((name: string, idx: number) => names.indexOf(name) !== idx);
+    const names = data.influencerSpots.map((s) => s.name);
+    const duplicates = names.filter((name, idx) => names.indexOf(name) !== idx);
     if (duplicates.length > 0) {
       errors.push({ field: 'influencerSpots', reason: `Duplicate spots found: ${duplicates.join(', ')}` });
     }
@@ -283,10 +293,10 @@ RULES:
       return null;
     }
 
-    let research: any;
+    let research: RawExtraction;
     try {
       research = JSON.parse(jsonMatch[0]);
-    } catch (e) {
+    } catch {
       console.error("[City Research] JSON parse failed:", jsonMatch[0].substring(0, 200));
       return null;
     }
