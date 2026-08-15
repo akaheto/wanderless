@@ -217,61 +217,55 @@ export async function researchCity(
     }
 
     // Phase 2: Claude Extraction
-    const extractionPrompt = `You are extracting verified travel data from web search results.
+    const extractionPrompt = `Extract verified travel data from these search results. Return ONLY valid JSON, nothing else.
 
-CRITICAL RULES:
-- Extract ONLY facts that appear in the search results
-- Do NOT estimate, guess, or make up numbers
-- If a value is not found, leave it as null
-- All prices must be actual numbers from websites
-- All spots must be real locations from the search results
-
-SEARCH RESULTS:
-
-HOTEL DATA:
+HOTEL SEARCH:
 ${hotelSearch}
 
-FLIGHT DATA:
+FLIGHT SEARCH:
 ${flightSearch}
 
-VISA DATA:
+VISA SEARCH:
 ${visaSearch}
 
-CLIMATE DATA:
+CLIMATE SEARCH:
 ${climateSearch}
 
-INFLUENCER SPOTS:
+INFLUENCER SEARCH:
 ${influencerSearch}
 
-Extract these exact fields:
+EXTRACT ONLY THESE FIELDS. Use null if data not found:
 
-1. Hotel prices (USD per night, as numbers only):
-   - 4-star: [exact number or null]
-   - 5-star: [exact number or null]
-   - source: [website name where prices came from]
+{
+  "hotelData": {
+    "fourStarUSD": <number between 50-2000, from search results only>,
+    "fiveStarUSD": <number between 50-2000, from search results only>,
+    "source": "<website name>"
+  },
+  "flightData": {
+    "nonstop": <true or false>,
+    "typicalHours": <number between 4-25>,
+    "source": "<airline or site name>"
+  },
+  "visaInfo": "<exact text from search results, minimum 10 characters>",
+  "climateData": "<exact text from search results, minimum 20 characters>",
+  "summary": "<one sentence about city>",
+  "influencerSpots": [
+    {"name": "<real location name from results>", "type": "bar|restaurant|cafe|museum|lookout|beach|market|shop|other", "description": "<brief description from results>"},
+    ...20-50 spots total...
+  ]
+}
 
-2. Flight data:
-   - nonstop: [true/false, only if explicitly mentioned]
-   - typicalHours: [total door-to-door hours as number, only if found]
-   - source: [airline or booking site name]
-
-3. Visa info: [exact text from search results, or null]
-
-4. Climate data: [exact text from search results, or null]
-
-5. Summary: [one sentence about the city, based on search results]
-
-6. Influencer spots: [array of 20-50 real locations from search results]
-   Each spot must have:
-   - name: [exactly as it appears in results]
-   - type: [bar/restaurant/cafe/museum/lookout/beach/market/shop/other]
-   - description: [why it's notable, from the search results]
-
-Return ONLY valid JSON, no explanation:
-{"hotelData":{"fourStarUSD":null,"fiveStarUSD":null,"source":""},"flightData":{"nonstop":true,"typicalHours":10,"source":""},"visaInfo":"","climateData":"","summary":"","influencerSpots":[]}`;
+RULES:
+- Return ONLY valid JSON, no other text
+- Use exact numbers found in search results, never estimate
+- String values must use double quotes
+- Use proper JSON syntax: commas between fields, no trailing commas
+- Numbers without quotes, booleans without quotes
+- This is your entire response - nothing before or after the JSON`;
 
     const message = await client.messages.create({
-      model: "claude-sonnet-5",
+      model: "claude-opus-5",
       max_tokens: 2000,
       messages: [{ role: "user", content: extractionPrompt }],
     });
