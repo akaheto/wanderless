@@ -349,3 +349,45 @@ describe("the departure airport now changes the answer", () => {
     expect(run()).toEqual(run());
   });
 });
+
+describe("origin ranking no longer turns on minutes", () => {
+  const all = { origins: ["JFK", "LGA", "EWR"] as Origin[], alliances: [], airlines: [] };
+
+  /**
+   * Singapore is 19h from JFK and 18.5h from Newark. The old comparator let that half
+   * hour pick Newark, presenting a rounding difference on a nineteen-hour journey as a
+   * reason to fly from a different airport.
+   *
+   * Both are nonstop and both land in the same band, so they now tie and the traveller's
+   * own airport order decides. Journey length still ranks, but only at the resolution the
+   * data supports.
+   */
+  it("ties two nonstops in the same band and defers to airport preference", () => {
+    const jfkFirst = selectRoute(routeTestDestination("singapore"), all);
+    expect(jfkFirst.route.origin).toBe("JFK");
+    expect(jfkFirst.route.nonstop).toBe(true);
+
+    const ewrFirst = selectRoute(routeTestDestination("singapore"), {
+      ...all,
+      origins: ["EWR", "JFK", "LGA"],
+    });
+    expect(ewrFirst.route.origin).toBe("EWR");
+  });
+
+  it("still prefers a nonstop over a connection, whatever the airport order", () => {
+    // LGA reaches nothing long-haul nonstop, so it must never win on preference alone.
+    const s = selectRoute(routeTestDestination("tokyo"), {
+      ...all,
+      origins: ["LGA", "JFK", "EWR"],
+    });
+    expect(s.route.nonstop).toBe(true);
+    expect(s.route.origin).not.toBe("LGA");
+  });
+
+  it("still prefers fewer connections when neither route is nonstop", () => {
+    const s = selectRoute(routeTestDestination("hanoi"), all);
+    const opts = routeOptions(routeTestDestination("hanoi"), all).map((o) => o.route);
+    const fewest = Math.min(...opts.map((r) => r.typicalConnections));
+    expect(s.route.typicalConnections).toBe(fewest);
+  });
+});
