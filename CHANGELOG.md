@@ -1,5 +1,51 @@
 # Changelog
 
+## [Unreleased] — 2026-08-15
+
+### Data integrity
+
+- **Travel advisories are live.** Replaced a hand-maintained table of 10 countries, last
+  touched 2024-08-10, with the published State Department feed — 212 countries. The feed
+  is not deterministic (its CDN serves several generations), so coverage rests on a
+  committed baseline with live reads layered over it.
+- **Stopped serving invented hotels.** With no credentials in any environment, hotel
+  search returned six fabricated hotels per query — names built from the destination slug,
+  rates from a hash of it — and stored them. It now declines honestly.
+- **Temperatures are Fahrenheit everywhere.** The weather panel requested metric and
+  rendered °C beside climate normals in °F; its heat warning fired above 35, correct for
+  Celsius only.
+- **Influencer spots require a citation.** Platform, URL and date, or the spot cannot be
+  stored.
+
+### Catalog
+
+- `arrivalAirport` added to `Destination`, required and compiler-enforced. 45 of 46
+  confirmed against real New York route networks; auto-derivation was measured at 14/20
+  and rejected.
+- Route table generated for all 46 destinations from published airport tables. 26 had no
+  entry and were silently scoring travel from a synthetic fallback.
+- Journey length expressed as a band rather than a figure. Derivation agrees with all 20
+  curated entries, 40 of 40.
+- Origin ranking no longer turns on minutes: Singapore, south-bali and ubud move from
+  Newark to JFK, having preferred Newark on the strength of half an hour.
+
+### Foundations
+
+- The data contract is executable. The completeness gate is generated from it, and a field
+  added without a contract entry fails the suite.
+- Shared provider contract with per-source staleness thresholds and a primary /
+  secondary / crowdsourced distinction.
+- Provenance overlay marks which card sections are sourced — five of nine are unconfirmed
+  editorial judgement.
+- `npm run check:providers`: 11 live, 6 dormant, 0 broken.
+
+### Fixed
+
+- 22 failing tests, all catalog drift after a pivot that reference data never followed.
+  Suite now 378 passing, 0 failing.
+- Events and restaurant lookups no longer swallow failures indistinguishably from empty
+  results.
+
 ## 0.13.0 — 2026-08-15
 
 **Influencer Spots & Comprehensive Documentation**
