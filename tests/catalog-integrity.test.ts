@@ -143,6 +143,57 @@ describe("route coverage", () => {
   });
 });
 
+/**
+ * Destinations still awaiting a confirmed arrival airport.
+ *
+ * Same ratchet as MISSING_ROUTES: may only shrink, and self-cleans. Auto-derivation was
+ * tried and rejected — nearest-airport scored 14/20 against known-correct values across
+ * three heuristics, and six of these 26 would be wrong on distance alone (Paris resolves
+ * to Le Bourget, Reykjavík to the domestic terminal, London to City). The gateway a
+ * traveller actually uses is a judgement, so these are confirmed by hand.
+ */
+const MISSING_AIRPORT = new Set([
+  "paris", "london", "barcelona", "amsterdam", "madrid", "istanbul", "prague",
+  "vienna", "berlin", "florence", "venice", "athens", "budapest", "copenhagen",
+  "milan", "dublin", "edinburgh", "munich", "brussels", "porto", "krakow",
+  "dubrovnik", "nice", "naples", "salzburg", "reykjavik",
+]);
+
+describe("arrival airports", () => {
+  it("gives every destination outside the quarantine an arrival airport", () => {
+    const missing = DESTINATIONS.filter(
+      (d) => !d.arrivalAirport && !MISSING_AIRPORT.has(d.id),
+    ).map((d) => d.id);
+    expect(
+      missing,
+      `No arrivalAirport, and not a known gap: ${missing.join(", ")}. Without it no ` +
+        `route source can be joined to this destination automatically.`,
+    ).toEqual([]);
+  });
+
+  it("uses well-formed IATA codes", () => {
+    for (const d of DESTINATIONS) {
+      if (!d.arrivalAirport) continue;
+      expect(d.arrivalAirport, d.id).toMatch(/^[A-Z]{3}$/);
+    }
+  });
+
+  it("keeps the quarantine free of destinations that now have one", () => {
+    const fixed = [...MISSING_AIRPORT].filter(
+      (id) => DESTINATIONS.find((d) => d.id === id)?.arrivalAirport,
+    );
+    expect(
+      fixed,
+      `These have an airport now — remove from MISSING_AIRPORT: ${fixed.join(", ")}`,
+    ).toEqual([]);
+  });
+
+  it("does not let the quarantine grow", () => {
+    // Ratchet. Lower as airports are confirmed; never raise.
+    expect(MISSING_AIRPORT.size).toBeLessThanOrEqual(26);
+  });
+});
+
 describe("advisory coverage", () => {
   it("resolves every destination's country to a published advisory", () => {
     const unresolved = [

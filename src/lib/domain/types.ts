@@ -122,6 +122,24 @@ export interface Destination {
   lon: number;
   timezone: string;
   coastal: boolean;
+  /**
+   * IATA code of the airport a visitor actually arrives at.
+   *
+   * Lives here rather than on `DestinationRoutes` — where it used to sit — because it is
+   * a property of the place, not of a routing. Keeping it on the route entry made the
+   * two mutually dependent: fetching routes for a destination requires knowing its
+   * airport, but the airport was only recorded inside the route entry that did not yet
+   * exist. That circularity is why the route table could only ever be filled by hand.
+   *
+   * Deliberately not derived. Nearest-airport selection was measured at 14/20 against
+   * known-correct values: Rome resolves to Ciampino rather than Fiumicino, Reykjavík to
+   * the domestic terminal rather than Keflavík, Paris to Le Bourget. The right answer is
+   * the gateway a traveller actually uses, which is a judgement no dataset encodes.
+   *
+   * Optional only while the remaining destinations are confirmed; the catalog-integrity
+   * quarantine ratchets that down to zero.
+   */
+  arrivalAirport?: string;
   archetype: Archetype;
   tourismTier: TourismTier;
   /** One line on what this place actually is. */
