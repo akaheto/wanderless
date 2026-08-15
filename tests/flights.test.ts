@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getDestination } from "@/data/destinations";
+import { routeTestDestination } from "./fixtures/destinations";
 import { BASELINE_ORIGIN, HOME, airportInfo, airportNote } from "@/data/home";
 import { ORIGINS } from "@/lib/domain/types";
 import { selectRoute } from "@/lib/routes";
@@ -78,7 +78,7 @@ describe("the flight search provider", () => {
 
 describe("comparing a searched itinerary with the curated estimate", () => {
   it("keeps both figures whole rather than overwriting one", () => {
-    const selected = selectRoute(getDestination("cape-town")!, {
+    const selected = selectRoute(routeTestDestination("cape-town"), {
       origins: ["EWR"],
       alliances: [],
       airlines: [],
@@ -91,7 +91,7 @@ describe("comparing a searched itinerary with the curated estimate", () => {
   });
 
   it("accepts a small difference without calling the estimate wrong", () => {
-    const selected = selectRoute(getDestination("cape-town")!, {
+    const selected = selectRoute(routeTestDestination("cape-town"), {
       origins: ["EWR"],
       alliances: [],
       airlines: [],
@@ -103,7 +103,7 @@ describe("comparing a searched itinerary with the curated estimate", () => {
   });
 
   it("flags a material contradiction as a signal the route table is stale", () => {
-    const selected = selectRoute(getDestination("cape-town")!, {
+    const selected = selectRoute(routeTestDestination("cape-town"), {
       origins: ["EWR"],
       alliances: [],
       airlines: [],
@@ -118,7 +118,7 @@ describe("comparing a searched itinerary with the curated estimate", () => {
   });
 
   it("treats a nonstop estimate contradicted by a connecting itinerary as material", () => {
-    const selected = selectRoute(getDestination("cape-town")!, {
+    const selected = selectRoute(routeTestDestination("cape-town"), {
       origins: ["EWR"],
       alliances: [],
       airlines: [],

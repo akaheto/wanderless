@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getDestination } from "@/data/destinations";
+import { catalogDestination } from "./fixtures/destinations";
 import { buildItinerary, estimateTransfer, haversineKm, summariseItinerary } from "@/lib/itinerary";
 import type { Origin, Trip, TripStop } from "@/lib/domain/types";
 import { nightsBetween } from "@/lib/dates";
@@ -41,8 +41,8 @@ describe("haversineKm", () => {
   });
 
   it("is zero for a point against itself, and symmetric", () => {
-    const hanoi = getDestination("hanoi")!;
-    const hoiAn = getDestination("hoi-an")!;
+    const hanoi = catalogDestination("hanoi");
+    const hoiAn = catalogDestination("hoi-an");
     expect(haversineKm(hanoi, hanoi)).toBe(0);
     expect(haversineKm(hanoi, hoiAn)).toBeCloseTo(haversineKm(hoiAn, hanoi), 6);
   });
@@ -50,7 +50,7 @@ describe("haversineKm", () => {
 
 describe("estimateTransfer", () => {
   it("calls a short domestic hop a flight and prices in airport overhead", () => {
-    const t = estimateTransfer(getDestination("hanoi")!, getDestination("hoi-an")!);
+    const t = estimateTransfer(catalogDestination("hanoi"), catalogDestination("hoi-an"));
     expect(t.mode).toBe("short-flight");
     // ~600 km of flying, but the overhead dominates — this is the point of the model.
     expect(t.hours).toBeGreaterThan(4);
@@ -59,21 +59,21 @@ describe("estimateTransfer", () => {
   });
 
   it("calls a nearby pair overland", () => {
-    const t = estimateTransfer(getDestination("phuket")!, getDestination("krabi")!);
+    const t = estimateTransfer(catalogDestination("phuket"), catalogDestination("krabi"));
     expect(t.mode).toBe("ground");
     expect(t.hours).toBeLessThan(4);
   });
 
-  it("treats a transpacific leg as punishing", () => {
-    const t = estimateTransfer(getDestination("tokyo")!, getDestination("mexico-city")!);
+  it("treats an intercontinental leg as punishing", () => {
+    const t = estimateTransfer(catalogDestination("tokyo"), catalogDestination("lisbon"));
     expect(t.mode).toBe("long-flight");
     expect(t.burden).toBe("punishing");
     expect(t.hours).toBeGreaterThan(14);
   });
 
   it("adds an international penalty over a comparable domestic distance", () => {
-    const domestic = estimateTransfer(getDestination("bangkok")!, getDestination("phuket")!);
-    const international = estimateTransfer(getDestination("bangkok")!, getDestination("hcmc")!);
+    const domestic = estimateTransfer(catalogDestination("bangkok"), catalogDestination("phuket"));
+    const international = estimateTransfer(catalogDestination("bangkok"), catalogDestination("hcmc"));
     // Similar distances; the border is the difference.
     expect(international.hours).toBeGreaterThan(domestic.hours);
   });
@@ -82,30 +82,30 @@ describe("estimateTransfer", () => {
     // Krabi to Koh Samui is 200 km, which the distance model calls a 3-hour drive. It
     // actually crosses the peninsula from the Andaman coast to the Gulf — a bus and a
     // ferry, or a connecting flight. This is the case ADR 0011 exists to handle.
-    const t = estimateTransfer(getDestination("krabi")!, getDestination("koh-samui")!);
+    const t = estimateTransfer(catalogDestination("krabi"), catalogDestination("koh-samui"));
     expect(t.hours).toBe(8);
     expect(t.burden).toBe("full-day");
     expect(t.note).toMatch(/peninsula/i);
   });
 
   it("applies an override in both directions", () => {
-    const there = estimateTransfer(getDestination("krabi")!, getDestination("koh-samui")!);
-    const back = estimateTransfer(getDestination("koh-samui")!, getDestination("krabi")!);
+    const there = estimateTransfer(catalogDestination("krabi"), catalogDestination("koh-samui"));
+    const back = estimateTransfer(catalogDestination("koh-samui"), catalogDestination("krabi"));
     expect(back.hours).toBe(there.hours);
     expect(back.fromDestinationId).toBe("koh-samui");
   });
 
   it("leaves uncurated pairs on the heuristic", () => {
-    const t = estimateTransfer(getDestination("phuket")!, getDestination("krabi")!);
+    const t = estimateTransfer(catalogDestination("phuket"), catalogDestination("krabi"));
     expect(t.mode).toBe("ground");
     expect(t.note).not.toMatch(/peninsula/i);
   });
 
   it("never returns a negative or non-finite estimate", () => {
-    const ids = ["hanoi", "tokyo", "lisbon", "maldives", "cape-town", "krabi"];
+    const ids = ["hanoi", "tokyo", "lisbon", "south-bali", "rome", "krabi"];
     for (const a of ids) {
       for (const b of ids) {
-        const t = estimateTransfer(getDestination(a)!, getDestination(b)!);
+        const t = estimateTransfer(catalogDestination(a), catalogDestination(b));
         expect(Number.isFinite(t.hours), `${a}→${b}`).toBe(true);
         expect(t.hours, `${a}→${b}`).toBeGreaterThanOrEqual(0);
         expect(t.distanceKm, `${a}→${b}`).toBeGreaterThanOrEqual(0);
