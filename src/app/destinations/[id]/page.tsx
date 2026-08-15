@@ -32,6 +32,7 @@ import {
   ScoreBar,
   StatTile,
   money,
+  Provenance,
 } from "@/components/ui";
 import { MONTH_NAMES, addDays, formatDate, isValidDate, monthsInRange } from "@/lib/dates";
 import { defaultDates } from "@/lib/scoring/params";
@@ -89,6 +90,8 @@ export default async function DestinationPage({
   // Advisories are country-scoped. Keying this by city name is why only ten
   // destinations ever resolved one.
   const travelAdvisory = await getTravelAdvisory(d.country);
+  // One clock for every provenance mark on the page, read here rather than in render.
+  const asOf = new Date().toISOString().slice(0, 10);
 
   // Get flight estimates (no API needed, just links + estimates)
   const flightEstimate = getFlightEstimate(d.id);
@@ -162,6 +165,7 @@ export default async function DestinationPage({
           <Card>
             <CardHeader
               title="Climate through the year"
+              right={<Provenance status="sourced" source="Open-Meteo ERA5" sourceDate={record.source.verifiedOn} asOf={asOf} />}
               note={`${record.source.note}. Highlighted months are the ones your dates fall in.`}
             />
             <div className="px-4 py-4">
@@ -172,6 +176,7 @@ export default async function DestinationPage({
           <Card>
             <CardHeader
               title="Day by day, for these dates"
+              right={<Provenance status="sourced" source="Open-Meteo ERA5" sourceDate={record.source.verifiedOn} asOf={asOf} />}
               note="Normals for the exact calendar days — not a forecast."
             />
             <div className="px-4 py-4">
@@ -199,6 +204,7 @@ export default async function DestinationPage({
           <Card>
             <CardHeader
               title="What that actually means"
+              right={<Provenance status="derived" note="from climate normals" />}
               note="Interpretation of the measured values above, not a measurement itself."
             />
             <dl className="divide-y divide-line">
@@ -255,7 +261,11 @@ export default async function DestinationPage({
 
         <div className="min-w-0 space-y-6">
           <Card>
-            <CardHeader title="Season by season" note="Curated rating out of 5, with peak/shoulder/low." />
+            <CardHeader
+              title="Season by season"
+              note="Curated rating out of 5, with peak/shoulder/low."
+              right={<Provenance status="unverified" note="suitability and season labels are hand-entered" />}
+            />
             <div className="px-4 py-4">
               <SuitabilityStrip destination={d} highlightMonths={tripMonths} />
 
@@ -278,7 +288,10 @@ export default async function DestinationPage({
 
           {risks.length > 0 && (
             <Card>
-              <CardHeader title="Risks on these dates" />
+              <CardHeader
+                title="Risks on these dates"
+                right={<Provenance status="unverified" note="hand-written; not derived from climate or advisories" />}
+              />
               <ul className="divide-y divide-line">
                 {risks.map((r) => (
                   <li key={r.label} className="flex items-start gap-2.5 px-4 py-2.5">
@@ -307,7 +320,10 @@ export default async function DestinationPage({
           {demographics && <DemographicsPanel demographics={demographics} />}
 
           <Card>
-            <CardHeader title="Public holidays during your dates" />
+            <CardHeader
+              title="Public holidays during your dates"
+              right={<Provenance status="sourced" source="Nager.Date" sourceDate={HOLIDAY_SOURCE.verifiedOn} asOf={asOf} />}
+            />
             <div className="px-4 py-3.5 text-[13px]">
               {unavailable ? (
                 <p className="text-ink-2">
@@ -328,17 +344,22 @@ export default async function DestinationPage({
               )}
               {holidayDataAvailable(d) && (
                 <p className="mt-2 text-[11.5px] text-ink-3">
-                  {HOLIDAY_SOURCE.source}, fetched {HOLIDAY_SOURCE.verifiedOn}.
+                  {HOLIDAY_SOURCE.source}, published {HOLIDAY_SOURCE.verifiedOn}.
                 </p>
               )}
             </div>
           </Card>
 
           <Card>
-            <CardHeader title="Profile" note={`Curated ${d.curatedOn}.`} />
+            <CardHeader
+              title="Profile"
+              note={`Curated ${d.curatedOn}.`}
+              right={<Provenance status="unverified" note="archetype, tier and summary are editorial" />}
+            />
             <div className="space-y-4 px-4 py-4">
               <RatingGroup
                 title="Experience"
+                right={<Provenance status="unverified" note="seven 0-5 scores, hand-entered" />}
                 ratings={[
                   ["Food", d.experience.food],
                   ["Culture", d.experience.culture],
@@ -351,6 +372,7 @@ export default async function DestinationPage({
               />
               <RatingGroup
                 title="Practicality"
+                right={<Provenance status="unverified" note="five 0-5 scores, hand-entered" />}
                 ratings={[
                   ["Getting around", d.practicality.localTransport],
                   ["Language", d.practicality.languageEase],
@@ -397,10 +419,22 @@ export default async function DestinationPage({
   );
 }
 
-function RatingGroup({ title, ratings }: { title: string; ratings: [string, number][] }) {
+function RatingGroup({
+  title,
+  ratings,
+  right,
+}: {
+  title: string;
+  ratings: [string, number][];
+  /** Provenance mark, so a group of hand-entered scores can say so. */
+  right?: React.ReactNode;
+}) {
   return (
     <div>
-      <h3 className="mb-1.5 text-[12px] tracking-wide text-ink-3 uppercase">{title}</h3>
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <h3 className="text-[12px] tracking-wide text-ink-3 uppercase">{title}</h3>
+        {right}
+      </div>
       <ul className="space-y-1">
         {ratings.map(([label, value]) => (
           <li key={label} className="flex items-center justify-between gap-3 text-[13px]">
