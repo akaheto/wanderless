@@ -16,7 +16,8 @@
     "verify:destination": "tsx scripts/verify-destination.ts",
     "publish:destination": "tsx scripts/publish-destination.ts",
     "verify:advisories": "tsx scripts/verify-advisory-coverage.ts",
-    "build:advisories": "tsx scripts/build-advisory-baseline.ts"
+    "build:advisories": "tsx scripts/build-advisory-baseline.ts",
+    "check:providers": "tsx --env-file-if-exists=.env.local scripts/check-providers.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
