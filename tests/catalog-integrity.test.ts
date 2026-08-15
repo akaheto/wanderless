@@ -42,11 +42,10 @@ import { countryKey, normalizeCountry } from "@/lib/integrations/state-dept-feed
  *
  * Tracked as Phase 1c in docs/technical/specs/destination-data-contract.md §3.7.4.
  */
-const MISSING_ROUTES = new Set([
-  "paris", "london", "barcelona", "amsterdam", "madrid", "istanbul", "prague",
-  "vienna", "berlin", "florence", "venice", "athens", "budapest", "copenhagen",
-  "milan", "dublin", "edinburgh", "munich", "brussels", "porto", "krakow",
-  "dubrovnik", "nice", "naples", "salzburg", "reykjavik",
+const MISSING_ROUTES = new Set<string>([
+  // Empty. `npm run build:routes` reads the published destination tables of JFK, Newark
+  // and LaGuardia and covers all 46, so no destination scores travel from a synthetic
+  // fallback any more. Kept as the ratchet's floor rather than deleted.
 ]);
 
 /**
@@ -139,7 +138,7 @@ describe("route coverage", () => {
 
   it("does not let the quarantine grow", () => {
     // Ratchet. Lower this number as routes land; never raise it.
-    expect(MISSING_ROUTES.size).toBeLessThanOrEqual(26);
+    expect(MISSING_ROUTES.size).toBe(0);
   });
 });
 

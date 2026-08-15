@@ -78,7 +78,7 @@ describe("the flight search provider", () => {
 
 describe("comparing a searched itinerary with the curated estimate", () => {
   it("keeps both figures whole rather than overwriting one", () => {
-    const selected = selectRoute(routeTestDestination("cape-town"), {
+    const selected = selectRoute(routeTestDestination("dubrovnik"), {
       origins: ["EWR"],
       alliances: [],
       airlines: [],
@@ -86,24 +86,24 @@ describe("comparing a searched itinerary with the curated estimate", () => {
     const result = compareWithEstimate(itinerary(), selected);
 
     expect(result.itinerary.totalMinutes).toBe(930);
-    expect(result.estimate.typicalTotalHours).toBe(15.5);
+    expect(result.estimate.typicalTotalHours).toBe(9);
     expect(itineraryHours(result.itinerary)).toBe(15.5);
   });
 
   it("accepts a small difference without calling the estimate wrong", () => {
-    const selected = selectRoute(routeTestDestination("cape-town"), {
+    const selected = selectRoute(routeTestDestination("dubrovnik"), {
       origins: ["EWR"],
       alliances: [],
       airlines: [],
     });
-    const result = compareWithEstimate(itinerary({ totalMinutes: 990 }), selected);
+    const result = compareWithEstimate(itinerary({ totalMinutes: 570 }), selected);
 
     expect(result.contradictsEstimate).toBe(false);
     expect(result.summary).toContain("the ranking stands");
   });
 
   it("flags a material contradiction as a signal the route table is stale", () => {
-    const selected = selectRoute(routeTestDestination("cape-town"), {
+    const selected = selectRoute(routeTestDestination("dubrovnik"), {
       origins: ["EWR"],
       alliances: [],
       airlines: [],
@@ -118,7 +118,7 @@ describe("comparing a searched itinerary with the curated estimate", () => {
   });
 
   it("treats a nonstop estimate contradicted by a connecting itinerary as material", () => {
-    const selected = selectRoute(routeTestDestination("cape-town"), {
+    const selected = selectRoute(routeTestDestination("dubrovnik"), {
       origins: ["EWR"],
       alliances: [],
       airlines: [],
@@ -217,7 +217,7 @@ describe("home base", () => {
       expect(airportInfo(origin)?.name, origin).toBeTruthy();
     }
     expect(airportNote("LGA")).toContain("perimeter");
-    expect(airportNote("EWR")).toContain("Cape Town");
+    expect(airportNote("EWR")).toContain("Dubrovnik");
     expect(airportNote("JFK")).toBeUndefined();
   });
 

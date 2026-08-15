@@ -49,7 +49,7 @@ export const HOME: HomeBase = {
       name: "LGA — LaGuardia",
       note: "A 1,500-mile perimeter rule and no long-haul international service — every route in the catalog connects.",
     },
-    { code: "EWR", name: "EWR — Newark", note: "United hub. Reaches Cape Town and Marrakech nonstop; JFK does not." },
+    { code: "EWR", name: "EWR — Newark", note: "United hub. Reaches Dubrovnik nonstop, seasonally; JFK does not." },
   ],
   climateReferenceId: "nyc-reference",
   lat: 40.7128,

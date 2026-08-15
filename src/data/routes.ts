@@ -14,8 +14,9 @@ import type { DestinationRoutes, Origin, OriginRoute } from "@/lib/domain/types"
  *   the 27 destinations is reachable nonstop from LaGuardia — every one connects. That is
  *   genuinely useful to know before booking rather than after.
  *
- *   EWR is a United hub and reaches several places JFK does not. Cape Town and Marrakech
- *   are dramatically better from Newark, which the JFK-only model hid completely.
+ *   EWR is a United hub and reaches several places JFK does not. Dubrovnik
+ *   is reachable nonstop only from Newark, and only seasonally — which the JFK-only
+ *   model hid completely.
  *
  * CURATED, and the most volatile data in the app — airline networks change every season.
  * `verifiedOn` is not decorative. Real schedules arrive with Amadeus in Release 5.
@@ -250,7 +251,37 @@ function buildRoutes(destinationId: string, spec: RouteSpec): DestinationRoutes 
   };
 }
 
+import GENERATED from "./generated/routes.json";
+
+/**
+ * The route table: generated entries, with the hand-written specs still available.
+ *
+ * `npm run build:routes` reads the published destination tables of JFK, Newark and
+ * LaGuardia and writes `generated/routes.json`. That closed the gap where 26 of 46
+ * destinations had no entry at all and silently scored travel from their `travel.*`
+ * figures via a synthetic JFK-only fallback.
+ *
+ * The hand-written SPECS above are kept rather than deleted: they carry airline lists the
+ * parser does not extract, and where the two disagree the generator preserves the curated
+ * value and reports it. A generated `false` is weaker evidence than a human-verified
+ * `true` — replacing one with the other would be a regression dressed as a refresh.
+ */
+const generatedRoutes = (
+  GENERATED as unknown as {
+    generatedOn: string;
+    routes: Record<string, Omit<DestinationRoutes, "verifiedOn">>;
+  }
+).routes;
+
 export const ROUTES: Record<string, DestinationRoutes> = Object.fromEntries(
+  Object.entries(generatedRoutes).map(([id, r]) => [
+    id,
+    { ...r, verifiedOn: (GENERATED as unknown as { generatedOn: string }).generatedOn },
+  ]),
+);
+
+/** Retained so the curated specs stay reachable and reviewable. */
+export const CURATED_SPECS = Object.fromEntries(
   Object.entries(SPECS).map(([id, spec]) => [id, buildRoutes(id, spec)]),
 );
 
