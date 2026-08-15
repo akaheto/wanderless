@@ -36,6 +36,7 @@ import {
 } from "@/components/ui";
 import { MONTH_NAMES, addDays, formatDate, isValidDate, monthsInRange } from "@/lib/dates";
 import { defaultDates } from "@/lib/scoring/params";
+import { pathsUnder, sectionStatus } from "@/lib/domain/contract";
 
 // Reads saved places from the database, so it must never be prerendered — a statically
 // generated page would bake in whichever places existed at build time. This is why there
@@ -359,7 +360,12 @@ export default async function DestinationPage({
             <div className="space-y-4 px-4 py-4">
               <RatingGroup
                 title="Experience"
-                right={<Provenance status="unverified" note="seven 0-5 scores, hand-entered" />}
+                right={
+                  <Provenance
+                    status={sectionStatus(pathsUnder("experience")) === "editorial" ? "unverified" : "sourced"}
+                    note={`${pathsUnder("experience").length} scores, per the data contract`}
+                  />
+                }
                 ratings={[
                   ["Food", d.experience.food],
                   ["Culture", d.experience.culture],
@@ -372,7 +378,12 @@ export default async function DestinationPage({
               />
               <RatingGroup
                 title="Practicality"
-                right={<Provenance status="unverified" note="five 0-5 scores, hand-entered" />}
+                right={
+                  <Provenance
+                    status={sectionStatus(pathsUnder("practicality")) === "editorial" ? "unverified" : "sourced"}
+                    note={`${pathsUnder("practicality").length} scores, per the data contract`}
+                  />
+                }
                 ratings={[
                   ["Getting around", d.practicality.localTransport],
                   ["Language", d.practicality.languageEase],
