@@ -379,7 +379,62 @@ provisional, so it is a lower priority than §3.7.1–2, but it inherits the sam
 `verifiedOn` fix and should be listed as a known-provisional source in the admin staleness view
 rather than presenting as verified.
 
-#### 3.7.4 One open question on the climate stamp
+#### 3.7.4 Catalog drift — 22 failing tests, diagnosed 2026-08-15
+
+**This blocks Phase 2.** The suite has 22 failures across 7 files. They were assumed to be
+scoring-engine bugs; they are not. The engine is sound. Every failure traces to the catalog
+having drifted away from the reference data and tests that depend on it — the same class of
+problem this spec exists to close, showing up as red tests.
+
+**A. A destination was deleted, and the tests still reference it.**
+
+`cape-town` is gone from the catalog. Tests still call `getDestination("cape-town")!`, and the
+non-null assertion silences the compiler, so instead of failing to build it fails at runtime as
+`Cannot read properties of undefined (reading 'id')` deep inside `dateWindowClimate` and
+`selectRoute`. Accounts for the `climate`, `routes` and `engine` failures.
+
+The `!` is the real defect. A lookup that can miss should be handled, not asserted away — this
+is `CLAUDE.md`'s fail-fast rule inverted, since the assertion converts a clear compile-time
+error into an obscure runtime one.
+
+**B. 26 of 46 destinations have no route table entry.**
+
+```
+paris, london, barcelona, amsterdam, madrid, istanbul, prague, vienna,
+berlin, florence, venice, athens, budapest, copenhagen, milan, dublin,
+edinburgh, munich, brussels, porto, krakow, dubrovnik, nice, naples,
+salzburg, reykjavik
+```
+
+Every European destination. `selectRoute` falls back to the destination's legacy `travel`
+figures, so the app does not crash — but `travel.*` then scores from hand-written numbers rather
+than the route table, silently, for **57% of the catalog**. The test asserting full coverage
+correctly fails.
+
+This is §3.7.3 worse than described: `routes.ts` is not merely provisional, it is mostly absent.
+Fixing it is Phase 1b work — a real flight provider — not a data patch.
+
+**C. `CURATED_ON` is dated in the future.**
+
+```
+distinct curatedOn across all 46 : 2026-08-13
+curation test pins ASOF          : 2026-08-12
+checkStaleness verdict           : invalid-date
+```
+
+The global constant was bumped to a date after the test's pinned clock, so every destination now
+reports as curated *tomorrow* and `checkStaleness` classifies all 46 as `invalid-date`.
+
+This is §3.7.1 demonstrating itself. A per-destination `curatedOn` written at publish could not
+drift this way; a single hand-edited constant can, and did. Note the fix is not to edit the
+constant to a plausible past date — that would restore green tests by inventing a review date
+nobody performed.
+
+**Prerequisite for Phase 2.** A and C are small. B needs a real provider. Phase 2 derives
+`seasons`, `suitability` and `risks`, all of which the engine consumes, so it must not be built
+while 57% of the catalog is silently scoring off fallback data.
+
+#### 3.7.5 One open question on the climate stamp
 
 `climate/*.json` carries `verifiedOn: "2026-08-11"` while `manifest.generatedOn` is `"2026-08-14"`.
 Under §3.6.1 the stamp should be **ERA5's data cutoff**, not the fetch date. A 3-day gap is
@@ -562,7 +617,8 @@ rather than silent. Decide that at the point of removal, not now.
 | **0** | Contract module: §2 as executable TS, gate generated from it, unit tests | S | — |
 | **0b** | **Provenance overlay** (§4.2): `FieldStatus`, `DataAge`, `TierMark` on every card section, behind `NEXT_PUBLIC_DATA_PROVENANCE_OVERLAY` | M | 0 |
 | **1b** | Provider layer: uniform `Fetched<T>`, port existing clients, add visa + tz, per-source `verifiedOn` (§3.6.1) | M | 0 |
-| **2** | Derivation: `seasons`, `suitability`, `risks`, multipliers as pure tested functions | M | 0 |
+| **1c** | **Catalog drift repair** (§3.7.4): remove the `cape-town` references and the `!` assertions hiding them, restore route coverage, resolve the future-dated `CURATED_ON` | M | 1b |
+| **2** | Derivation: `seasons`, `suitability`, `risks`, multipliers as pure tested functions | M | 0, **1c** |
 | **3** | Editorial drafting: rubric, `assumed`/`evidence`/`confidence`, LLM confined to stage 4 | M | 0,1b,2 |
 | **4** | Gate + `incomplete` status end-to-end; per-source staleness (§3.6.4) | S | 0–3 |
 | **5** | Both entry points on the shared core; site UI and CLI produce identical records | M | 0–4 |
