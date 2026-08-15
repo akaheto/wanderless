@@ -86,6 +86,36 @@ export interface PracticalityProfile {
   tripSimplicity: number;
 }
 
+/**
+ * How long the journey takes, as a band rather than a figure.
+ *
+ * A precise duration is a property of the itinerary someone selects, not of the
+ * destination: it moves with the routing, the date, and the connection. Storing "9h"
+ * claimed a precision the data cannot support, and the curated numbers could never be
+ * refreshed because no source publishes a "typical" duration.
+ *
+ * Bands are derivable and checkable. Great-circle distance plus cruise speed agreed with
+ * all 20 curated route entries across both New York origins — 40 of 40 — where the same
+ * derivation scored only 14/20 when asked for a precise airport. Where an estimate is
+ * honest at one resolution and not another, the schema should record the resolution that
+ * holds.
+ *
+ * Real durations still exist in the app: they come from live flight search, attached to
+ * an actual itinerary, with the date it was retrieved.
+ */
+export type TravelBand = "0-8" | "8-16" | "16+";
+
+/** Band boundaries in hours, used for derivation and for scoring comparisons. */
+export const TRAVEL_BAND_MAX: Record<TravelBand, number> = {
+  "0-8": 8,
+  "8-16": 16,
+  "16+": 30,
+};
+
+export function travelBandOf(hours: number): TravelBand {
+  return hours < 8 ? "0-8" : hours < 16 ? "8-16" : "16+";
+}
+
 export interface TravelProfile {
   /** Whether a nonstop exists from the reference departure airport. */
   nonstop: boolean;
