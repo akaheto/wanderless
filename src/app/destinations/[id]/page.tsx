@@ -70,9 +70,21 @@ export default async function DestinationPage({
     places.map((p) => p.sourceId).filter((id): id is number => id !== null),
   );
 
-  // Fetch events, restaurants, demographics, travel advisory, flights, and weather
-  const events = await getEventsByCity(d.name, 6).catch(() => []);
-  const restaurants = await getRestaurantCategories(d.name).catch(() => ({}));
+  // Fetch events, restaurants, demographics, travel advisory, flights, and weather.
+  //
+  // These catches log rather than swallow. `.catch(() => [])` made a Yelp or Ticketmaster
+  // failure indistinguishable from a genuine empty result: the section simply vanished,
+  // and nobody could tell whether a city had no notable restaurants or whether the
+  // lookup had thrown. An empty array is still the render fallback — neither of these is
+  // worth failing a page over — but the failure is no longer invisible.
+  const events = await getEventsByCity(d.name, 6).catch((error) => {
+    console.error(`[Destination ${d.id}] events lookup failed:`, error);
+    return [];
+  });
+  const restaurants = await getRestaurantCategories(d.name).catch((error) => {
+    console.error(`[Destination ${d.id}] restaurant lookup failed:`, error);
+    return {};
+  });
   const demographics = getDemographics(d.name);
   // Advisories are country-scoped. Keying this by city name is why only ten
   // destinations ever resolved one.
